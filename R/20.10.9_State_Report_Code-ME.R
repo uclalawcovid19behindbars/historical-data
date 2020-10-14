@@ -4,18 +4,26 @@
 
 ## General Load -----------------------------------------------------------
 
-library(readxl)
-library(tidyverse)
-library(ggthemes)
-library(pdftools)
+##Define package list
+Packages <- c("readxl","tidyverse","ggthemes","pdftools", "plyr")
+.packages = Packages
+##Install CRAN packages (if not already installed)
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+##Load packages into session 
+lapply(.packages, require, character.only=TRUE)
 
-historical_data <- "Covid Custody Project_101120.xlsx"
+##Load in historical data
+base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+data_folder <- file.path("data", "xlsx")
+historical_data <- file.path(base_path, data_folder, "Covid Custody Project_100720.xlsx")
 
 tab_Names <- excel_sheets(path = historical_data)
 list_all <- lapply(tab_Names, function(x)
   read_excel(path = historical_data, sheet = x))
+#! why not looking at 15-19?
 data <- plyr::rbind.fill(list_all) %>%
-  subset(., select = -c(...15,...16,...17,...18,...19))
+  subset(., select = -c(...15,...16,...17,...18,...19)) 
 ucla <- data
 
 f <- read_xlsx("facility_spellings_091820.xlsx")
