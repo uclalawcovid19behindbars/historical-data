@@ -1,5 +1,6 @@
 # Files in `data` directory
 data/*
+outfiles/*
 
 # History files
 .Rhistory
@@ -7,6 +8,7 @@ data/*
 
 # Session Data files
 .RData
+.DS_Store
 
 # User-specific files
 .Ruserdata
