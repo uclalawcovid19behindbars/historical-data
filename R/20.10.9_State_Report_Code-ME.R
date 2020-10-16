@@ -26,97 +26,100 @@ data <- plyr::rbind.fill(list_all) %>%
   subset(., select = -c(...15,...16,...17,...18,...19)) 
 ucla <- data
 
-f <- read_xlsx("facility_spellings_091820.xlsx")
+f <- read_xlsx(file.path(base_path, data_folder,"facility_spellings_091820.xlsx"))
 
 id_xwalk <- f %>%
   select(Count.ID, State, City, facility_name_raw, facility_name_clean) %>%
-  rename("Name" = "facility_name_raw") %>%
+  dplyr::rename("Name" = "facility_name_raw") %>%
   unique()
+print(n_distinct(id_xwalk$facility_name_clean))
 
-fac_info <- read_xlsx("facility_information_091820.xlsx") %>%
-  # we don't want this information as of now since we don't know how accurate it is
-  select(-TYPE, -POPULATION, -CAPACITY, -SECURELVL, -federal_prison_type) %>%
-  # we don't need this information since it's already on the file
-  select(-Name)
+# fac_info <- read_xlsx(file.path(base_path, data_folder,"facility_information_091820.xlsx")) %>%
+#   # we don't want this information as of now since we don't know how accurate it is
+#   select(-TYPE, -POPULATION, -CAPACITY, -SECURELVL, -federal_prison_type) %>%
+#   # we don't need this information since it's already on the file
+#   select(-Name)
 
-select <- read_xlsx("20.10.8_Columns_Selected.xlsx") %>%
+select <- read_xlsx(file.path(base_path, data_folder,"20.10.8_Columns_Selected.xlsx")) %>%
           select(ColName)
 
 
 ## Write Functions ---------------------------------------------------------
 
-graph_state <- function(x, y, k) {
-  x$y <- as.numeric(x[, y])
-  x$Date <- as.Date(x$Date, format = "%Y-%m-%d")
-  z <- x %>%
-       group_by(Date) %>%
-       summarise(n = sum(y, na.rm = TRUE))
-    ggplot(data = z, aes(x = Date, y = n)) +
-    geom_line() +
-    geom_point() +
-    labs(x = "Date",
-         y = "Inmate Deaths",
-         title = paste0("Test Graph for ", k)) +
-    theme_economist()
-  ggsave(filename = paste0(k, ".pdf"), 
-         plot = last_plot(),
-         width = 8,
-         device = "pdf")
-}
+# graph_state <- function(x, y, k) {
+#   x$y <- as.numeric(x[, y])
+#   x$Date <- as.Date(x$Date, format = "%Y-%m-%d")
+#   z <- x %>%
+#        group_by(Date) %>%
+#        dplyr::summarise(n = sum(y, na.rm = TRUE))
+#     ggplot(data = z, aes(x = Date, y = n)) +
+#     geom_line() +
+#     geom_point() +
+#     labs(x = "Date",
+#          y = "Inmate Deaths",
+#          title = paste0("Test Graph for ", k)) +
+#     theme_economist()
+#   ggsave(filename = paste0(k, ".pdf"), 
+#          plot = last_plot(),
+#          width = 8,
+#          device = "pdf")
+# }
 
-state_report_og <- function(x) {
-  # merge on ID
-  
-  x <- x %>%
-    subset(., select = -c(Count.ID)) %>%
-    merge(., id_xwalk, by = c("State", "Name")) %>%
-    select(-Name) %>%
-    rename("Name" = "facility_name_clean") 
-  
-  colnames(select) <- "x"
-  present <- as.data.frame(colnames(x))
-  colnames(present) <- "x"
-  final <- merge(present, select, by = "x")
-  df <- x %>%
-    select(final$x)
-  state_name <- df[1, "State"]
-  df$Date <- as.Date(x$Date, format = "%Y-%m-%d")
-  match <- c("Count.ID", "Date", "Name", "Facility", "State")
-  hold <- as.character(colnames(df)) %in% match
-  df <- cbind(df[, hold], df[, !hold])
-  
-  for (i in 6:length(colnames(df))) {
-    var <- colnames(df)[i]
-    df[, i] <- as.numeric(df[, i])
-    
-    df_sum <- df %>%
-      group_by(Date) %>%
-      summarise(n = sum(eval(parse(text = var)), na.rm = TRUE))
-    ggplot(data = df_sum, aes(x = Date, y = n)) +
-      geom_line() +
-      geom_point() +
-      labs(x = "Date",
-           y = var,
-           title = paste0("Case Graph for ", state_name, " | ", var)) +
-      theme_economist()
-    ggsave(filename = paste0("page_", i, ".pdf"), 
-           plot = last_plot(),
-           width = 8,
-           device = "pdf")
-  
-    
-  }
-  
-  
-  
-  eval(parse(text = paste("pdf_combine(c(", paste("'page_",
-                                                  6:length(colnames(df)), ".pdf'", sep = "",
-                                                  collapse = ","), "), output = ", paste0("'", state_name, "_report.pdf'"),
-                          ")")))
-  
-  
-  
-}
+# state_report_og <- function(x) {
+#   # merge on ID
+#   
+#   x <- x %>%
+#     subset(., select = -c(Count.ID)) %>%
+#     merge(., id_xwalk, by = c("State", "Name")) %>%
+#     select(-Name) %>%
+#     rename("Name" = "facility_name_clean") 
+#   
+#   colnames(select) <- "x"
+#   present <- as.data.frame(colnames(x))
+#   colnames(present) <- "x"
+#   final <- merge(present, select, by = "x")
+#   df <- x %>%
+#     select(final$x)
+#   state_name <- df[1, "State"]
+#   df$Date <- as.Date(x$Date, format = "%Y-%m-%d")
+#   match <- c("Count.ID", "Date", "Name", "Facility", "State")
+#   hold <- as.character(colnames(df)) %in% match
+#   df <- cbind(df[, hold], df[, !hold])
+#   
+#   for (i in 6:length(colnames(df))) {
+#     var <- colnames(df)[i]
+#     df[, i] <- as.numeric(df[, i])
+#     
+#     df_sum <- df %>%
+#       group_by(Date) %>%
+#       dplyr::summarise(n = sum(eval(parse(text = var)), na.rm = TRUE))
+#     ggplot(data = df_sum, aes(x = Date, y = n)) +
+#       geom_line() +
+#       geom_point() +
+#       labs(x = "Date",
+#            y = var,
+#            title = paste0("Case Graph for ", state_name, " | ", var)) +
+#       theme_economist()
+#     ggsave(filename = paste0("page_", i, ".pdf"), 
+#            plot = last_plot(),
+#            width = 8,
+#            device = "pdf")
+#   
+#     
+#   }
+#   
+#   
+#   
+#   eval(parse(text = paste("pdf_combine(c(", paste("'page_",
+#                                                   6:length(colnames(df)), ".pdf'", sep = "",
+#                                                   collapse = ","), "), output = ", paste0("'", state_name, "_report.pdf'"),
+#                           ")")))
+#   
+#   
+#   
+# }
+
+## NB: should make target out file for all of these
 
 state_report <- function(x) {
   # merge on ID
@@ -124,25 +127,32 @@ state_report <- function(x) {
   x <- x %>%
     subset(., select = -c(Count.ID)) %>%
     merge(., id_xwalk, by = c("State", "Name")) %>%
+    ##! this seems potentially risky. what if we want to keep both instances of `Name`?
     select(-Name) %>%
-    rename("Name" = "facility_name_clean") 
+    dplyr::rename("Name" = "facility_name_clean")
   
+  browser()
   colnames(select) <- "x"
   present <- as.data.frame(colnames(x))
-  colnames(present) <- "x"
+  colnames(present) <- "x" 
+  ## only keeps variables from `select`
+  ## needs to be re-coded for clarity
   final <- merge(present, select, by = "x")
+  ## subsets data to columns in `select`
   df <- x %>%
         select(final$x)
   state_name <- df[1, "State"]
   df$Date <- as.Date(x$Date, format = "%Y-%m-%d")
   match <- c("Count.ID", "Date", "Name", "Facility", "State")
   hold <- as.character(colnames(df)) %in% match
+  ## re-order columns to put `match` ones in front
   df <- cbind(df[, hold], df[, !hold])
+
   
-  # Facility per day graph
+  ## Facility per day graph
   df_fac <- df %>%
     group_by(Date) %>%
-    summarise(n = n())
+    dplyr::summarise(n = n())
   ggplot(data = df_fac, aes(x = Date, y = n)) +
     geom_line(color = "blue") +
     geom_point(color = "orange") +
@@ -158,7 +168,7 @@ state_report <- function(x) {
   df_dup <- df %>%
     group_by(Date, Name) %>%
     filter(n() > 1) %>%
-    summarise(n = n())
+    dplyr::summarise(n = n())
   ggplot(data = df_dup, aes(x = Date, y = n)) +
     geom_line(color = "blue") +
     geom_point(color = "orange") +
@@ -171,13 +181,14 @@ state_report <- function(x) {
          width = 8,
          device = "pdf")
   
+  ## loop through numeric vars of interest and make plots
   for (i in 6:length(colnames(df))) {
     var <- colnames(df)[i]
     df[, i] <- as.numeric(df[, i])
 
     df_sum <- df %>%
           group_by(Date) %>%
-          summarise(n = sum(eval(parse(text = var)), na.rm = TRUE))
+          dplyr::summarise(n = sum(eval(parse(text = var)), na.rm = TRUE))
     ggplot(data = df_sum, aes(x = Date, y = n)) +
       geom_line(color = "red") +
       geom_point(color = "orange") +
@@ -192,7 +203,7 @@ state_report <- function(x) {
     
     df_fac_d <- df %>%
       group_by(Date, Name) %>%
-      summarise(n = sum(eval(parse(text = var)), na.rm = TRUE))
+      dplyr::summarise(n = sum(eval(parse(text = var)), na.rm = TRUE))
     ggplot(data = df_fac_d, aes(x = Date, y = n, group = Name, color = Name)) +
       geom_line() +
       geom_point() +
