@@ -1,0 +1,127 @@
+---
+title: "Infection count breakdown"
+author: "Hope Johnson"
+date: "10/19/2020"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+##Define package list
+Packages <- c("readxl","tidyverse","ggthemes","pdftools", "plyr", "skimr", "knitr")
+.packages = Packages
+##Install CRAN packages (if not already installed)
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+##Load packages into session 
+lapply(.packages, require, character.only=TRUE)
+```
+
+First, I read in the historical data and merge it with alternative facility name spellings.
+
+```{r, warning=FALSE, message=FALSE}
+##Load in historical data
+base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+data_folder <- file.path("data", "xlsx")
+historical_data <- file.path(base_path, data_folder, "Covid Custody Project_100720.xlsx")
+
+tab_Names <- excel_sheets(path = historical_data)
+list_all <- lapply(tab_Names, function(x)
+  read_excel(path = historical_data, sheet = x))
+#! why not looking at 15-19?
+data <- plyr::rbind.fill(list_all) %>%
+  subset(., select = -c(...15,...16,...17,...18,...19)) 
+ucla <- data
+
+f <- read_xlsx(file.path(base_path, data_folder,"facility_spellings_091820.xlsx"))
+
+id_xwalk <- f %>%
+  select(Count.ID, State, City, facility_name_raw, facility_name_clean) %>%
+  dplyr::rename("Name" = "facility_name_raw") %>%
+  unique()
+# print(n_distinct(id_xwalk$facility_name_clean))
+
+select <- read_xlsx(file.path(base_path, data_folder,"20.10.8_Columns_Selected.xlsx")) %>%
+          select(ColName)
+```
+
+Next, I clean the data very minimally.
+
+```{r, warning=FALSE, message=FALSE}
+intermed_dat <- ucla %>%
+  subset(., select = -c(Count.ID)) %>%
+  merge(., id_xwalk, by = c("State", "Name")) %>%
+  ##! this seems potentially risky. what if we want to keep both instances of `Name`?
+  select(-Name) %>%
+  dplyr::rename("Name" = "facility_name_clean")
+
+colnames(select) <- "x"
+present <- as.data.frame(colnames(intermed_dat))
+colnames(present) <- "x" 
+## only keeps variables from `select`
+## needs to be re-coded for clarity
+final <- merge(present, select, by = "x")
+## subsets data to columns in `select`
+clean_dat <- intermed_dat %>%
+      select(final$x)
+state_name <- clean_dat[1, "State"]
+clean_dat$Date <- as.Date(intermed_dat$Date, format = "%Y-%m-%d")
+match <- c("Count.ID", "Date", "Name", "Facility", "State")
+hold <- as.character(colnames(clean_dat)) %in% match
+## re-order columns to put `match` ones in front
+clean_dat <- cbind(clean_dat[, hold], clean_dat[, !hold])
+```
+
+Filter the data down to the relevant information:
+- Filter by date, to only keep observations from the most recent date recorded. 
+- Filter out statewide counts and LA jails. 
+
+```{r, warning=FALSE, message=FALSE}
+most_recent_day <- clean_dat %>% 
+  filter(Date == max(Date)) %>%
+  filter((Name != "STATEWIDE") & (Name != "LOS ANGELES JAILS")) %>%
+  mutate(Residents.Confirmed = as.numeric(Residents.Confirmed)) 
+```
+The most recent data in this historical data file is from `r max(clean_dat$Date)`. On that day, we have data from `r n_distinct(most_recent_day$Name)` unique facilities. 
+
+Next, I check out the facility with the maximum number of resident confirmed cases on the most recent date in our historical data file. 
+```{r}
+max_facility <- most_recent_day %>% 
+  slice(which.max(Residents.Confirmed)) %>%
+  select(Facility, Name, State, 
+         Residents.Confirmed, Residents.Deaths, 
+         Resident.Deaths, Residents.Recovered, 
+         Staff.Confirmed, Staff.Death, 
+         Staff.Deaths, Staff.Recovered)
+kable(max_facility)
+```
+
+The maximum number of confirmed residents on that day comes from `r max_facility$Name`, where there were `r max_facility$Residents.Confirmed` residents confirmed.
+
+Finally, I find the count breakdowns on most recent date.
+
+Below are two tables with information on the infection count breakdown by facility. The first table has exact counts, and the second table has counts rounded to tens. In the first row, for example, "0" indicates that the number of infected residents spans from 0-9. The second row, "10", indicates that the number of infected residents spans from 10-19.
+
+```{r, warning=F, message=FALSE}
+
+summed <- most_recent_day %>%
+  group_by(Name) %>%
+  dplyr::summarise(`Total infected` = sum(Residents.Confirmed, na.rm = TRUE))%>%
+  ungroup()
+
+tab_1 <- summed %>% dplyr::count(`Total infected`, sort=TRUE, name="Number of facilities")
+tab_2 <- summed %>% dplyr::count(`Total infected (rounded to tens)` = round(`Total infected`, -1), sort=TRUE, name="Number of facilities")
+
+kable(tab_1)
+kable(tab_2)
+```
+
+
+
+
+
+
+
+

@@ -131,7 +131,7 @@ state_report <- function(x) {
     select(-Name) %>%
     dplyr::rename("Name" = "facility_name_clean")
   
-  browser()
+  # browser()
   colnames(select) <- "x"
   present <- as.data.frame(colnames(x))
   colnames(present) <- "x" 
