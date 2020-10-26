@@ -1,17 +1,26 @@
 ---
-title: "Clean Florida - COVID-19 Behind Bars Historical Data Cleaning"
+title: "Cleaning template - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
 date: "10/26/2020"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-options(warnPartialMatchDollar = TRUE)
-options(warnPartialMatchArgs = TRUE)
+##Define package list
+Packages<-c("tidyverse")
+.packages = Packages
+##Install CRAN packages (if not already installed)
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+##Load packages into session 
+lapply(.packages, require, character.only=TRUE)
+##Load utilities function
+base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+util_path <- file.path(base_path, "R", "0-utilities.R")
+source(util_path, local = knitr::knit_global())
 ```
 
-## State data cleaning functions
+## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
