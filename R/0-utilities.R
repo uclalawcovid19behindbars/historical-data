@@ -1,21 +1,43 @@
-legs <- function(x) {
-  switch(x,
-         cow = ,
-         horse = ,
-         dog = 4,
-         human = ,
-         chicken = 2,
-         plant = 0,
-         stop("Unknown input")
-  )
+
+
+# State cleaning helpers --------------------------------------------------
+
+filter_by_state <- function(x) {
+  
 }
 
-x_option <- function(x) {
-  switch(x,
-         a = "option 1",
-         b = "option 2",
-         c = "option 3",
-         stop("Invalid `x` value")
-  )
+filter_by_date <- function(x) {
+  
 }
+
+standardize_facility_name <- function() {
+  
+}
+
+assign_prev_data <- function(x) {
+}
+
+concat_by_facility <- function(x) {
+  
+}
+
+flag_outlier <- function() {
+  
+}
+
+flag_noncumulative <- function() {
+  
+}
+
+
+
+
+
+
+# Merge helpers -----------------------------------------------------------
+
+merge_population <- function() {
+  
+}
+
 
