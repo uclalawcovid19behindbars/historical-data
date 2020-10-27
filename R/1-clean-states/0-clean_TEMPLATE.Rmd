@@ -5,7 +5,7 @@ date: "10/26/2020"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r package setup, include=FALSE}
 ##Define package list
 Packages<-c("tidyverse")
 .packages = Packages
@@ -14,28 +14,33 @@ Packages<-c("tidyverse")
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ##Load packages into session 
 lapply(.packages, require, character.only=TRUE)
-##Load utilities function
+```
+
+## Purpose
+
+This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Chase Hommeyer, Grace DiLaura, and Kalind Parish. 
+
+
+## Load inputs
+
+Input files: 
+
+* Utilities script
+* Historical data to clean
+* Date range to clean 
+* Facility name look-up table 
+
+```{r load inputs, echo=FALSE}
 base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+data_folder <- file.path("data", "xlsx")
+
+##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
+##Facility name look-up table
+f <- read_xlsx(file.path(base_path, data_folder,"facility_spellings_091820.xlsx"))
+##Historical data file
+historical_data <- file.path(base_path, data_folder, "Covid Custody Project_100720.xlsx")
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
