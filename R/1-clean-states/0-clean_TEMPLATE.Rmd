@@ -46,7 +46,7 @@ f <- read_xlsx(file.path(data_path,"facility_spellings_091820.xlsx"))
 # no filter
 df <- load_data(data_path, 
                 "101820")
-# numeric: confirmed, deaths, recovered, 
+# numeric: confirmed, deaths, recovered, tested, negative, pending, population, quarantine, released, positive, recoveries, active, isolation, presumed, zipcode, latitude, longitude, County.FIPS, HIFLD_ID
 
 ```
 
