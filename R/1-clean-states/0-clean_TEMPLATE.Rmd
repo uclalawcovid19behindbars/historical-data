@@ -16,9 +16,9 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 ```
 
-## Purpose
+## Intro & Credits
 
-This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Chase Hommeyer, Grace DiLaura, and Kalind Parish. 
+This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Chase Hommeyer, Grace DiLaura, and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
 
 
 ## Load inputs
@@ -26,21 +26,27 @@ This script is used to clean one state in the historical data concerning COVID-1
 Input files: 
 
 * Utilities script
-* Historical data to clean
+* Historical data
 * Date range to clean 
 * Facility name look-up table 
 
 ```{r load inputs, echo=FALSE}
 base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
-data_folder <- file.path("data", "xlsx")
+data_path <- file.path(base_path, "data", "xlsx")
 
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ##Facility name look-up table
-f <- read_xlsx(file.path(base_path, data_folder,"facility_spellings_091820.xlsx"))
-##Historical data file
-historical_data <- file.path(base_path, data_folder, "Covid Custody Project_100720.xlsx")
+f <- read_xlsx(file.path(data_path,"facility_spellings_091820.xlsx"))
 ```
+
+
+```{r load data}
+df <- load_data(data_path, 
+                "101820",
+                filter_state = "")
+```
+
 
 

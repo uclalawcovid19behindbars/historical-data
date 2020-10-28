@@ -5,28 +5,46 @@ date: "10/26/2020"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-options(warnPartialMatchDollar = TRUE)
-options(warnPartialMatchArgs = TRUE)
+```{r package setup, include=FALSE}
+##Define package list
+Packages<-c("tidyverse")
+.packages = Packages
+##Install CRAN packages (if not already installed)
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+##Load packages into session 
+lapply(.packages, require, character.only=TRUE)
 ```
 
-## State data cleaning functions
+## Intro & Credits
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Chase Hommeyer, Grace DiLaura, and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+## Load inputs
+
+Input files: 
+
+* Utilities script
+* Historical data
+* Date range to clean 
+* Facility name look-up table 
+
+```{r load inputs, echo=FALSE}
+base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+data_path <- file.path(base_path, "data", "xlsx")
+
+##Load utilities function
+util_path <- file.path(base_path, "R", "0-utilities.R")
+source(util_path, local = knitr::knit_global())
+##Facility name look-up table
+f <- read_xlsx(file.path(data_path,"facility_spellings_091820.xlsx"))
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r load data, echo=FALSE}
+df <- load_data(data_path, 
+                "101820",
+                filter_state = "Florida")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
