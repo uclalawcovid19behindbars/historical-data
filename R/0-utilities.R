@@ -51,7 +51,10 @@ load_data <- function(data_path,
   return(filter3_df)
 }
 
-
+combine_similar_cols <- function(from, to) {
+  # if this column is not missing (Facility.1), put whatever was in it in the dominant column (Facility)
+  
+}
 
 standardize_facility_name <- function() {
   

@@ -45,19 +45,40 @@ f <- read_xlsx(file.path(data_path,"facility_spellings_091820.xlsx"))
 ```{r load data}
 # no filter
 df <- load_data(data_path, 
-                "101820") 
-df_typed <- type_convert(df)
+                "101820")
+                # filter_state = "Florida") 
+df_typed <- type_convert(df) 
+df_out <- df_typed %>%
+  select(!starts_with("...")) %>%
+  select(!starts_with("lots")) %>%
+  select(!starts_with("Bad")) %>%
+  select(!c("V2", "V4", "V5", "V7", "V8", "V10"))
+
 
 ## Residents.Confirmed, Residents.Deaths
 
 ## Residents.Quarantined contains information including "Cells", "Combo"
 
-## "..."
-
 ## There is "Facility." and "Facility" --> combine
+
+# Residents.Confirmed is a character --> why? 
+```
+
+```{r combine similar columns}
 
 
 ```
+
+
+```{r standardize facility names}
+
+```
+
+
+```{r filter columns}
+
+```
+
 
 
 
