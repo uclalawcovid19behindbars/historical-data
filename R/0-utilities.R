@@ -51,22 +51,25 @@ load_data <- function(data_path,
   return(filter3_df)
 }
 
+## if Staff.Death is missing, fill it with Staff.Deaths
+# table(is.na(df_out$Staff.Death) & !is.na(df_out$Staff.Deaths))
+# table(!is.na(df_out$Staff.Death) & is.na(df_out$Staff.Deaths))
+
 combine_similar_cols <- function(from, to) {
   # if this column is not missing (Facility.1), put whatever was in it in the dominant column (Facility)
   
 }
 
-standardize_facility_name <- function() {
-  
+# https://stackoverflow.com/questions/45515218/combine-rows-in-data-frame-containing-na-to-make-complete-row
+coalesce_by_column <- function(df) {
+  return(dplyr::coalesce(!!! as.list(df)))
 }
+
 
 assign_prev_data <- function(x) {
   
 }
 
-concat_by_facility <- function(x) {
-  
-}
 
 flag_outlier <- function() {
   
