@@ -7,7 +7,7 @@ output: html_document
 
 ```{r package setup, include=FALSE}
 ##Define package list
-Packages<-c("tidyverse")
+Packages<-c("tidyverse", "glue", "assertthat")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -33,18 +33,104 @@ Input files:
 ```{r load inputs, echo=FALSE}
 base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
 data_path <- file.path(base_path, "data", "xlsx")
-
+facility_xwalk_path <- file.path("~", "UCLA", "code", "facility_data", "data_sheets")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ##Facility name look-up table
-f <- read_xlsx(file.path(data_path,"facility_spellings_091820.xlsx"))
+f <- read_csv(file.path(facility_xwalk_path,"fac_spellings.csv"))
 ```
 
 
-```{r load data, echo=FALSE}
+```{r load data, message=FALSE}
 df <- load_data(data_path, 
-                "101820",
-                filter_state = "Florida")
+                "103020",
+                filter_state = "Florida") 
+df_typed <- type_convert(df)
+# KEEP DF_TYPED UNTOUCHED! 
 ```
 
+Fill in missing values of `Staff.Deaths` with non-missing values of `Staff.Death`, when those exist. Do the same with `Resident.Death`/`Resident.Deaths`.
+
+```{r combine similar columns}
+df_out <- df_typed %>%
+  select(!starts_with("...")) %>%
+  select(!starts_with("lots")) %>%
+  select(!starts_with("Bad")) %>%
+  select(!c("V2", "V4", "V5", "V7", "V8", "V10")) %>%
+  select(!c("Facility.", "Coder", "Housing.Type")) %>%
+  select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
+
+df_out %<>% 
+  mutate(Staff.Deaths = coalesce(Staff.Deaths, Staff.Death)) %>%
+  mutate(Resident.Deaths = coalesce(Resident.Deaths, Resident.Deaths)) %>%
+  mutate(Residents.Confirmed = na_if(Residents.Confirmed, "n/a")) %>%
+  mutate(Residents.Confirmed = as.numeric(Residents.Confirmed))
+```
+
+
+```{r standardize facility names}
+id_xwalk <- f %>%
+  select(Count.ID, State, City, facility_name_raw, facility_name_clean) %>%
+  unique() %>%
+  mutate(facility_name_raw_merging = tolower(facility_name_raw))
+
+df_out %<>%
+  mutate(name_merging = tolower(Name)) %>%
+  mutate(name_merging = str_remove_all(name_merging,"( |)- operated by the")) %>%
+  mutate(name_merging = str_remove_all(name_merging,"( |)- operated by")) %>%
+  mutate(name_merging = str_remove_all(name_merging, "\\."))
+
+ 
+df_mid <-left_join(df_out, id_xwalk, 
+                   by = c("name_merging" = "facility_name_raw_merging", 
+                          "State" = "State"))
+
+# show instances where "facility_name_raw" is NA-ish
+# Figure out what to do about these 3 instances -- perma CC them? 
+df_mid %>%
+  filter(is.na(facility_name_clean)) %>%
+  select(Name, name_merging, facility_name_clean, City.x, City.y, sheet_name)
+
+```
+
+
+Figure out duplicate date/facilities, concatenate those instances from multiple rows into one.
+
+
+```{r concat duplicate date/facilities}
+# verify these numbers seem right
+n_distinct(df_out)
+nrow(df_mid)
+nrow(distinct(df_mid, sheet_name, facility_name_clean))
+see_if(nrow(df_mid) == nrow(distinct(df_mid, sheet_name, facility_name_clean)))
+
+df_mid %<>% 
+  group_by(facility_name_clean, sheet_name) %>%
+  mutate(dupe_fac_date = n() > 1) %>%
+  ungroup() %>%
+  relocate(dupe_fac_date, .before =) %>%
+  mutate(fac_date = glue::glue('{facility_name_clean}_{sheet_name}'))
+
+table(df_mid$dupe_fac_date) # !!
+
+df_comb <- df_mid %>%
+  group_by(fac_date) %>%
+  summarise_all(coalesce_by_column) %>%
+  ungroup()
+
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, Name)))
+```
+
+
+Find non-cumulative counts, separate those. 
+
+```{r}
+
+```
+
+Find outliers, figure out what to do,
+
+```{r}
+
+```

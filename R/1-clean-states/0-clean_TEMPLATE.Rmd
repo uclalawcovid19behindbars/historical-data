@@ -52,25 +52,52 @@ df_out <- df_typed %>%
   select(!starts_with("...")) %>%
   select(!starts_with("lots")) %>%
   select(!starts_with("Bad")) %>%
-  select(!c("V2", "V4", "V5", "V7", "V8", "V10"))
+  select(!c("V2", "V4", "V5", "V7", "V8", "V10")) %>%
+  select(!c("Facility.", "Coder", "Housing.Type")) %>%
+  select_if(~sum(!is.na(.)) > 0) %>% # rm 100% missing cols 
+  
+
+# FEDERAL
+# If 'State.1' exists:
+# - Make "Facility" = "Federal Prison"
+# - Make "State" = {LOOKUP 'state.1' acronym --> full state name}
+
+# OHIO
+# If 'Residents.Quarantined' exists:
+# - Force it as numeric
+# - Put entries into 'Residents.Quarantine'
+
+# TEXAS
+# If 'Allred' exists:
+# - investigate that date. facility name?
 
 
-## Residents.Confirmed, Residents.Deaths
+# Residents.Confirmed is a character --> has entries with "n/a". convert these to NA
 
-## Residents.Quarantined contains information including "Cells", "Combo"
-
-## There is "Facility." and "Facility" --> combine
-
-# Residents.Confirmed is a character --> why? 
 ```
 
+Columns that mean the same thing but have slightly different names: 
+- Staff.Death, Staff.Deaths
+- Staff.Recovered, Staff.Recoveries
+- Staff.Quarantined, Staff.Quarantine
+- Residents.Recovered, Residents.Recoveries
+- Resident.Death, Residents.Deaths, Resident.Deaths..Confirmed., {? Resident.Deaths..Presumed.}
+- Resident.Tested, Residents.Tested
+- Inmates.Positive, Residents.Positive
+
 ```{r combine similar columns}
-
-
+allred <- (subset(df_out, !is.na(df_out$Allred)))
 ```
 
 
 ```{r standardize facility names}
+id_xwalk <- f %>%
+  select(Count.ID, State, City, facility_name_raw, facility_name_clean) %>%
+  unique()
+df_mid <-left_join(df_out, id_xwalk, 
+                   by = c("Name" = "facility_name_raw", 
+                          "State" = "State"))
+
 
 ```
 
