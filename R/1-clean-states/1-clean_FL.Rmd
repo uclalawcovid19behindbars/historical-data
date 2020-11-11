@@ -7,7 +7,7 @@ output: html_document
 
 ```{r package setup, include=FALSE}
 ##Define package list
-Packages<-c("tidyverse", "glue", "assertthat")
+Packages<-c("tidyverse", "glue", "assertthat", "stringr")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -69,6 +69,12 @@ df_out %<>%
 ```
 
 
+```{r make date variable}
+df_out <- df_out %>%
+  mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
+```
+
+
 ```{r standardize facility names}
 id_xwalk <- f %>%
   select(Count.ID, State, City, facility_name_raw, facility_name_clean) %>%
@@ -87,11 +93,24 @@ df_mid <-left_join(df_out, id_xwalk,
                           "State" = "State"))
 
 # show instances where "facility_name_raw" is NA-ish
-# Figure out what to do about these 3 instances -- perma CC them? 
 df_mid %>%
   filter(is.na(facility_name_clean)) %>%
   select(Name, name_merging, facility_name_clean, City.x, City.y, sheet_name)
 
+# No other "GEO groups" reported in FL 
+df_mid %>%
+  filter(str_detect(Name, regex('geo', ignore_case = TRUE)) )
+
+# Ask: was there black water or south bay geo group on these dates? 
+# Asnwer: Yes
+df_mid %>%
+  filter(str_detect(Name, regex('south bay', ignore_case = TRUE)) | str_detect(Name, regex('black', ignore_case = TRUE))) %>%
+  filter(date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))
+
+## ! 
+## Remove "GEO GROUP" with no associated values that are tied
+df_mid <- df_mid %>%
+  filter(!str_detect(Name, regex('geo', ignore_case = TRUE))) 
 ```
 
 
@@ -99,7 +118,6 @@ Figure out duplicate date/facilities, concatenate those instances from multiple 
 
 
 ```{r concat duplicate date/facilities}
-# verify these numbers seem right
 n_distinct(df_out)
 nrow(df_mid)
 nrow(distinct(df_mid, sheet_name, facility_name_clean))
@@ -123,13 +141,94 @@ assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, Name)))
 ```
 
 
-Find non-cumulative counts, separate those. 
+Find time periods where facilities were missing lots of data. 
 
 ```{r}
+df_comb %>%
+  count(date, sort = TRUE)
+
+df_comb %>%
+  count(facility_name_clean, sort = TRUE)
+```
+
+
+
+Find non-cumulative counts, separate those into "active" and "confirmed". Use residents recovered to calculate "confirmed". 
+
+```{r}
+df_comb <- df_comb %>% 
+  group_by(facility_name_clean) %>%
+  mutate(previous_date_value = lag(Residents.Confirmed, order_by = date)) %>%
+  mutate(lag_change = Residents.Confirmed - previous_date_value,
+         cumulative = ifelse(lag_change >= 0, TRUE, FALSE)) %>%
+  ungroup() 
+
+
+ggplot(data = df_comb, 
+       aes(x = date, y = lag_change, group = facility_name_clean)) +
+  geom_area(alpha=0.6 , size=.5, color = "white") +
+  labs(x = "Date",
+    y = "lag_change")
+
+ggplot(df_comb, aes(x=date, y=lag_change)) +
+  geom_point(alpha = 1/10) +
+  xlab("") +
+  scale_x_date(date_labels = "%b")
+
+plots <- df_comb %>% 
+  group_by(facility_name_clean) %>% 
+  do(plots=ggplot(data=.) +
+         aes(x = date, y = lag_change) + 
+       geom_area(alpha=0.6 , size=.5, color = "white") + 
+       labs(x = "Date",
+            y = "lag_change") + 
+       ggtitle(unique(.$facility_name_clean))) 
+plots$plots
+
+noncumulative <- df_comb %>%
+  filter(cumulative == FALSE) %>%
+  select(facility_name_raw, facility_name_clean, date, 
+         Residents.Confirmed, previous_date_value, lag_change, cumulative, 
+         Residents.Recovered)
+
+df_comb %>% 
+  filter(facility_name_clean == "ST LUCE COUNTY JAIL") %>% 
+  ggplot(., aes(x=date, y=lag_change)) +
+    geom_point() +
+    xlab("") +
+    scale_x_date(date_labels = "%b")
+
+df_comb %>% 
+  filter(facility_name_clean == "ST LUCE COUNTY JAIL") %>% 
+  ggplot(., aes(x=date, y=Residents.Confirmed)) +
+    geom_point() +
+    xlab("") +
+    scale_x_date(date_labels = "%b") + 
+    ggtitle(unique("ST LUCE COUNTY JAIL"))
+
+df_comb %>% 
+  filter(facility_name_clean == "MIAMI FDC") %>% 
+  ggplot(., aes(x=date, y=Residents.Confirmed)) +
+    geom_point() +
+    xlab("") +
+    scale_x_date(date_labels = "%b") + 
+    ggtitle(unique("MIAMI FDC"))
+  
+
+
+df_comb %>% 
+  filter(facility_name_clean == "SFRC") %>% 
+  ggplot(., aes(x=date, y=Residents.Confirmed)) +
+    geom_point() +
+    xlab("") +
+    scale_x_date(date_labels = "%b") + 
+    ggtitle(unique("SFRC"))
+
+
 
 ```
 
-Find outliers, figure out what to do,
+Find outliers, figure out what to do.
 
 ```{r}
 
