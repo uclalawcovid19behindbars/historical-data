@@ -55,12 +55,8 @@ load_data <- function(data_path,
 # table(is.na(df_out$Staff.Death) & !is.na(df_out$Staff.Deaths))
 # table(!is.na(df_out$Staff.Death) & is.na(df_out$Staff.Deaths))
 
-combine_similar_cols <- function(from, to) {
-  # if this column is not missing (Facility.1), put whatever was in it in the dominant column (Facility)
-  
-}
-
 # https://stackoverflow.com/questions/45515218/combine-rows-in-data-frame-containing-na-to-make-complete-row
+# CAN ALSO SUM BY COLUMN 
 coalesce_by_column <- function(df) {
   return(dplyr::coalesce(!!! as.list(df)))
 }
@@ -75,14 +71,67 @@ flag_outlier <- function() {
   
 }
 
-flag_noncumulative <- function() {
-  
+flag_noncumulative <- function(dat) {
+  dat <- dat %>% 
+    group_by(facility_name_clean) %>%
+    mutate(previous_date_value = lag(Residents.Confirmed, order_by = date)) %>%
+    mutate(lag_change = Residents.Confirmed - previous_date_value,
+           cumulative = ifelse(lag_change >= 0, TRUE, FALSE)) %>%
+    ungroup() 
+  return(dat)
+}
+
+plot_lag_counts <- function(dat) {
+  plots <- dat %>% 
+    group_by(facility_name_clean) %>% 
+    do(plots=ggplot(data=.) +
+         aes(x = date, y = lag_change) + 
+         geom_area(alpha=0.6 , size=.5, color = "white") + 
+         labs(x = "Date",
+              y = "lag_change") + 
+         ggtitle(unique(.$facility_name_clean))) 
+  return(plots$plots)
 }
 
 
+create_cumulative_count <- function(dat, facility, non_cumulative_var) {
+  facility <- enquo(facility)
+  non_cumulative_var <- enquo(non_cumulative_var)
+  
+  out <- dat %>% 
+    group_by(facility_name_clean) %>% 
+    arrange(date) %>%
+    mutate(cumsum = cumsum(!!non_cumulative_var)) %>%
+    ungroup 
+  # out[[non_cumulative_var]] <- ifelse(out$facility_name_clean == facility, 
+  #                                     out$cumsum,
+  #                                     out[[non_cumulative_var]])
+  # out$cumsum <- NULL
+  # 
+    # ask someone about this! 
+    # tried to do the above in base R but it also didn't work 
+  
+    # mutate(!!non_cumulative_var = ifelse(facility_name_clean == !!facility,
+    #                                     cumsum, 
+    #                                     !!non_cumulative_var)) %>%
+    # mutate(Residents.Confirmed = ifelse(facility_name_clean == !!facility,
+    #                                     cumsum, 
+    #                                     Residents.Confirmed)) %>%
+  
+  return(out)
+}
 
 
+t1 %>% 
+  rename( !! quo_name(new_var) := old_name) %>% 
+  select(Year, !!new_var) %>% 
+  mutate(testvar = !! rlang::sym(rlang::quo_name(new_var)))
 
+new_var = quo(new_name)
+t1 %>% 
+  rename(!! new_var := old_name) %>% 
+  select(Year, !!new_var) %>% 
+  mutate(testvar = !! new_var)
 
 # Merge helpers -----------------------------------------------------------
 
