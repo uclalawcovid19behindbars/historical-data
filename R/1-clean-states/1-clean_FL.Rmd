@@ -7,7 +7,7 @@ output: html_document
 
 ```{r package setup, include=FALSE}
 ##Define package list
-Packages<-c("tidyverse", "glue", "assertthat", "stringr")
+Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -70,6 +70,14 @@ df_out %<>%
 
 
 ```{r make date variable}
+# COME BACK: 
+# Filter out administrative, community corrections, county jail?
+df_out <- df_out %>%
+  filter(Facility != "Federal Prison") %>%
+  filter(Facility != "Federal RRC") 
+```
+
+```{r filter out non-state prisons}
 df_out <- df_out %>%
   mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
 ```
@@ -135,17 +143,6 @@ assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, Name)))
 ```
 
 
-Find time periods where facilities were missing lots of data. 
-
-```{r}
-df_comb %>%
-  count(date, sort = TRUE)
-
-df_comb %>%
-  count(facility_name_clean, sort = TRUE)
-```
-
-
 Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
 ```{r}
@@ -202,6 +199,32 @@ df_comb %>%
     scale_x_date(date_labels = "%b") + 
     ggtitle(unique("SFRC"))
 ```
+
+Find date spans / week spans with no data.
+
+```{r}
+
+dates <- df_comb %>%
+  arrange(date) %>%
+  count(date)
+dates
+
+ggplot(data = dates, 
+       aes(x = date, y = n)) +
+  geom_bar(stat="identity") +
+  labs(x = "Date",
+    y = "n instances")
+
+
+# 2020-10-01: Only 1 facility counted
+
+# discount_data_df %>%
+#   mutate(Date = as.Date(Date)) %>%
+#   complete(Date = seq.Date(min(Date), max(Date), by="day")) %>%
+#   fill(`Discount Rate`)
+```
+
+
 
 Find outliers, figure out what to do.
 
