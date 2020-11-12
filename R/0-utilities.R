@@ -121,18 +121,6 @@ create_cumulative_count <- function(dat, facility, non_cumulative_var) {
   return(out)
 }
 
-
-t1 %>% 
-  rename( !! quo_name(new_var) := old_name) %>% 
-  select(Year, !!new_var) %>% 
-  mutate(testvar = !! rlang::sym(rlang::quo_name(new_var)))
-
-new_var = quo(new_name)
-t1 %>% 
-  rename(!! new_var := old_name) %>% 
-  select(Year, !!new_var) %>% 
-  mutate(testvar = !! new_var)
-
 # Merge helpers -----------------------------------------------------------
 
 merge_population <- function() {
