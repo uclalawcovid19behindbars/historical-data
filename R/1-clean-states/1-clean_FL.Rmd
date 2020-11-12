@@ -102,20 +102,14 @@ df_mid %>%
   filter(str_detect(Name, regex('geo', ignore_case = TRUE)) )
 
 # Ask: was there black water or south bay geo group on these dates? 
-# Asnwer: Yes
+# Answer: Yes
 df_mid %>%
   filter(str_detect(Name, regex('south bay', ignore_case = TRUE)) | str_detect(Name, regex('black', ignore_case = TRUE))) %>%
   filter(date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))
-
-## ! 
-## Remove "GEO GROUP" with no associated values that are tied
-df_mid <- df_mid %>%
-  filter(!str_detect(Name, regex('geo', ignore_case = TRUE))) 
 ```
 
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one.
-
 
 ```{r concat duplicate date/facilities}
 n_distinct(df_out)
@@ -152,68 +146,52 @@ df_comb %>%
 ```
 
 
-
-Find non-cumulative counts, separate those into "active" and "confirmed". Use residents recovered to calculate "confirmed". 
+Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
 ```{r}
-df_comb <- df_comb %>% 
-  group_by(facility_name_clean) %>%
-  mutate(previous_date_value = lag(Residents.Confirmed, order_by = date)) %>%
-  mutate(lag_change = Residents.Confirmed - previous_date_value,
-         cumulative = ifelse(lag_change >= 0, TRUE, FALSE)) %>%
-  ungroup() 
+df_comb <- flag_noncumulative(df_comb)
 
-
+# plot lag counts overall 
 ggplot(data = df_comb, 
        aes(x = date, y = lag_change, group = facility_name_clean)) +
   geom_area(alpha=0.6 , size=.5, color = "white") +
   labs(x = "Date",
     y = "lag_change")
 
-ggplot(df_comb, aes(x=date, y=lag_change)) +
-  geom_point(alpha = 1/10) +
-  xlab("") +
-  scale_x_date(date_labels = "%b")
+# plot lag counts by facility
+plot_lag_counts(df_comb)
 
-plots <- df_comb %>% 
+# ST LUCE COUNTY JAIL
+# Active --> cumulative 
+df_comb <- df_comb %>% 
   group_by(facility_name_clean) %>% 
-  do(plots=ggplot(data=.) +
-         aes(x = date, y = lag_change) + 
-       geom_area(alpha=0.6 , size=.5, color = "white") + 
-       labs(x = "Date",
-            y = "lag_change") + 
-       ggtitle(unique(.$facility_name_clean))) 
-plots$plots
+  arrange(date) %>%
+  mutate(cumsum = cumsum(Residents.Confirmed)) %>%
+  ungroup %>%
+  mutate(Residents.Confirmed = ifelse(facility_name_clean == "ST LUCE COUNTY JAIL",
+                       cumsum, Residents.Confirmed)) %>%
+  select(-cumsum)
 
-noncumulative <- df_comb %>%
-  filter(cumulative == FALSE) %>%
-  select(facility_name_raw, facility_name_clean, date, 
-         Residents.Confirmed, previous_date_value, lag_change, cumulative, 
-         Residents.Recovered)
+# test <- create_cumulative_count(df_comb, "ST LUCE COUNTY JAIL", 
+#                                 "Residents.Confirmed")
 
+
+# noncumulative <- df_comb %>%
+#   filter(cumulative == FALSE) %>%
+#   select(facility_name_raw, facility_name_clean, date, 
+#          Residents.Confirmed, previous_date_value, lag_change, cumulative, 
+#          Residents.Recovered)
+  
+
+# Come back to SFRC
+# Strange thing with +71 one day, -71 four days later
 df_comb %>% 
-  filter(facility_name_clean == "ST LUCE COUNTY JAIL") %>% 
+  filter(facility_name_clean == "SFRC") %>% 
   ggplot(., aes(x=date, y=lag_change)) +
     geom_point() +
     xlab("") +
-    scale_x_date(date_labels = "%b")
-
-df_comb %>% 
-  filter(facility_name_clean == "ST LUCE COUNTY JAIL") %>% 
-  ggplot(., aes(x=date, y=Residents.Confirmed)) +
-    geom_point() +
-    xlab("") +
     scale_x_date(date_labels = "%b") + 
-    ggtitle(unique("ST LUCE COUNTY JAIL"))
-
-df_comb %>% 
-  filter(facility_name_clean == "MIAMI FDC") %>% 
-  ggplot(., aes(x=date, y=Residents.Confirmed)) +
-    geom_point() +
-    xlab("") +
-    scale_x_date(date_labels = "%b") + 
-    ggtitle(unique("MIAMI FDC"))
-  
+    ggtitle(unique("SFRC"))
 
 
 df_comb %>% 
@@ -223,9 +201,6 @@ df_comb %>%
     xlab("") +
     scale_x_date(date_labels = "%b") + 
     ggtitle(unique("SFRC"))
-
-
-
 ```
 
 Find outliers, figure out what to do.
