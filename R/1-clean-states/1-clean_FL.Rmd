@@ -32,13 +32,14 @@ Input files:
 
 ```{r load inputs, echo=FALSE}
 base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
-data_path <- file.path(base_path, "data", "xlsx")
-facility_xwalk_path <- file.path("~", "UCLA", "code", "facility_data", "data_sheets")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ##Facility name look-up table
-f <- read_csv(file.path(facility_xwalk_path,"fac_spellings.csv"))
+f <- read_csv("https://raw.githubusercontent.com/uclalawcovid19behindbars/facility_data/master/data_sheets/fac_spellings.csv")
+##Load population data
+pop <- read_csv(file.path(data_path, "Prison_Boundaries.csv"))
 ```
 
 
@@ -47,7 +48,6 @@ df <- load_data(data_path,
                 "103020",
                 filter_state = "Florida") 
 df_typed <- type_convert(df)
-# KEEP DF_TYPED UNTOUCHED! 
 ```
 
 Fill in missing values of `Staff.Deaths` with non-missing values of `Staff.Death`, when those exist. Do the same with `Resident.Death`/`Resident.Deaths`.
@@ -69,15 +69,15 @@ df_out %<>%
 ```
 
 
-```{r make date variable}
-# COME BACK: 
+```{r filter federal prisons}
+# Q
 # Filter out administrative, community corrections, county jail?
 df_out <- df_out %>%
   filter(Facility != "Federal Prison") %>%
   filter(Facility != "Federal RRC") 
 ```
 
-```{r filter out non-state prisons}
+```{r create date var}
 df_out <- df_out %>%
   mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
 ```
@@ -100,7 +100,7 @@ df_mid <-left_join(df_out, id_xwalk,
                    by = c("name_merging" = "facility_name_raw_merging", 
                           "State" = "State"))
 
-# show instances where "facility_name_raw" is NA-ish
+# show instances where merge didn't identify a clean name
 df_mid %>%
   filter(is.na(facility_name_clean)) %>%
   select(Name, name_merging, facility_name_clean, City.x, City.y, sheet_name)
@@ -139,7 +139,7 @@ df_comb <- df_mid %>%
   summarise_all(coalesce_by_column) %>%
   ungroup()
 
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, Name)))
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_clean)))
 ```
 
 
@@ -152,6 +152,7 @@ df_comb <- flag_noncumulative(df_comb)
 ggplot(data = df_comb, 
        aes(x = date, y = lag_change, group = facility_name_clean)) +
   geom_area(alpha=0.6 , size=.5, color = "white") +
+  scale_x_date(date_labels = "%m") + 
   labs(x = "Date",
     y = "lag_change")
 
@@ -163,11 +164,11 @@ plot_lag_counts(df_comb)
 df_comb <- df_comb %>% 
   group_by(facility_name_clean) %>% 
   arrange(date) %>%
-  mutate(cumsum = cumsum(Residents.Confirmed)) %>%
+  mutate(temp_cumulative_var = cumsum(Residents.Confirmed)) %>%
   ungroup %>%
   mutate(Residents.Confirmed = ifelse(facility_name_clean == "ST LUCE COUNTY JAIL",
-                       cumsum, Residents.Confirmed)) %>%
-  select(-cumsum)
+                       temp_cumulative_var, Residents.Confirmed)) %>%
+  select(-temp_cumulative_var)
 
 # test <- create_cumulative_count(df_comb, "ST LUCE COUNTY JAIL", 
 #                                 "Residents.Confirmed")
@@ -180,7 +181,7 @@ df_comb <- df_comb %>%
 #          Residents.Recovered)
   
 
-# Come back to SFRC
+# Come back to SFRC (south florida reception center?)
 # Strange thing with +71 one day, -71 four days later
 df_comb %>% 
   filter(facility_name_clean == "SFRC") %>% 
@@ -200,10 +201,10 @@ df_comb %>%
     ggtitle(unique("SFRC"))
 ```
 
+
 Find date spans / week spans with no data.
 
 ```{r}
-
 dates <- df_comb %>%
   arrange(date) %>%
   count(date)
@@ -215,8 +216,8 @@ ggplot(data = dates,
   labs(x = "Date",
     y = "n instances")
 
-
-# 2020-10-01: Only 1 facility counted
+# 2020-10-01: Only 1 facility counted (county jail)
+# Not worried about this
 
 # discount_data_df %>%
 #   mutate(Date = as.Date(Date)) %>%
@@ -225,9 +226,50 @@ ggplot(data = dates,
 ```
 
 
+Merge in population data.
 
-Find outliers, figure out what to do.
+```{r population data merge}
+# clean HIFLD population data
+pop_merging <- pop %>%
+  filter(STATE == "FL") %>%
+  select(NAME, FACILITYID, POPULATION) %>%
+  mutate(State = "Florida") %>%
+  mutate(POPULATION = ifelse(POPULATION < 0, NA, POPULATION)) %>%
+  mutate(name_merging = tolower(NAME),
+         name_merging = str_replace(name_merging, "correctional institution", "ci"),
+         name_merging = str_replace(name_merging, "correctional facility", "cf"),
+         name_merging = str_remove_all(name_merging, ", east unit"),
+         name_merging = str_remove_all(name_merging, ", west unit"),
+         name_merging = str_remove_all(name_merging, "\\.")) %>%
+  group_by(name_merging) %>%
+  mutate(POPULATION = sum(POPULATION, na.rm = TRUE)) %>%
+  distinct(name_merging, .keep_all = TRUE)
 
-```{r}
+# Unresolved pop data: 
+# BLACKWATER 
+# Central office
+# Community corrections region 1-4
+
+see_if(nrow(pop_merging) == n_distinct(pop_merging$name_merging))
+
+# merge HIFLD data to facility name crosswalk
+pop_joined <-left_join(pop_merging, id_xwalk, 
+                   by = c("name_merging" = "facility_name_raw_merging", 
+                          "State" = "State")) %>%
+  drop_na(facility_name_clean)
+
+# merge HIFLD population data to data 
+test_join <- left_join(df_comb, pop_joined, by = "facility_name_clean")
+dim(test_join)
+dim(df_comb)
+
+
+dist_fac <- tibble(name = unique(df_comb$facility_name_clean))
+dist_merged <- tibble(name = unique(pop_joined$facility_name_clean))
+# check facilities that aren't overlapping
+ck <- anti_join(dist_fac, dist_merged)
 
 ```
+
+
+
