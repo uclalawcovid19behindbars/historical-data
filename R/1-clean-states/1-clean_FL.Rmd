@@ -61,9 +61,15 @@ df_out <- df_typed %>%
   select(!c("Facility.", "Coder", "Housing.Type")) %>%
   select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
 
+# test <- df_out %>%
+#   filter((!is.na(Staff.Death)) & (!is.na(Staff.Deaths))) %>%
+#   mutate(check_equal = ifelse(Staff.Death == Staff.Deaths, TRUE, FALSE)) %>%
+#   select(Staff.Death, Staff.Deaths, check_equal, Facility, sheet_name)
+
+# re-write coalesce that gives a warning when there are duplicate values (especially if not equal)
 df_out %<>% 
-  mutate(Staff.Deaths = coalesce(Staff.Deaths, Staff.Death)) %>%
-  mutate(Resident.Deaths = coalesce(Resident.Deaths, Resident.Deaths)) %>%
+  mutate(Staff.Deaths = coalesce_with_warnings(Staff.Deaths, Staff.Death)) %>%
+  mutate(Resident.Deaths = coalesce_with_warnings(Resident.Deaths, Resident.Death)) %>%
   mutate(Residents.Confirmed = na_if(Residents.Confirmed, "n/a")) %>%
   mutate(Residents.Confirmed = as.numeric(Residents.Confirmed))
 ```
@@ -85,7 +91,7 @@ df_out <- df_out %>%
 
 ```{r standardize facility names}
 id_xwalk <- f %>%
-  select(Count.ID, State, City, facility_name_raw, facility_name_clean) %>%
+  select(Count.ID, State, facility_name_raw, facility_name_clean) %>%
   unique() %>%
   mutate(facility_name_raw_merging = tolower(facility_name_raw))
 
@@ -95,29 +101,36 @@ df_out %<>%
   mutate(name_merging = str_remove_all(name_merging,"( |)- operated by")) %>%
   mutate(name_merging = str_remove_all(name_merging, "\\."))
 
- 
-df_mid <-left_join(df_out, id_xwalk, 
+df_mid <- nest_join(df_out, id_xwalk, 
                    by = c("name_merging" = "facility_name_raw_merging", 
-                          "State" = "State"))
+                          "State" = "State")) %>%
+        hoist(id_xwalk,
+              facility_name_clean = pluck("facility_name_clean", 1)) %>%
+  mutate(facility_name_clean = map(facility_name_clean, first),
+         facility_name_clean = as.character(facility_name_clean))
+```
 
+```{r facility merge checks, include = FALSE}
 # show instances where merge didn't identify a clean name
-df_mid %>%
-  filter(is.na(facility_name_clean)) %>%
-  select(Name, name_merging, facility_name_clean, City.x, City.y, sheet_name)
+ck <- anti_join(df_out, id_xwalk, 
+                by = c("name_merging" = "facility_name_raw_merging", 
+                          "State" = "State"))
+View(ck)
 
-# No other "GEO groups" reported in FL 
+# Any other "GEO groups" reported in FL?
+# No
 df_mid %>%
   filter(str_detect(Name, regex('geo', ignore_case = TRUE)) )
 
 # Ask: was there black water or south bay geo group on these dates? 
 # Answer: Yes
-df_mid %>%
+
+another_check <- df_mid %>%
   filter(str_detect(Name, regex('south bay', ignore_case = TRUE)) | str_detect(Name, regex('black', ignore_case = TRUE))) %>%
   filter(date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))
 ```
 
-
-Figure out duplicate date/facilities, concatenate those instances from multiple rows into one.
+Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
 
 ```{r concat duplicate date/facilities}
 n_distinct(df_out)
@@ -130,34 +143,62 @@ df_mid %<>%
   mutate(dupe_fac_date = n() > 1) %>%
   ungroup() %>%
   relocate(dupe_fac_date, .before =) %>%
-  mutate(fac_date = glue::glue('{facility_name_clean}_{sheet_name}'))
-
-table(df_mid$dupe_fac_date) # !!
+  mutate(fac_date = glue::glue('{facility_name_clean}_{sheet_name}')) %>%
+  select(-id_xwalk)
 
 df_comb <- df_mid %>%
   group_by(fac_date) %>%
   summarise_all(coalesce_by_column) %>%
   ungroup()
 
+assert_that(nrow(df_comb) == nrow(df_mid)) # make sure we didn't pick up any extra rows
 assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_clean)))
 ```
-
 
 Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
 ```{r}
-df_comb <- flag_noncumulative(df_comb)
+df_comb <- flag_noncumulative_cases(df_comb)
+df_comb <- flag_noncumulative_deaths(df_comb)
 
-# plot lag counts overall 
-ggplot(data = df_comb, 
-       aes(x = date, y = lag_change, group = facility_name_clean)) +
-  geom_area(alpha=0.6 , size=.5, color = "white") +
-  scale_x_date(date_labels = "%m") + 
-  labs(x = "Date",
-    y = "lag_change")
+# lag cases 
+df_comb %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_cases, group = facility_name_clean)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_cases")
+
+# lag deaths
+df_comb %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_deaths, group = facility_name_clean)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_deaths")
+
+# df_comb %>%
+#   filter(facility_name_clean != "STATEWIDE") %>%
+#   ggplot(data = ., 
+#          aes(x = date, y = Resident.Deaths, group = facility_name_clean)) +
+#     geom_area(alpha=0.6 , size=.5, color = "white") +
+#     scale_x_date(date_labels = "%m") 
+
+
+# # TO DO: create lag death chart 
+# # Aggregate to weekly, bi-weekly
+death_check <- df_comb %>%
+  group_by(date) %>%
+  summarise(total_deaths = sum(Resident.Deaths)) 
+
 
 # plot lag counts by facility
-plot_lag_counts(df_comb)
+lag_case_plots <- plot_lag_cases(df_comb)
+lag_death_plots <- plot_lag_deaths(df_comb)
 
 # ST LUCE COUNTY JAIL
 # Active --> cumulative 
@@ -183,6 +224,10 @@ df_comb <- df_comb %>%
 
 # Come back to SFRC (south florida reception center?)
 # Strange thing with +71 one day, -71 four days later
+# TO DO: GO LOOK FOR PERMA-CC on this day for perma-CC
+
+# write a function for large negatives/positives followed by large positives/negatives
+
 df_comb %>% 
   filter(facility_name_clean == "SFRC") %>% 
   ggplot(., aes(x=date, y=lag_change)) +
@@ -202,7 +247,7 @@ df_comb %>%
 ```
 
 
-Find date spans / week spans with no data.
+Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was mis-read. Might want to go back to the perma-CC and resolve these instances. 
 
 ```{r}
 dates <- df_comb %>%
@@ -218,11 +263,6 @@ ggplot(data = dates,
 
 # 2020-10-01: Only 1 facility counted (county jail)
 # Not worried about this
-
-# discount_data_df %>%
-#   mutate(Date = as.Date(Date)) %>%
-#   complete(Date = seq.Date(min(Date), max(Date), by="day")) %>%
-#   fill(`Discount Rate`)
 ```
 
 
@@ -259,7 +299,7 @@ pop_joined <-left_join(pop_merging, id_xwalk,
   drop_na(facility_name_clean)
 
 # merge HIFLD population data to data 
-test_join <- left_join(df_comb, pop_joined, by = "facility_name_clean")
+test_join <- semi_join(df_comb, pop_joined, by = "facility_name_clean")
 dim(test_join)
 dim(df_comb)
 
