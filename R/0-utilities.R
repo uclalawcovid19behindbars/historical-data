@@ -23,6 +23,8 @@ load_data <- function(data_path,
   all_dat <- read_sheets(xlsx_file = historical_datafile)
   
   ##Convert date-type 
+  # WHY iS thiS ALL NA 
+  # 
   all_dat$Date <- as.Date(all_dat$Date, format = "%Y-%m-%d")
   
   ##No use case for filtering multi-subset of states
@@ -55,40 +57,88 @@ load_data <- function(data_path,
 # table(is.na(df_out$Staff.Death) & !is.na(df_out$Staff.Deaths))
 # table(!is.na(df_out$Staff.Death) & is.na(df_out$Staff.Deaths))
 
+
+#' A re-coding of the coalesce function to include warnings when multiple
+#' values are given which are not NA and are different
+#' 
+#' @param ... vectors of equal length and type to coalesce
+#' @return vector of coalesced values
+#' 
+#' @examples 
+#' coalesce_with_warnings(1:3, 4:6)
+#' coalesce_with_warnings(1:3, c(1:2, NA))
+
+coalesce_with_warnings <- function(...){
+  d <- cbind(...)
+  
+  sapply(1:nrow(d), function(i){
+    x <- d[i,]
+    if(all(is.na(x))){
+      out <- NA
+    }
+    else{
+      xbar <- unique(as.vector(na.omit(x)))
+      if(length(xbar) != 1){
+        warning(paste0(
+          "Row ", i, " has multiple values that do not match."))
+      }
+      # only grab the first one
+      out <- xbar[1]
+    }
+    out
+  })
+}
+
 # https://stackoverflow.com/questions/45515218/combine-rows-in-data-frame-containing-na-to-make-complete-row
-# CAN ALSO SUM BY COLUMN 
+# Consider summing by column when using this function
 coalesce_by_column <- function(df) {
-  return(dplyr::coalesce(!!! as.list(df)))
+  return(coalesce_with_warnings(!!! as.list(df)))
 }
 
-
-assign_prev_data <- function(x) {
-  
+coalesce_by_column <- function(df) {
+  return(coalesce(!!! as.list(df)))
 }
 
-
-flag_outlier <- function() {
-  
-}
-
-flag_noncumulative <- function(dat) {
+flag_noncumulative_cases <- function(dat) {
   dat <- dat %>% 
     group_by(facility_name_clean) %>%
-    mutate(previous_date_value = lag(Residents.Confirmed, order_by = date)) %>%
-    mutate(lag_change = Residents.Confirmed - previous_date_value,
-           cumulative = ifelse(lag_change >= 0, TRUE, FALSE)) %>%
+    mutate(previous_date_value_cases = lag(Residents.Confirmed, order_by = date)) %>%
+    mutate(lag_change_cases = Residents.Confirmed - previous_date_value_cases,
+           cumulative_cases = ifelse(lag_change_cases >= 0, TRUE, FALSE)) %>%
     ungroup() 
   return(dat)
 }
 
-plot_lag_counts <- function(dat) {
+flag_noncumulative_deaths <- function(dat) {
+  dat <- dat %>% 
+    group_by(facility_name_clean) %>%
+    mutate(previous_date_value_deaths = lag(Resident.Deaths, order_by = date)) %>%
+    mutate(lag_change_deaths = Resident.Deaths - previous_date_value_deaths,
+           cumulative_deaths = ifelse(lag_change_deaths >= 0, TRUE, FALSE)) %>%
+    ungroup() 
+  return(dat)
+}
+
+plot_lag_cases <- function(dat) {
   plots <- dat %>% 
     group_by(facility_name_clean) %>% 
     do(plots=ggplot(data=.) +
-         aes(x = date, y = lag_change) + 
-         geom_area(alpha=0.6 , size=.5, color = "white") + 
+         aes(x = date, y = lag_change_cases) + 
+         geom_line(alpha=0.6 , size=.5, color = "black") + 
          labs(x = "Date",
-              y = "lag_change") + 
+              y = "Lag change (cases)") + 
+         ggtitle(unique(.$facility_name_clean))) 
+  return(plots$plots)
+}
+
+plot_lag_deaths <- function(dat) {
+  plots <- dat %>% 
+    group_by(facility_name_clean) %>% 
+    do(plots=ggplot(data=.) +
+         aes(x = date, y = lag_change_cases) + 
+         geom_line(alpha=0.6 , size=.5, color = "black") + 
+         labs(x = "Date",
+              y = "Lag change (deaths)") + 
          ggtitle(unique(.$facility_name_clean))) 
   return(plots$plots)
 }
