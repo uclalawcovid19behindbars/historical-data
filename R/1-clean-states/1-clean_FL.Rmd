@@ -61,12 +61,6 @@ df_out <- df_typed %>%
   select(!c("Facility.", "Coder", "Housing.Type")) %>%
   select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
 
-# test <- df_out %>%
-#   filter((!is.na(Staff.Death)) & (!is.na(Staff.Deaths))) %>%
-#   mutate(check_equal = ifelse(Staff.Death == Staff.Deaths, TRUE, FALSE)) %>%
-#   select(Staff.Death, Staff.Deaths, check_equal, Facility, sheet_name)
-
-# re-write coalesce that gives a warning when there are duplicate values (especially if not equal)
 df_out %<>% 
   mutate(Staff.Deaths = coalesce_with_warnings(Staff.Deaths, Staff.Death)) %>%
   mutate(Resident.Deaths = coalesce_with_warnings(Resident.Deaths, Resident.Death)) %>%
@@ -76,8 +70,6 @@ df_out %<>%
 
 
 ```{r filter federal prisons}
-# Q
-# Filter out administrative, community corrections, county jail?
 df_out <- df_out %>%
   filter(Facility != "Federal Prison") %>%
   filter(Facility != "Federal RRC") 
@@ -103,9 +95,8 @@ df_out %<>%
 
 df_mid <- nest_join(df_out, id_xwalk, 
                    by = c("name_merging" = "facility_name_raw_merging", 
-                          "State" = "State")) %>%
-        hoist(id_xwalk,
-              facility_name_clean = pluck("facility_name_clean", 1)) %>%
+                          "State" = "State")) %>% 
+  hoist(id_xwalk, facility_name_clean = pluck("facility_name_clean", 1)) %>%
   mutate(facility_name_clean = map(facility_name_clean, first),
          facility_name_clean = as.character(facility_name_clean))
 ```
@@ -115,8 +106,6 @@ df_mid <- nest_join(df_out, id_xwalk,
 ck <- anti_join(df_out, id_xwalk, 
                 by = c("name_merging" = "facility_name_raw_merging", 
                           "State" = "State"))
-View(ck)
-
 # Any other "GEO groups" reported in FL?
 # No
 df_mid %>%
@@ -124,10 +113,14 @@ df_mid %>%
 
 # Ask: was there black water or south bay geo group on these dates? 
 # Answer: Yes
-
 another_check <- df_mid %>%
   filter(str_detect(Name, regex('south bay', ignore_case = TRUE)) | str_detect(Name, regex('black', ignore_case = TRUE))) %>%
   filter(date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))
+```
+Remove "GEO Group" observations for July 8, 10, and 11. These observations were an OCR error because the facilities on those dates had names that spanned multiple lines. If we included these observations, we would be double-counting deaths in South Bay GEO Group prison. 
+```{r drop geo-group observations}
+df_mid <- df_mid %>%
+  filter(!(Name == "GEO Group Inc" & (date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))))
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
@@ -151,7 +144,6 @@ df_comb <- df_mid %>%
   summarise_all(coalesce_by_column) %>%
   ungroup()
 
-assert_that(nrow(df_comb) == nrow(df_mid)) # make sure we didn't pick up any extra rows
 assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_clean)))
 ```
 
@@ -189,16 +181,39 @@ df_comb %>%
 #     scale_x_date(date_labels = "%m") 
 
 
-# # TO DO: create lag death chart 
-# # Aggregate to weekly, bi-weekly
-death_check <- df_comb %>%
-  group_by(date) %>%
-  summarise(total_deaths = sum(Resident.Deaths)) 
-
+# # # Aggregate to weekly, bi-weekly
+# death_check <- df_comb %>%
+#   group_by(date) %>%
+#   summarise(total_deaths = sum(Resident.Deaths)) 
 
 # plot lag counts by facility
 lag_case_plots <- plot_lag_cases(df_comb)
 lag_death_plots <- plot_lag_deaths(df_comb)
+
+# WAKULLA
+# TAYLOR CI 
+# SFRC 
+# MADISON CI 
+# COLUMBIA CI
+
+lag_death_plots %>% 
+  filter(facility_name_clean == "SFRC") %>% 
+  pull(plots)
+
+View(df_comb %>% filter(Name == "UNION CI") %>%
+       select(date, Resident.Deaths, Resident.Death, lag_change_deaths, cumulative_deaths))
+
+View(df_comb %>% filter(Name == "SUMTER CI") %>%
+       select(date, Resident.Deaths, Resident.Death, lag_change_deaths, cumulative_deaths))
+
+
+
+
+weekly_avg <- df_comb %>%
+  group_by(week = week(date), facility_name_clean) %>%
+  summarise(weekly_mean_change = mean(lag_change_deaths))
+
+
 
 # ST LUCE COUNTY JAIL
 # Active --> cumulative 
@@ -230,7 +245,7 @@ df_comb <- df_comb %>%
 
 df_comb %>% 
   filter(facility_name_clean == "SFRC") %>% 
-  ggplot(., aes(x=date, y=lag_change)) +
+  ggplot(., aes(x=date, y=lag_change_cases)) +
     geom_point() +
     xlab("") +
     scale_x_date(date_labels = "%b") + 
