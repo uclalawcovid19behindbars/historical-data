@@ -22,11 +22,6 @@ load_data <- function(data_path,
   historical_datafile <- file.path(data_path, file_name)
   all_dat <- read_sheets(xlsx_file = historical_datafile)
   
-  ##Convert date-type 
-  # WHY iS thiS ALL NA 
-  # 
-  all_dat$Date <- as.Date(all_dat$Date, format = "%Y-%m-%d")
-  
   ##No use case for filtering multi-subset of states
   if(!is.null(filter_state)) {
     filter1_df <- all_dat %>% 
@@ -41,7 +36,6 @@ load_data <- function(data_path,
   } else {
     filter2_df <- filter1_df
   }
-  
   ##Filter date, if argument exists
   if(!is.null(filter_date)) {
     filter3_df <- filter2_df %>% 
@@ -49,7 +43,6 @@ load_data <- function(data_path,
   } else {
     filter3_df <- filter2_df
   }
-  
   return(filter3_df)
 }
 
@@ -135,12 +128,14 @@ plot_lag_deaths <- function(dat) {
   plots <- dat %>% 
     group_by(facility_name_clean) %>% 
     do(plots=ggplot(data=.) +
-         aes(x = date, y = lag_change_cases) + 
+         aes(x = date, y = lag_change_deaths) + 
          geom_line(alpha=0.6 , size=.5, color = "black") + 
          labs(x = "Date",
               y = "Lag change (deaths)") + 
-         ggtitle(unique(.$facility_name_clean))) 
-  return(plots$plots)
+         ggtitle(unique(.$facility_name_clean)))
+  return(plots)
+  # plots_tib <- tibble(data = list(df.1, df.2)) %>% 
+  #   mutate(plots = plots$plots)
 }
 
 
