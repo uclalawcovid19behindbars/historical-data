@@ -92,6 +92,18 @@ coalesce_by_column <- function(df) {
   return(coalesce(!!! as.list(df)))
 }
 
+# bang_select <- function(df, cols){
+#   dplyr::select(df, !!cols)
+# }
+# 
+# enq_select <- function(df, ...){
+#   args <- dplyr::enquos(...)
+#   dplyr::select(df, !!!args)
+# }
+# 
+# bang_select(sleep, "extra")
+# enq_select(sleep, extra)
+
 flag_noncumulative_cases <- function(dat) {
   dat <- dat %>% 
     group_by(facility_name_clean) %>%
@@ -102,7 +114,7 @@ flag_noncumulative_cases <- function(dat) {
   return(dat)
 }
 
-flag_noncumulative_deaths <- function(dat) {
+flag_noncumulative_deaths <- function(dat, var) {
   dat <- dat %>% 
     group_by(facility_name_clean) %>%
     mutate(previous_date_value_deaths = lag(Resident.Deaths, order_by = date)) %>%
@@ -112,32 +124,18 @@ flag_noncumulative_deaths <- function(dat) {
   return(dat)
 }
 
-plot_lag_cases <- function(dat) {
+plot_lags <- function(dat, date, var) {
+  y_label = paste("Lag change", as_label(var))
   plots <- dat %>% 
     group_by(facility_name_clean) %>% 
     do(plots=ggplot(data=.) +
-         aes(x = date, y = lag_change_cases) + 
+         aes_string(x = date, y = var) +
          geom_line(alpha=0.6 , size=.5, color = "black") + 
          labs(x = "Date",
-              y = "Lag change (cases)") + 
+              y = var) + 
          ggtitle(unique(.$facility_name_clean))) 
-  return(plots$plots)
-}
-
-plot_lag_deaths <- function(dat) {
-  plots <- dat %>% 
-    group_by(facility_name_clean) %>% 
-    do(plots=ggplot(data=.) +
-         aes(x = date, y = lag_change_deaths) + 
-         geom_line(alpha=0.6 , size=.5, color = "black") + 
-         labs(x = "Date",
-              y = "Lag change (deaths)") + 
-         ggtitle(unique(.$facility_name_clean)))
   return(plots)
-  # plots_tib <- tibble(data = list(df.1, df.2)) %>% 
-  #   mutate(plots = plots$plots)
 }
-
 
 create_cumulative_count <- function(dat, facility, non_cumulative_var) {
   facility <- enquo(facility)
