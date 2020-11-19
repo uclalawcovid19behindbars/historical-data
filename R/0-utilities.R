@@ -128,41 +128,42 @@ plot_lags <- function(dat, date, var) {
   y_label = paste("Lag change", as_label(var))
   plots <- dat %>% 
     group_by(facility_name_clean) %>% 
-    do(plots=ggplot(data=.) +
+    do(plot=ggplot(data=.) +
          aes_string(x = date, y = var) +
          geom_line(alpha=0.6 , size=.5, color = "black") + 
          labs(x = "Date",
               y = var) + 
-         ggtitle(unique(.$facility_name_clean))) 
+         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m", 
+                      date_breaks = "1 month") + 
+         ggtitle(unique(.$facility_name_clean)))
   return(plots)
 }
 
-create_cumulative_count <- function(dat, facility, non_cumulative_var) {
-  facility <- enquo(facility)
-  non_cumulative_var <- enquo(non_cumulative_var)
-  
-  out <- dat %>% 
-    group_by(facility_name_clean) %>% 
-    arrange(date) %>%
-    mutate(cumsum = cumsum(!!non_cumulative_var)) %>%
-    ungroup 
-  # out[[non_cumulative_var]] <- ifelse(out$facility_name_clean == facility, 
-  #                                     out$cumsum,
-  #                                     out[[non_cumulative_var]])
-  # out$cumsum <- NULL
-  # 
-    # ask someone about this! 
-    # tried to do the above in base R but it also didn't work 
-  
-    # mutate(!!non_cumulative_var = ifelse(facility_name_clean == !!facility,
-    #                                     cumsum, 
-    #                                     !!non_cumulative_var)) %>%
-    # mutate(Residents.Confirmed = ifelse(facility_name_clean == !!facility,
-    #                                     cumsum, 
-    #                                     Residents.Confirmed)) %>%
-  
-  return(out)
-}
+# create_cumulative_count <- function(dat, facility, non_cumulative_var) {
+#   facility <- enquo(facility)
+#   non_cumulative_var <- enquo(non_cumulative_var)
+#   
+#   out <- dat %>% 
+#     group_by(facility_name_clean) %>% 
+#     arrange(date) %>%
+#     mutate(cumsum = cumsum(!!non_cumulative_var)) %>%
+#     ungroup 
+#   return(out)
+# }
+
+# library(rlang)
+# test_plot_lags <- function(dat, var) {
+#   plots <- dat %>%
+#     group_by(group) %>%
+#     do(plots=ggplot(data=.) +
+#          aes(x = ID, y = {{var}}) +
+#          geom_line(alpha=0.6 , size=.5, color = "black") +
+#          ggtitle(unique(.$group)))
+#   return(plots)
+# }
+# test <- test_plot_lags(sleep, extra)
+# test$plots
+
 
 # Merge helpers -----------------------------------------------------------
 

@@ -7,13 +7,14 @@ output: html_document
 
 ```{r package setup, include=FALSE}
 ##Define package list
-Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate")
+Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate", "devtools")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ##Load packages into session 
 lapply(.packages, require, character.only=TRUE)
+devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 ```
 
 ## Intro & Credits
@@ -45,7 +46,7 @@ pop <- read_csv(file.path(data_path, "Prison_Boundaries.csv"))
 
 ```{r load data, message=FALSE}
 df <- load_data(data_path, 
-                "103020",
+                "11420",
                 filter_state = "Florida") 
 df_typed <- type_convert(df)
 ```
@@ -85,12 +86,16 @@ df_out <- df_out %>%
 id_xwalk <- f %>%
   select(Count.ID, State, facility_name_raw, facility_name_clean) %>%
   unique() %>%
-  mutate(facility_name_raw_merging = tolower(facility_name_raw))
+  mutate(facility_name_raw_merging = toupper(facility_name_raw))
 
-df_out %<>%
-  mutate(name_merging = tolower(Name)) %>%
-  mutate(name_merging = str_remove_all(name_merging,"( |)- operated by the")) %>%
-  mutate(name_merging = str_remove_all(name_merging,"( |)- operated by")) %>%
+# test <- df_out %>%
+#   mutate(name_merging = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE))
+# 
+
+df_out <- df_out %>%
+  mutate(name_merging = toupper(Name)) %>%
+  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY THE")) %>%
+  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY")) %>%
   mutate(name_merging = str_remove_all(name_merging, "\\."))
 
 df_mid <- nest_join(df_out, id_xwalk, 
@@ -106,6 +111,7 @@ df_mid <- nest_join(df_out, id_xwalk,
 ck <- anti_join(df_out, id_xwalk, 
                 by = c("name_merging" = "facility_name_raw_merging", 
                           "State" = "State"))
+print(ck)
 # Any other "GEO groups" reported in FL?
 # No
 df_mid %>%
@@ -117,7 +123,9 @@ another_check <- df_mid %>%
   filter(str_detect(Name, regex('south bay', ignore_case = TRUE)) | str_detect(Name, regex('black', ignore_case = TRUE))) %>%
   filter(date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))
 ```
+
 Remove "GEO Group" observations for July 8, 10, and 11. These observations were an OCR error because the facilities on those dates had names that spanned multiple lines. If we included these observations, we would be double-counting deaths in South Bay GEO Group prison. 
+
 ```{r drop geo-group observations}
 df_mid <- df_mid %>%
   filter(!(Name == "GEO Group Inc" & (date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))))
@@ -144,16 +152,19 @@ df_comb <- df_mid %>%
   summarise_all(coalesce_by_column) %>%
   ungroup()
 
+# Fix coalesce instance where it selected 0 rather than 1
+df_comb$Staff.Confirmed[df_comb$fac_date == "LAKE CITY CF_4.17.20"] <- 1
+
 assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_clean)))
 ```
 
 Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
-```{r}
+```{r plot cases/deaths}
 df_comb <- flag_noncumulative_cases(df_comb)
 df_comb <- flag_noncumulative_deaths(df_comb)
 
-# lag cases 
+# lag cases overall 
 df_comb %>%
   filter(facility_name_clean != "STATEWIDE") %>%
   ggplot(data = ., 
@@ -163,7 +174,7 @@ df_comb %>%
     labs(x = "Date",
       y = "lag_change_cases")
 
-# lag deaths
+# lag deaths overall
 df_comb %>%
   filter(facility_name_clean != "STATEWIDE") %>%
   ggplot(data = ., 
@@ -173,99 +184,122 @@ df_comb %>%
     labs(x = "Date",
       y = "lag_change_deaths")
 
-# df_comb %>%
-#   filter(facility_name_clean != "STATEWIDE") %>%
-#   ggplot(data = ., 
-#          aes(x = date, y = Resident.Deaths, group = facility_name_clean)) +
-#     geom_area(alpha=0.6 , size=.5, color = "white") +
-#     scale_x_date(date_labels = "%m") 
-
-
-# # # Aggregate to weekly, bi-weekly
-# death_check <- df_comb %>%
-#   group_by(date) %>%
-#   summarise(total_deaths = sum(Resident.Deaths)) 
-
 # plot lag counts by facility
-lag_case_plots <- plot_lag_cases(df_comb)
-lag_death_plots <- plot_lag_deaths(df_comb)
+lag_case_plots <- plot_lags(df_comb, "date", "lag_change_cases")
+```
 
-# WAKULLA
-# TAYLOR CI 
-# SFRC 
-# MADISON CI 
-# COLUMBIA CI
+Investigate apparent non-cumulative counts at St. Luce County Jail. There was no death data reported for St. Luce, so we don't deal with any non-cumulative death counts for that facility.
 
-lag_death_plots %>% 
-  filter(facility_name_clean == "SFRC") %>% 
+```{r St luce verification}
+df_comb %>% 
+  filter(Name == "ST LUCE COUNTY JAIL") %>%
+  select(date, Resident.Deaths, Resident.Death, lag_change_deaths, cumulative_deaths,
+              Residents.Confirmed, lag_change_cases, cumulative_cases)
+
+lag_case_plots %>% 
+  filter(facility_name_clean == "ST LUCE COUNTY JAIL") %>% 
   pull(plots)
 
-View(df_comb %>% filter(Name == "UNION CI") %>%
-       select(date, Resident.Deaths, Resident.Death, lag_change_deaths, cumulative_deaths))
-
-View(df_comb %>% filter(Name == "SUMTER CI") %>%
-       select(date, Resident.Deaths, Resident.Death, lag_change_deaths, cumulative_deaths))
-
-
-
-
-weekly_avg <- df_comb %>%
-  group_by(week = week(date), facility_name_clean) %>%
-  summarise(weekly_mean_change = mean(lag_change_deaths))
-
-
-
 # ST LUCE COUNTY JAIL
-# Active --> cumulative 
+# Active cases --> cumulative cases
 df_comb <- df_comb %>% 
   group_by(facility_name_clean) %>% 
   arrange(date) %>%
-  mutate(temp_cumulative_var = cumsum(Residents.Confirmed)) %>%
+  mutate(temp_cumulative_cases_var = cumsum(Residents.Confirmed)) %>%
   ungroup %>%
   mutate(Residents.Confirmed = ifelse(facility_name_clean == "ST LUCE COUNTY JAIL",
-                       temp_cumulative_var, Residents.Confirmed)) %>%
-  select(-temp_cumulative_var)
-
-# test <- create_cumulative_count(df_comb, "ST LUCE COUNTY JAIL", 
-#                                 "Residents.Confirmed")
-
-
-# noncumulative <- df_comb %>%
-#   filter(cumulative == FALSE) %>%
-#   select(facility_name_raw, facility_name_clean, date, 
-#          Residents.Confirmed, previous_date_value, lag_change, cumulative, 
-#          Residents.Recovered)
-  
-
-# Come back to SFRC (south florida reception center?)
-# Strange thing with +71 one day, -71 four days later
-# TO DO: GO LOOK FOR PERMA-CC on this day for perma-CC
-
-# write a function for large negatives/positives followed by large positives/negatives
-
-df_comb %>% 
-  filter(facility_name_clean == "SFRC") %>% 
-  ggplot(., aes(x=date, y=lag_change_cases)) +
-    geom_point() +
-    xlab("") +
-    scale_x_date(date_labels = "%b") + 
-    ggtitle(unique("SFRC"))
-
-
-df_comb %>% 
-  filter(facility_name_clean == "SFRC") %>% 
-  ggplot(., aes(x=date, y=Residents.Confirmed)) +
-    geom_point() +
-    xlab("") +
-    scale_x_date(date_labels = "%b") + 
-    ggtitle(unique("SFRC"))
+                       temp_cumulative_cases_var, Residents.Confirmed)) %>%
+  select(-temp_cumulative_cases_var)
 ```
 
+Starting on 10/28, we stopped getting facility-specific death counts. Instead, the state moved to reporting exclusively state-wide death counts (non facility-specific). Up until this point, the state-wide death counts were "STATE-WIDE FOR NON-SPECIFIC FACILITIES", in the range of 0-25. To calculate the state-wide death count up until 10/28, we add up this reported number with the sum of all deaths by facility.
 
-Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was mis-read. Might want to go back to the perma-CC and resolve these instances. 
+Note that between 9/29 and 10/26, the facility-specific death counts stopped getting properly scraped. So although these values were being provided by the state, we do not capture the counts in these data. Therefore, both the facility-specific death counts and the state-wide death count for this date range are absolute minimums.
+
+```{r clean death data}
+# before 10/28, statewide = statewide + (minimum) sum of all facilities
+# after 10/28, statewide = statewide
+
+deaths_by_date <- df_comb %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  group_by(date) %>%
+  summarise(all_res_deaths = behindbarstools::sum_na_rm(Resident.Deaths))
+
+df_sw <- left_join(df_comb, deaths_by_date, by = "date")
+
+df_sw <- df_sw %>%
+  mutate(Resident.Deaths = case_when(
+    date < as.Date("2020-10-30") & facility_name_clean == "STATEWIDE" ~ behindbarstools::vector_sum_na_rm(Resident.Deaths, all_res_deaths),
+    TRUE ~ Resident.Deaths)) 
+
+# flag dates when the facility-specific death counts failed
+# between 9/29 and 10/26 
+df_sw$scraper_failed <- ifelse(((df_sw$date >= as.Date("2020-09-29") & 
+                                   df_sw$date < as.Date("2020-10-28")) & 
+                                  df_sw$facility_name_clean != "STATEWIDE"),
+                               TRUE, FALSE)
+
+df_sw <- df_sw %>%
+  mutate(Resident.Deaths = ifelse(scraper_failed == TRUE,
+                                  NA, Resident.Deaths))
+
+df_sw %>%
+  filter(facility_name_clean == "STATEWIDE" | facility_name_clean == "UNION CI") %>%
+  select(facility_name_clean, date, Resident.Deaths, lag_change_deaths, all_res_deaths, scraper_failed) 
+```
+
+```{r plot cleaned death data}
+df_sw <- flag_noncumulative_deaths(df_sw)
+lag_death_plots <- plot_lags(df_sw, "date", "lag_change_deaths")
+
+## save them 
+# for (i in 1:nrow(lag_death_plots)){
+#   facility_name <- lag_death_plots$facility_name_clean[[i]]
+#   plot_name <- paste0(facility_name, ".png")
+#   ggsave(paste0(plot_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
+#          path = file.path(base_path, "plots", "FL"))
+# }
+
+df_sw %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_deaths, group = facility_name_clean)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_deaths")
+```
+
+Highlight places with large (absolute value) lag change in deaths, counts.
+
+```{r abs lag change - deaths}
+investigate <- df_sw %>%
+  group_by(facility_name_clean) %>%
+  summarise(sum_covid_cases = sum(abs(lag_change_cases), na.rm = TRUE),
+            sum_covid_deaths = sum(abs(lag_change_deaths), na.rm = TRUE))
+# write_csv(investigate, file.path(base_path, "data", "outputs", "FLCovidByFacility.csv"))
+
+monthly_deaths <- df_sw %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  group_by(month = month(date), year = year(date), facility_name_clean) %>%
+  summarise(sum_covid_deaths = sum(lag_change_deaths, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(yr_month = glue('{year}_{month}'))
+#write_csv(monthly_deaths, file.path(base_path, "data", "outputs", "FLCovidByFacilityMonth.csv"))
+
+
+lag_death_plots %>% 
+  filter(facility_name_clean == "RMC") %>% 
+  pull(plot)
+
+View(df_sw %>% filter(Name == "RMC") %>%
+       select(date, Resident.Deaths, lag_change_deaths, cumulative_deaths))
+```
+
+Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was misread. 
 
 ```{r}
-dates <- df_comb %>%
+dates <- df_sw %>%
   arrange(date) %>%
   count(date)
 dates
@@ -275,11 +309,7 @@ ggplot(data = dates,
   geom_bar(stat="identity") +
   labs(x = "Date",
     y = "n instances")
-
-# 2020-10-01: Only 1 facility counted (county jail)
-# Not worried about this
 ```
-
 
 Merge in population data.
 
@@ -323,8 +353,4 @@ dist_fac <- tibble(name = unique(df_comb$facility_name_clean))
 dist_merged <- tibble(name = unique(pop_joined$facility_name_clean))
 # check facilities that aren't overlapping
 ck <- anti_join(dist_fac, dist_merged)
-
 ```
-
-
-
