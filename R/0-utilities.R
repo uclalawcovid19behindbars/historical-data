@@ -139,31 +139,18 @@ plot_lags <- function(dat, date, var) {
   return(plots)
 }
 
+# library(rlang)
 # create_cumulative_count <- function(dat, facility, non_cumulative_var) {
-#   facility <- enquo(facility)
-#   non_cumulative_var <- enquo(non_cumulative_var)
-#   
-#   out <- dat %>% 
-#     group_by(facility_name_clean) %>% 
+#   out <- dat %>%
+#     group_by(facility_name_clean) %>%
 #     arrange(date) %>%
-#     mutate(cumsum = cumsum(!!non_cumulative_var)) %>%
-#     ungroup 
+#     mutate(temp_cumulative_var = cumsum({{non_cumulative_var}})) %>%
+#     ungroup %>%
+#     mutate({{ non_cumulative_var }} = ifelse(facility_name_clean == facility,
+#                                             temp_cumulative_var, {{non_cumulative_var}})) %>%
+#     select(-temp_cumulative_var)
 #   return(out)
 # }
-
-# library(rlang)
-# test_plot_lags <- function(dat, var) {
-#   plots <- dat %>%
-#     group_by(group) %>%
-#     do(plots=ggplot(data=.) +
-#          aes(x = ID, y = {{var}}) +
-#          geom_line(alpha=0.6 , size=.5, color = "black") +
-#          ggtitle(unique(.$group)))
-#   return(plots)
-# }
-# test <- test_plot_lags(sleep, extra)
-# test$plots
-
 
 # Merge helpers -----------------------------------------------------------
 
