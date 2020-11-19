@@ -7,13 +7,14 @@ output: html_document
 
 ```{r package setup, include=FALSE}
 ##Define package list
-Packages<-c("tidyverse")
+Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate", "devtools")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ##Load packages into session 
 lapply(.packages, require, character.only=TRUE)
+devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 ```
 
 ## Intro & Credits
@@ -32,13 +33,14 @@ Input files:
 
 ```{r load inputs, echo=FALSE}
 base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
-data_path <- file.path(base_path, "data", "xlsx")
-
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ##Facility name look-up table
-f <- read_xlsx(file.path(data_path,"facility_spellings_091820.xlsx"))
+f <- read_csv("https://raw.githubusercontent.com/uclalawcovid19behindbars/facility_data/master/data_sheets/fac_spellings.csv")
+##Load population data
+pop <- read_csv(file.path(data_path, "Prison_Boundaries.csv"))
 ```
 
 
@@ -71,8 +73,11 @@ df_out <- df_typed %>%
 # If 'Allred' exists:
 # - investigate that date. facility name?
 
-
-# Residents.Confirmed is a character --> has entries with "n/a". convert these to NA
+df_out %<>% 
+  mutate(Staff.Deaths = coalesce_with_warnings(Staff.Deaths, Staff.Death)) %>%
+  mutate(Resident.Deaths = coalesce_with_warnings(Resident.Deaths, Resident.Death)) %>%
+  mutate(Residents.Confirmed = na_if(Residents.Confirmed, "n/a")) %>%
+  mutate(Residents.Confirmed = as.numeric(Residents.Confirmed))
 
 ```
 
@@ -85,27 +90,135 @@ Columns that mean the same thing but have slightly different names:
 - Resident.Tested, Residents.Tested
 - Inmates.Positive, Residents.Positive
 
-```{r combine similar columns}
-allred <- (subset(df_out, !is.na(df_out$Allred)))
+```{r filter federal prisons}
+df_out <- df_out %>%
+  filter(Facility != "Federal Prison") %>%
+  filter(Facility != "Federal RRC") 
 ```
 
+```{r create date var}
+df_out <- df_out %>%
+  mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
+```
 
 ```{r standardize facility names}
 id_xwalk <- f %>%
-  select(Count.ID, State, City, facility_name_raw, facility_name_clean) %>%
-  unique()
-df_mid <-left_join(df_out, id_xwalk, 
-                   by = c("Name" = "facility_name_raw", 
+  select(Count.ID, State, facility_name_raw, facility_name_clean) %>%
+  unique() %>%
+  mutate(facility_name_raw_merging = toupper(facility_name_raw))
+
+# test <- df_out %>%
+#   mutate(name_merging = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE))
+
+
+df_out <- df_out %>%
+  mutate(name_merging = toupper(Name)) %>%
+  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY THE")) %>%
+  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY")) %>%
+  mutate(name_merging = str_remove_all(name_merging, "\\."))
+
+df_mid <- nest_join(df_out, id_xwalk, 
+                   by = c("name_merging" = "facility_name_raw_merging", 
+                          "State" = "State")) %>% 
+  hoist(id_xwalk, facility_name_clean = pluck("facility_name_clean", 1)) %>%
+  mutate(facility_name_clean = map(facility_name_clean, first),
+         facility_name_clean = as.character(facility_name_clean))
+
+```
+
+
+```{r facility merge checks, include = FALSE}
+# show instances where merge didn't identify a clean name
+ck <- anti_join(df_out, id_xwalk, 
+                by = c("name_merging" = "facility_name_raw_merging", 
                           "State" = "State"))
+print(ck)
+```
 
+```{r concat duplicate date/facilities}
+n_distinct(df_out)
+nrow(df_mid)
+nrow(distinct(df_mid, sheet_name, facility_name_clean))
+see_if(nrow(df_mid) == nrow(distinct(df_mid, sheet_name, facility_name_clean)))
 
+df_mid %<>% 
+  group_by(facility_name_clean, sheet_name) %>%
+  mutate(dupe_fac_date = n() > 1) %>%
+  ungroup() %>%
+  relocate(dupe_fac_date, .before =) %>%
+  mutate(fac_date = glue::glue('{facility_name_clean}_{sheet_name}')) %>%
+  select(-id_xwalk)
+
+df_comb <- df_mid %>%
+  group_by(fac_date) %>%
+  summarise_all(coalesce_by_column) %>%
+  ungroup()
+
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_clean)))
+```
+
+```{r plot cases/deaths}
+df_comb <- flag_noncumulative_cases(df_comb)
+df_comb <- flag_noncumulative_deaths(df_comb)
+
+# lag cases overall 
+df_comb %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_cases, group = facility_name_clean)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_cases")
+
+# lag deaths overall
+df_comb %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_deaths, group = facility_name_clean)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_deaths")
+
+# plot lag counts by facility
+lag_case_plots <- plot_lags(df_comb, "date", "lag_change_cases")
 ```
 
 
-```{r filter columns}
+```{r plot death data}
+df_comb <- flag_noncumulative_deaths(df_comb)
 
+df_comb %>%
+  filter(facility_name_clean != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_deaths, group = facility_name_clean)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_deaths")
+
+lag_death_plots <- plot_lags(df_comb, "date", "lag_change_deaths")
 ```
 
+Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was misread. 
 
+```{r}
+dates <- df_comb %>%
+  arrange(date) %>%
+  count(date)
+dates
 
+ggplot(data = dates, 
+       aes(x = date, y = n)) +
+  geom_bar(stat="identity") +
+  labs(x = "Date",
+    y = "n instances")
+```
 
+Merge in population data.
+
+```{r population data merge}
+# clean population data
+
+```
