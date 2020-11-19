@@ -219,7 +219,6 @@ Note that between 9/29 and 10/26, the facility-specific death counts stopped get
 ```{r clean death data}
 # before 10/28, statewide = statewide + (minimum) sum of all facilities
 # after 10/28, statewide = statewide
-
 deaths_by_date <- df_comb %>%
   filter(facility_name_clean != "STATEWIDE") %>%
   group_by(date) %>%
