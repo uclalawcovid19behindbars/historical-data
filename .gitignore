@@ -4,6 +4,9 @@ data/outputs/*
 outfiles/*
 Plots/*
 
+# HTML files 
+.html
+
 # History files
 .Rhistory
 .Rapp.history
