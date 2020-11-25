@@ -1,6 +1,8 @@
 # Files in `data` directory
-data/*
+data/inputs/*
+data/outputs/*
 outfiles/*
+Plots/*
 
 # History files
 .Rhistory

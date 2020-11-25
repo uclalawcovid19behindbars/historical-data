@@ -7,7 +7,8 @@ output: html_document
 
 ```{r package setup, include=FALSE}
 ##Define package list
-Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate", "devtools")
+Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
+            "devtools", "svglite")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -79,6 +80,12 @@ df_out <- df_out %>%
 ```{r create date var}
 df_out <- df_out %>%
   mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
+```
+
+
+```{r create state acronym var}
+
+
 ```
 
 
@@ -198,7 +205,7 @@ df_comb %>%
 
 lag_case_plots %>% 
   filter(facility_name_clean == "ST LUCE COUNTY JAIL") %>% 
-  pull(plots)
+  pull(plot)
 
 # ST LUCE COUNTY JAIL
 # Active cases --> cumulative cases
@@ -250,8 +257,11 @@ df_sw %>%
 ```{r plot cleaned death data}
 df_sw <- flag_noncumulative_deaths(df_sw)
 lag_death_plots <- plot_lags(df_sw, "date", "lag_change_deaths")
+df_sw %>%
+  filter(cumulative_deaths == "FALSE") %>%
+  select(date, facility_name_clean, Resident.Deaths, previous_date_value_deaths)
 
-## save them 
+## save death plots
 # for (i in 1:nrow(lag_death_plots)){
 #   facility_name <- lag_death_plots$facility_name_clean[[i]]
 #   plot_name <- paste0(facility_name, ".png")
@@ -286,13 +296,12 @@ monthly_deaths <- df_sw %>%
   mutate(yr_month = glue('{year}_{month}'))
 #write_csv(monthly_deaths, file.path(base_path, "data", "outputs", "FLCovidByFacilityMonth.csv"))
 
-
 lag_death_plots %>% 
   filter(facility_name_clean == "RMC") %>% 
   pull(plot)
 
-View(df_sw %>% filter(Name == "RMC") %>%
-       select(date, Resident.Deaths, lag_change_deaths, cumulative_deaths))
+# View(df_sw %>% filter(Name == "RMC") %>%
+#        select(date, Resident.Deaths, lag_change_deaths, cumulative_deaths))
 ```
 
 Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was misread. 
@@ -309,6 +318,118 @@ ggplot(data = dates,
   labs(x = "Date",
     y = "n instances")
 ```
+
+
+
+```{r find infection spikes, include=FALSE }
+## Find historical spikes over time.
+
+## get 7-day percentage change in cases
+percentage_change <- df_sw %>%
+    dplyr::arrange(facility_name_clean, date) %>%
+    mutate(
+        week_ago = dplyr::lag(Residents.Confirmed, n = 7),
+        seven_day_change = (Residents.Confirmed - week_ago) / (week_ago + 0.00001) ,
+        n_increase = Residents.Confirmed - week_ago,
+        denom_zero = ifelse(week_ago == 0, TRUE, FALSE)
+    ) %>%
+    select(State, facility_name_clean, date, Residents.Confirmed, 
+           week_ago, seven_day_change, denom_zero, n_increase) %>%
+    ungroup()
+
+View(percentage_change)
+
+## COLUMBIA CI
+df_sw %>%
+  filter(facility_name_clean == "COLUMBIA CI") %>%
+  ggplot(data = ., 
+         aes(x = date, y = Residents.Confirmed)) +
+      geom_line(linetype = "dashed")+
+      geom_point() + 
+     scale_x_date(date_minor_breaks = "1 month", date_labels = "%b", 
+                      date_breaks = "1 month") +     
+  labs(title = "COVID-19 Spike in Columbia Correctional Institution, Florida",
+    x = "",
+    y = "# of People Incarcerated Infected with COVID-19")
+
+# df_sw %>%
+#   filter(facility_name_clean == "COLUMBIA CI") %>% 
+#   select(date, Residents.Confirmed) %>%
+#   View()
+
+## MAYO ANNEX
+df_sw %>%
+  filter(facility_name_clean == "MAYO ANNEX") %>%
+  ggplot(data = ., 
+         aes(x = date, y = Residents.Confirmed)) +
+      geom_line(linetype = "dashed")+
+      geom_point() + 
+     scale_x_date(date_minor_breaks = "1 month", date_labels = "%b", 
+                      date_breaks = "1 month") +     
+  labs(title = "COVID-19 Spike in Mayo Correctional Institution Annex, Florida",
+    x = "",
+    y = "# of People Incarcerated Infected with COVID-19")
+# ggsave(file.path(base_path, "plots", "FL", "mayo_graph.svg"))
+
+# df_sw %>%
+#   filter(facility_name_clean == "MAYO ANNEX") %>% 
+#   select(date, Residents.Confirmed) %>%
+#   View()
+
+## SANTA ROSA CI 
+df_sw %>%
+  filter(facility_name_clean == "SANTA ROSA CI") %>%
+  ggplot(data = ., 
+         aes(x = date, y = Residents.Confirmed)) +
+      geom_line(linetype = "dashed")+
+      geom_point() + 
+     scale_x_date(date_minor_breaks = "1 month", date_labels = "%b", 
+                      date_breaks = "1 month") +     
+  labs(title = "COVID-19 Spike in Santa Rosa Correctional Institution, Florida",
+    x = "",
+    y = "# of People Incarcerated Infected with COVID-19")
+```
+
+Filter down the columns to only the ones we want to save.
+
+```{r}
+## Vars not present that ARE in current scraped data: 
+## Staff.Tested, Staff.Negative, Staff.Pending, Staff.Quarantine
+## Residents.Released (newly scraped only), Residents.Active (historical scraped only)
+
+out <- df_sw %>%
+  select(
+    date, State, facility_name_clean,
+    Residents.Confirmed, Staff.Confirmed, 
+    Resident.Deaths, Staff.Deaths,
+    Residents.Recovered, Staff.Recovered, # what to do with these? make all null?
+    Residents.Negative, 
+    Residents.Tested,                     # what to do about Residents.Tested vs T.Admin
+    Residents.Pending, 
+    Resident.Population, 
+    Residents.Quarantine, 
+    Website, Facility, hifld_id, Address, Zipcode, City, County, 
+    Latitude, Longitude, County.FIPS, Notes
+    ) %>%  
+  mutate(jurisdiction = "") %>%                # mapping from this to county, federal, state
+  rename(
+    Date = date,
+    Name = facility_name_clean,
+    StateLong = State,
+    Residents.Population = Resident.Population,
+    source = Website
+    ) %>%
+  mutate(
+    State = behindbarstools::translate_state(StateLong, reverse = TRUE)
+    ) %>%
+  select(-c(StateLong, Facility)) 
+
+write_csv(out, file.path(base_path, "data", "outputs", "FL-clean.csv"))
+
+base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+
+```
+
 
 Merge in population data.
 
