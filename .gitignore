@@ -4,8 +4,9 @@ data/outputs/*
 outfiles/*
 Plots/*
 
-# HTML files 
-.html
+# Written files 
+*.html
+*.docx
 
 # History files
 .Rhistory
