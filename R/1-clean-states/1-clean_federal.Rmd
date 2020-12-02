@@ -277,6 +277,7 @@ pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Popu
 dat_with_pop <- all_dat %>%
   left_join(pop, by = "Name")
 
+# no federal data in here, it seems! 
 table(is.na(dat_with_pop$Population))
 
 ```
