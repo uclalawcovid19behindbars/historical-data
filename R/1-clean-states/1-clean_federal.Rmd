@@ -1,0 +1,282 @@
+---
+  title: "Clean Federal data - COVID-19 Behind Bars Historical Data Cleaning"
+author: "Hope Johnson"
+date: "11/30/2020"
+output: html_document
+---
+  
+```{r package setup, include=FALSE}
+##Define package list
+Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate", "devtools", "rlang")
+.packages = Packages
+##Install CRAN packages (if not already installed)
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+##Load packages into session 
+lapply(.packages, require, character.only=TRUE)
+devtools::install_github("uclalawcovid19behindbars/behindbarstools")
+```
+
+## Intro & Credits
+
+This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Chase Hommeyer, Grace DiLaura, and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
+
+
+## Load inputs
+
+Input files: 
+  
+* Utilities script
+* Historical data
+* Date range to clean 
+* Facility name look-up table 
+
+```{r load inputs, echo=FALSE}
+base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
+##Load utilities function
+util_path <- file.path(base_path, "R", "0-utilities.R")
+source(util_path, local = knitr::knit_global())
+```
+
+
+```{r load data}
+# no filter
+df <- load_data(data_path, 
+                "11420")
+
+df_federal <- df %>%
+  filter((State == "Federal") | 
+         str_detect(Facility, "(?i)federal"))
+
+df_typed <- type_convert(df_federal) 
+df_out <- df_typed %>%
+  select(!starts_with("...")) %>%
+  select(!starts_with("lots")) %>%
+  select(!starts_with("Bad")) %>%
+  select(!c("V2", "V4", "V5", "V7", "V8", "V10")) %>%
+  select(!c("Facility.", "Coder", "Housing.Type")) %>%
+  select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
+
+df_out <- df_out %>% 
+  mutate(Resident.Deaths = coalesce_with_warnings(Resident.Deaths, Resident.Death))
+```
+
+```{r create date var}
+df_out <- df_out %>%
+  mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
+```
+
+```{r standardize facility names}
+name_xwalk <- "https://raw.githubusercontent.com/uclalawcovid19behindbars" %>%
+    str_c("/facility_data/master/data_sheets/fac_spellings.csv") %>%
+    read_csv(col_types = cols()) %>%
+    select(
+      ID = Count.ID, State, 
+      facility_name_clean,
+      facility_name_raw) %>%
+    mutate(xwalk_name_clean = behindbarstools::clean_fac_col_txt(str_to_upper(facility_name_clean))) %>%
+    mutate(xwalk_name_raw = behindbarstools::clean_fac_col_txt(str_to_upper(facility_name_raw))) %>%
+    unique()
+
+df_out <- df_out %>%
+  mutate(scrape_name_clean = 
+           behindbarstools::clean_fac_col_txt(str_to_upper(Name)))
+
+federal_xwalk <- name_xwalk %>%
+    filter(State == "Federal") 
+  
+federal <- df_out %>%
+  nest_join(name_xwalk, 
+            by = c("scrape_name_clean" = "xwalk_name_raw")) %>%
+  hoist(name_xwalk, Name = pluck("xwalk_name_clean", 1)) %>%
+  mutate(Name = map(Name, first),
+        Name = as.character(Name),
+        Name = ifelse(is.na(Name), scrape_name_clean, Name)) 
+```
+
+
+```{r facility merge checks, include = FALSE}
+# show instances where merge didn't identify a clean name
+ck <- anti_join(df_out, federal_xwalk, 
+                by = c("scrape_name_clean" = "xwalk_name_raw"))
+print(ck)
+print(unique(ck$Name))
+```
+
+```{r concat duplicate date/facilities}
+federal %<>% 
+  group_by(Name, sheet_name) %>%
+  mutate(dupe_fac_date = n() > 1) %>%
+  ungroup() %>%
+  relocate(dupe_fac_date, .before =) %>%
+  mutate(fac_date = glue::glue('{Name}_{sheet_name}')) %>%
+  select(-name_xwalk)
+
+df_comb <- federal %>%
+  group_by(fac_date) %>%
+  summarise_all(coalesce_by_column) %>%
+  ungroup()
+
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, Name)))
+```
+
+```{r clean most recently scraped data}
+slist <- read_rds(file.path(data_path, "scrape_details.rds"))
+hist_dat <- slist[["hist_data"]]
+today_dat <- slist[["current_data"]]
+recent_dat <- hist_dat %>%
+  bind_rows(today_dat)
+
+recent_dat <- recent_dat %>%
+  mutate(date = lubridate::mdy(Date)) %>%
+  filter(jurisdiction == "federal",
+         date > as.Date('2020-11-04'))
+
+recent_comb <- recent_dat %>%
+  group_by(Name, date) %>%
+  summarise_all(coalesce_by_column) %>%
+  ungroup()
+
+clean_recent_dat <- recent_comb %>%
+  select(Name, date,Residents.Confirmed, Staff.Confirmed,
+         Residents.Deaths, Staff.Deaths, City)
+```
+
+```{r merge recently scraped data and historical data}
+df_comb_out <- df_comb %>%
+  rename(Residents.Deaths = Resident.Death) %>%
+    select(Name, date,Residents.Confirmed, Staff.Confirmed,
+         Residents.Deaths, Staff.Deaths, City)
+
+all_dat <- bind_rows(df_comb_out, clean_recent_dat)
+n_distinct(all_dat$Name)
+```
+
+Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was misread. 
+
+```{r}
+dates <- all_dat %>%
+  arrange(date) %>%
+  count(date)
+dates
+
+ggplot(data = dates, 
+       aes(x = date, y = n)) +
+  geom_bar(stat="identity") +
+  labs(x = "Date",
+       y = "n instances")
+```
+
+
+```{r plot cases/deaths}
+all_dat <- flag_noncumulative_cases(all_dat, Name)
+all_dat <- flag_noncumulative_deaths(all_dat, Name, Residents.Deaths)
+
+# lag cases overall 
+all_dat %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_cases, group = Name)) +
+  geom_line(alpha=0.6 , size=.5, color = "black") +
+  scale_x_date(date_labels = "%m") + 
+  labs(x = "Date",
+       y = "lag_change_cases")
+
+# lag deaths overall
+all_dat %>%
+  ggplot(data = ., 
+         aes(x = date, y = lag_change_deaths, group = Name)) +
+  geom_line(alpha=0.6 , size=.5, color = "black") +
+  scale_x_date(date_labels = "%m") + 
+  labs(x = "Date",
+       y = "lag_change_deaths")
+
+# plot lag counts by facility
+lag_case_plots <- plot_lags(all_dat, "date", 
+                            y_var = "lag_change_cases",
+                            grp_var = Name)
+
+# massive outbreak in May - 500+
+lag_case_plots %>%
+  filter(Name == "LOMPOC FCI") %>%
+  pull(plot)
+
+# May outbreak - 200, lasted a few days
+lag_case_plots %>%
+  filter(Name == "TERMINAL ISLAND FCI") %>%
+  pull(plot)
+
+# big July outbreak -- high numbers 
+lag_case_plots %>%
+  filter(Name == "SEAGOVILLE FCI") %>%
+  pull(plot)
+
+# sustained outbreaks all summer
+lag_case_plots %>%
+  filter(Name == "ELKTON FCI") %>%
+  pull(plot)
+
+# more recent outbreak -- Sept until present
+lag_case_plots %>%
+  filter(Name == "BIG SPRING FCI") %>%
+  pull(plot)
+```
+
+
+```{r}
+# plot  cumulative cases by facility
+cumulative_case_plots <- plot_lags(all_dat, "date", 
+                            y_var = "Residents.Confirmed",
+                            grp_var = Name,
+                            y_lab = "Cases among incarcerated people")
+
+# massive outbreak in May - 500+
+# CUMULATIVE COUNTS DECREASING
+cumulative_case_plots %>%
+  mutate(file_name = glue("'{Name}.png'")) %>%
+  filter(Name == "LOMPOC FCI") %>%
+  pull(plot) 
+ggsave(file.path("~", "Desktop", "federal plots", "LOMPOC FCI.png"))
+
+# May outbreak - 200, lasted a few days
+# CUMULATIVE COUNTS DECREASING
+cumulative_case_plots %>%
+  filter(Name == "TERMINAL ISLAND FCI") %>%
+  pull(plot)
+ggsave(file.path("~", "Desktop", "federal plots", "TERMINAL ISLAND FCI.png"))
+
+# big July outbreak -- high numbers 
+cumulative_case_plots %>%
+  filter(Name == "SEAGOVILLE FCI") %>%
+  pull(plot)
+ggsave(file.path("~", "Desktop", "federal plots", "SEAGOVILLE FCI.png"))
+
+# sustained outbreaks all summer
+cumulative_case_plots %>%
+  filter(Name == "ELKTON FCI") %>%
+  pull(plot)
+ggsave(file.path("~", "Desktop", "federal plots", "ELKTON FCI.png"))
+
+
+# more recent outbreak -- Sept until present
+cumulative_case_plots %>%
+  filter(Name == "BIG SPRING FCI") %>%
+  pull(plot)
+ggsave(file.path("~", "Desktop", "federal plots", "BIG SPRING FCI.png"))
+```
+
+
+
+Merge in population data.
+
+```{r population data merge}
+# clean population data
+pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/Merg_Pop.csv') %>%
+  mutate(Name = behindbarstools::clean_fac_col_txt(Name,to_upper = TRUE))
+
+dat_with_pop <- all_dat %>%
+  left_join(pop, by = "Name")
+
+table(is.na(dat_with_pop$Population))
+
+```
