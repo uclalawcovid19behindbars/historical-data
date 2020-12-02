@@ -168,8 +168,8 @@ assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_cl
 Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
 ```{r plot cases/deaths}
-df_comb <- flag_noncumulative_cases(df_comb)
-df_comb <- flag_noncumulative_deaths(df_comb)
+df_comb <- flag_noncumulative_cases(df_comb, facility_name_clean)
+df_comb <- flag_noncumulative_deaths(df_comb, facility_name_clean, Resident.Deaths)
 
 # lag cases overall 
 df_comb %>%
@@ -192,7 +192,9 @@ df_comb %>%
       y = "lag_change_deaths")
 
 # plot lag counts by facility
-lag_case_plots <- plot_lags(df_comb, "date", "lag_change_cases")
+lag_case_plots <- plot_lags(df_comb, "date", 
+                            y_var = "lag_change_cases",
+                            grp_var = facility_name_clean)
 ```
 
 Investigate apparent non-cumulative counts at St. Luce County Jail. There was no death data reported for St. Luce, so we don't deal with any non-cumulative death counts for that facility.
@@ -255,8 +257,10 @@ df_sw %>%
 ```
 
 ```{r plot cleaned death data}
-df_sw <- flag_noncumulative_deaths(df_sw)
-lag_death_plots <- plot_lags(df_sw, "date", "lag_change_deaths")
+df_sw <- flag_noncumulative_deaths(df_sw, facility_name_clean, Resident.Deaths)
+lag_death_plots <- plot_lags(df_sw, "date", 
+                             y_var = "lag_change_deaths",
+                             grp_var = facility_name_clean)
 df_sw %>%
   filter(cumulative_deaths == "FALSE") %>%
   select(date, facility_name_clean, Resident.Deaths, previous_date_value_deaths)
@@ -319,8 +323,6 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
-
-
 ```{r find infection spikes, include=FALSE }
 ## Find historical spikes over time.
 
@@ -337,7 +339,7 @@ percentage_change <- df_sw %>%
            week_ago, seven_day_change, denom_zero, n_increase) %>%
     ungroup()
 
-View(percentage_change)
+# View(percentage_change)
 
 ## COLUMBIA CI
 df_sw %>%
@@ -370,11 +372,6 @@ df_sw %>%
     x = "",
     y = "# of People Incarcerated Infected with COVID-19")
 # ggsave(file.path(base_path, "plots", "FL", "mayo_graph.svg"))
-
-# df_sw %>%
-#   filter(facility_name_clean == "MAYO ANNEX") %>% 
-#   select(date, Residents.Confirmed) %>%
-#   View()
 
 ## SANTA ROSA CI 
 df_sw %>%
@@ -424,53 +421,54 @@ out <- df_sw %>%
     ) %>%
   select(-c(StateLong, Facility)) 
 
-write_csv(out, file.path(base_path, "data", "florida_adult_facility_covid_counts_historical.csv"))
+#write_csv(out, file.path(base_path, "data", "florida_adult_facility_covid_counts_historical.csv"))
 
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
-
+hist_to_bind <- df_sw %>%
+    rename(Residents.Deaths = Resident.Death) %>%
+    select(Name, date,Residents.Confirmed, Staff.Confirmed,
+         Residents.Deaths, Staff.Deaths, City)
 ```
 
+Add in more recently scraped data (from November until present). 
 
-Merge in population data.
+First, read it in and clean it. 
 
-```{r population data merge}
-# clean HIFLD population data
-pop_merging <- pop %>%
-  filter(STATE == "FL") %>%
-  select(NAME, FACILITYID, POPULATION) %>%
-  mutate(State = "Florida") %>%
-  mutate(POPULATION = ifelse(POPULATION < 0, NA, POPULATION)) %>%
-  mutate(name_merging = tolower(NAME),
-         name_merging = str_replace(name_merging, "correctional institution", "ci"),
-         name_merging = str_replace(name_merging, "correctional facility", "cf"),
-         name_merging = str_remove_all(name_merging, ", east unit"),
-         name_merging = str_remove_all(name_merging, ", west unit"),
-         name_merging = str_remove_all(name_merging, "\\.")) %>%
-  group_by(name_merging) %>%
-  mutate(POPULATION = sum(POPULATION, na.rm = TRUE)) %>%
-  distinct(name_merging, .keep_all = TRUE)
+```{r add in recently scraped data}
+slist <- read_rds(file.path(data_path, "scrape_details.rds"))
+hist_dat <- slist[["hist_data"]]
+today_dat <- slist[["current_data"]]
+recent_dat <- hist_dat %>%
+  bind_rows(today_dat)
 
-# Unresolved pop data: 
-# BLACKWATER 
-# Central office
-# Community corrections region 1-4
+recent_dat <- recent_dat %>%
+  mutate(date = lubridate::mdy(Date)) %>%
+  filter(State == "Florida",
+         date > as.Date('2020-11-04'))
 
-see_if(nrow(pop_merging) == n_distinct(pop_merging$name_merging))
+recent_comb <- recent_dat %>%
+  group_by(Name, date) %>%
+  summarise_all(coalesce_by_column) %>%
+  ungroup()
 
-# merge HIFLD data to facility name crosswalk
-pop_joined <-left_join(pop_merging, id_xwalk, 
-                   by = c("name_merging" = "facility_name_raw_merging", 
-                          "State" = "State")) %>%
-  drop_na(facility_name_clean)
+clean_recent_dat <- recent_comb %>%
+  select(Name, date,Residents.Confirmed, Staff.Confirmed,
+         Residents.Deaths, Staff.Deaths, City)
+```
+Then, bind it to the historical cleaned data from this script. 
 
-# merge HIFLD population data to data 
-test_join <- semi_join(df_comb, pop_joined, by = "facility_name_clean")
-dim(test_join)
-dim(df_comb)
+```{r}
+all_dat <- bind_rows(hist_to_bind, clean_recent_dat)
+n_distinct(all_dat$Name)
+```
 
+Finally, merge in population data.
 
-dist_fac <- tibble(name = unique(df_comb$facility_name_clean))
-dist_merged <- tibble(name = unique(pop_joined$facility_name_clean))
-# check facilities that aren't overlapping
-ck <- anti_join(dist_fac, dist_merged)
+````{r}
+pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/Merg_Pop.csv') %>%
+  mutate(Name = behindbarstools::clean_fac_col_txt(Name,to_upper = TRUE))
+
+dat_with_pop <- all_dat %>%
+  left_join(pop, by = "Name")
+
+table(is.na(dat_with_pop$Population))
 ```
