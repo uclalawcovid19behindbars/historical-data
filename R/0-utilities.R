@@ -104,9 +104,9 @@ coalesce_by_column <- function(df) {
 # bang_select(sleep, "extra")
 # enq_select(sleep, extra)
 
-flag_noncumulative_cases <- function(dat) {
+flag_noncumulative_cases <- function(dat, grp_var) {
   dat <- dat %>% 
-    group_by(facility_name_clean) %>%
+    group_by({{grp_var}}) %>%
     mutate(previous_date_value_cases = lag(Residents.Confirmed, order_by = date)) %>%
     mutate(lag_change_cases = Residents.Confirmed - previous_date_value_cases,
            cumulative_cases = ifelse(lag_change_cases >= 0, TRUE, FALSE)) %>%
@@ -114,28 +114,28 @@ flag_noncumulative_cases <- function(dat) {
   return(dat)
 }
 
-flag_noncumulative_deaths <- function(dat, var) {
+flag_noncumulative_deaths <- function(dat, grp_var, death_var) {
   dat <- dat %>% 
-    group_by(facility_name_clean) %>%
-    mutate(previous_date_value_deaths = lag(Resident.Deaths, order_by = date)) %>%
-    mutate(lag_change_deaths = Resident.Deaths - previous_date_value_deaths,
+    group_by({{grp_var}}) %>%
+    mutate(previous_date_value_deaths = lag({{death_var}}, order_by = date)) %>%
+    mutate(lag_change_deaths = {{death_var}} - previous_date_value_deaths,
            cumulative_deaths = ifelse(lag_change_deaths >= 0, TRUE, FALSE)) %>%
     ungroup() 
   return(dat)
 }
 
-plot_lags <- function(dat, date, var) {
-  y_label = paste("Lag change", as_label(var))
+plot_lags <- function(dat, date, y_var, grp_var, y_lab = NULL) {
+  y_label = ifelse(is.null(y_lab), y_var, y_lab)
   plots <- dat %>% 
-    group_by(facility_name_clean) %>% 
+    group_by({{grp_var}}) %>% 
     do(plot=ggplot(data=.) +
-         aes_string(x = date, y = var) +
+         aes_string(x = date, y = y_var) +
          geom_line(alpha=0.6 , size=.5, color = "black") + 
          labs(x = "Date",
-              y = var) + 
-         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m", 
+              y = y_label) + 
+         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m/%y", 
                       date_breaks = "1 month") + 
-         ggtitle(unique(.$facility_name_clean)))
+         ggtitle(unique(.$Name))) # NB: might need to change this if change grouping var
   return(plots)
 }
 
