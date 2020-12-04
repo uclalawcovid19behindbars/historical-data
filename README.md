@@ -69,12 +69,11 @@ When data are not available publicly, we make every effort to obtain missing inf
 
 Citations for academic publications and research reports:
 
-    Sharon Dolovich,
-`:  Aaron Littman, Kalind Parish, Grace DiLaura, Chase Hommeyer,  Michael Everett, Hope Johnson, and Neal Everett. UCLA Law Covid-19 Behind Bars Data Project: Jail/Prison Confirmed Cases Dataset [date you downloaded the data]. UCLA Law, 2020, https://law.ucla.edu/centers/criminal-justice/criminal-justice-program/related-programs/covid-19-behind-bars-data-project/.
+    Sharon Dolovich, Aaron Littman, Kalind Parish, Grace DiLaura, Chase Hommeyer,  Michael Everett, Hope Johnson, and Neal Everett. UCLA Law Covid-19 Behind Bars Data Project: Jail/Prison Confirmed Cases Dataset [date you downloaded the data]. UCLA Law, 2020, http://covid19behindbars.org/.
  
 Citations for media outlets, policy briefs, and online resources:
 
-    UCLA Law Covid-19 Behind Bars Data Project, https://law.ucla.edu/centers/criminal-justice/criminal-justice-program/related-programs/covid-19-behind-bars-data-project/.
+    UCLA Law Covid-19 Behind Bars Data Project, http://covid19behindbars.org/.
 
 ## Data licensing
 
