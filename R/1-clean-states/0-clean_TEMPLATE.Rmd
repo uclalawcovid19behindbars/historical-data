@@ -37,17 +37,14 @@ data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
-##Facility name look-up table
-f <- read_csv("https://raw.githubusercontent.com/uclalawcovid19behindbars/facility_data/master/data_sheets/fac_spellings.csv")
-##Load population data
-pop <- read_csv(file.path(data_path, "Prison_Boundaries.csv"))
 ```
 
 
 ```{r load data}
 # no filter
 df <- load_data(data_path, 
-                "101820")
+                "11420",
+                filter_state = "Florida")
                 # filter_state = "Florida") 
 df_typed <- type_convert(df) 
 df_out <- df_typed %>%
@@ -56,13 +53,7 @@ df_out <- df_typed %>%
   select(!starts_with("Bad")) %>%
   select(!c("V2", "V4", "V5", "V7", "V8", "V10")) %>%
   select(!c("Facility.", "Coder", "Housing.Type")) %>%
-  select_if(~sum(!is.na(.)) > 0) %>% # rm 100% missing cols 
-  
-
-# FEDERAL
-# If 'State.1' exists:
-# - Make "Facility" = "Federal Prison"
-# - Make "State" = {LOOKUP 'state.1' acronym --> full state name}
+  select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
 
 # OHIO
 # If 'Residents.Quarantined' exists:
@@ -77,8 +68,8 @@ df_out %<>%
   mutate(Staff.Deaths = coalesce_with_warnings(Staff.Deaths, Staff.Death)) %>%
   mutate(Resident.Deaths = coalesce_with_warnings(Resident.Deaths, Resident.Death)) %>%
   mutate(Residents.Confirmed = na_if(Residents.Confirmed, "n/a")) %>%
-  mutate(Residents.Confirmed = as.numeric(Residents.Confirmed))
-
+  mutate(Residents.Confirmed = as.numeric(Residents.Confirmed)) %>%
+  mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
 ```
 
 Columns that mean the same thing but have slightly different names: 
@@ -90,71 +81,30 @@ Columns that mean the same thing but have slightly different names:
 - Resident.Tested, Residents.Tested
 - Inmates.Positive, Residents.Positive
 
-```{r filter federal prisons}
-df_out <- df_out %>%
-  filter(Facility != "Federal Prison") %>%
-  filter(Facility != "Federal RRC") 
-```
-
-```{r create date var}
-df_out <- df_out %>%
-  mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
-```
-
 ```{r standardize facility names}
-id_xwalk <- f %>%
-  select(Count.ID, State, facility_name_raw, facility_name_clean) %>%
-  unique() %>%
-  mutate(facility_name_raw_merging = toupper(facility_name_raw))
+id_xwalk <- read_fac_spellings()
+df_mid <- clean_facility_name(df_out)
 
-# test <- df_out %>%
-#   mutate(name_merging = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE))
-
-
-df_out <- df_out %>%
-  mutate(name_merging = toupper(Name)) %>%
-  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY THE")) %>%
-  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY")) %>%
-  mutate(name_merging = str_remove_all(name_merging, "\\."))
-
-df_mid <- nest_join(df_out, id_xwalk, 
-                   by = c("name_merging" = "facility_name_raw_merging", 
-                          "State" = "State")) %>% 
-  hoist(id_xwalk, facility_name_clean = pluck("facility_name_clean", 1)) %>%
-  mutate(facility_name_clean = map(facility_name_clean, first),
-         facility_name_clean = as.character(facility_name_clean))
-
+table(df_out$Facility)
+table(df_mid$Facility)
 ```
 
-
-```{r facility merge checks, include = FALSE}
-# show instances where merge didn't identify a clean name
-ck <- anti_join(df_out, id_xwalk, 
-                by = c("name_merging" = "facility_name_raw_merging", 
-                          "State" = "State"))
-print(ck)
+```{r filter out federal prisons}
+names(df_mid)
+df_mid <- df_mid %>%
+  filter(federal_bool == FALSE) %>%
+  select(-c(name_xwalk, scrape_name_clean))
 ```
+
 
 ```{r concat duplicate date/facilities}
-n_distinct(df_out)
-nrow(df_mid)
-nrow(distinct(df_mid, sheet_name, facility_name_clean))
-see_if(nrow(df_mid) == nrow(distinct(df_mid, sheet_name, facility_name_clean)))
+nrow(distinct(df_mid, date, Name))
+see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, date)))
 
-df_mid %<>% 
-  group_by(facility_name_clean, sheet_name) %>%
-  mutate(dupe_fac_date = n() > 1) %>%
-  ungroup() %>%
-  relocate(dupe_fac_date, .before =) %>%
-  mutate(fac_date = glue::glue('{facility_name_clean}_{sheet_name}')) %>%
-  select(-id_xwalk)
+df_comb <- df_mid %>% 
+  group_by_coalesce(., Name, date)
 
-df_comb <- df_mid %>%
-  group_by(fac_date) %>%
-  summarise_all(coalesce_by_column) %>%
-  ungroup()
-
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_clean)))
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, date)))
 ```
 
 ```{r plot cases/deaths}

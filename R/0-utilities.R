@@ -46,64 +46,6 @@ load_data <- function(data_path,
   return(filter3_df)
 }
 
-## if Staff.Death is missing, fill it with Staff.Deaths
-# table(is.na(df_out$Staff.Death) & !is.na(df_out$Staff.Deaths))
-# table(!is.na(df_out$Staff.Death) & is.na(df_out$Staff.Deaths))
-
-
-#' A re-coding of the coalesce function to include warnings when multiple
-#' values are given which are not NA and are different
-#' 
-#' @param ... vectors of equal length and type to coalesce
-#' @return vector of coalesced values
-#' 
-#' @examples 
-#' coalesce_with_warnings(1:3, 4:6)
-#' coalesce_with_warnings(1:3, c(1:2, NA))
-
-coalesce_with_warnings <- function(...){
-  d <- cbind(...)
-  
-  sapply(1:nrow(d), function(i){
-    x <- d[i,]
-    if(all(is.na(x))){
-      out <- NA
-    }
-    else{
-      xbar <- unique(as.vector(na.omit(x)))
-      if(length(xbar) != 1){
-        warning(paste0(
-          "Row ", i, " has multiple values that do not match."))
-      }
-      # only grab the first one
-      out <- xbar[1]
-    }
-    out
-  })
-}
-
-# https://stackoverflow.com/questions/45515218/combine-rows-in-data-frame-containing-na-to-make-complete-row
-# Consider summing by column when using this function
-coalesce_by_column <- function(df) {
-  return(coalesce_with_warnings(!!! as.list(df)))
-}
-
-coalesce_by_column <- function(df) {
-  return(coalesce(!!! as.list(df)))
-}
-
-# bang_select <- function(df, cols){
-#   dplyr::select(df, !!cols)
-# }
-# 
-# enq_select <- function(df, ...){
-#   args <- dplyr::enquos(...)
-#   dplyr::select(df, !!!args)
-# }
-# 
-# bang_select(sleep, "extra")
-# enq_select(sleep, extra)
-
 flag_noncumulative_cases <- function(dat, grp_var) {
   dat <- dat %>% 
     group_by({{grp_var}}) %>%
@@ -137,25 +79,6 @@ plot_lags <- function(dat, date, y_var, grp_var, y_lab = NULL) {
                       date_breaks = "1 month") + 
          ggtitle(unique(.$Name))) # NB: might need to change this if change grouping var
   return(plots)
-}
-
-# library(rlang)
-# create_cumulative_count <- function(dat, facility, non_cumulative_var) {
-#   out <- dat %>%
-#     group_by(facility_name_clean) %>%
-#     arrange(date) %>%
-#     mutate(temp_cumulative_var = cumsum({{non_cumulative_var}})) %>%
-#     ungroup %>%
-#     mutate({{ non_cumulative_var }} = ifelse(facility_name_clean == facility,
-#                                             temp_cumulative_var, {{non_cumulative_var}})) %>%
-#     select(-temp_cumulative_var)
-#   return(out)
-# }
-
-# Merge helpers -----------------------------------------------------------
-
-merge_population <- function() {
-  
 }
 
 

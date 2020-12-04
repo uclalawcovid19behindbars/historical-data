@@ -1,7 +1,7 @@
 ---
 title: "Clean Florida - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "10/26/2020"
+date: "12/03/2020"
 output: html_document
 ---
 
@@ -15,7 +15,7 @@ Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ##Load packages into session 
 lapply(.packages, require, character.only=TRUE)
-devtools::install_github("uclalawcovid19behindbars/behindbarstools")
+devtools::install_github("uclalawcovid19behindbars/behindbarstools", force = TRUE)
 ```
 
 ## Intro & Credits
@@ -38,10 +38,6 @@ data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
-##Facility name look-up table
-f <- read_csv("https://raw.githubusercontent.com/uclalawcovid19behindbars/facility_data/master/data_sheets/fac_spellings.csv")
-##Load population data
-pop <- read_csv(file.path(data_path, "Prison_Boundaries.csv"))
 ```
 
 
@@ -52,9 +48,9 @@ df <- load_data(data_path,
 df_typed <- type_convert(df)
 ```
 
-Fill in missing values of `Staff.Deaths` with non-missing values of `Staff.Death`, when those exist. Do the same with `Resident.Death`/`Resident.Deaths`.
+Fill in missing values of `Staff.Deaths` with non-missing values of `Staff.Death`, when those exist. Do the same with `Resident.Death`/`Resident.Deaths`. 
 
-```{r combine similar columns}
+```{r initial cleaning}
 df_out <- df_typed %>%
   select(!starts_with("...")) %>%
   select(!starts_with("lots")) %>%
@@ -64,17 +60,12 @@ df_out <- df_typed %>%
   select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
 
 df_out %<>% 
-  mutate(Staff.Deaths = coalesce_with_warnings(Staff.Deaths, Staff.Death)) %>%
-  mutate(Resident.Deaths = coalesce_with_warnings(Resident.Deaths, Resident.Death)) %>%
+  mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death)) %>%
+  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) %>%
   mutate(Residents.Confirmed = na_if(Residents.Confirmed, "n/a")) %>%
-  mutate(Residents.Confirmed = as.numeric(Residents.Confirmed))
-```
-
-
-```{r filter federal prisons}
-df_out <- df_out %>%
-  filter(Facility != "Federal Prison") %>%
-  filter(Facility != "Federal RRC") 
+  mutate(Residents.Confirmed = as.numeric(Residents.Confirmed)) %>%
+  mutate(Name = str_remove_all(Name,"(?i)( |)- OPERATED BY THE")) %>%
+  mutate(Name = str_remove_all(Name,"(?i)( |)- OPERATED BY"))
 ```
 
 ```{r create date var}
@@ -82,43 +73,21 @@ df_out <- df_out %>%
   mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
 ```
 
-
-```{r create state acronym var}
-
-
+```{r standardize facility names}
+df_mid <- behindbarstools::clean_facility_name(df_out) %>%
+  select(-name_xwalk)
 ```
 
-
-```{r standardize facility names}
-id_xwalk <- f %>%
-  select(Count.ID, State, facility_name_raw, facility_name_clean) %>%
-  unique() %>%
-  mutate(facility_name_raw_merging = toupper(facility_name_raw))
-
-# test <- df_out %>%
-#   mutate(name_merging = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE))
-# 
-
-df_out <- df_out %>%
-  mutate(name_merging = toupper(Name)) %>%
-  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY THE")) %>%
-  mutate(name_merging = str_remove_all(name_merging,"( |)- OPERATED BY")) %>%
-  mutate(name_merging = str_remove_all(name_merging, "\\."))
-
-df_mid <- nest_join(df_out, id_xwalk, 
-                   by = c("name_merging" = "facility_name_raw_merging", 
-                          "State" = "State")) %>% 
-  hoist(id_xwalk, facility_name_clean = pluck("facility_name_clean", 1)) %>%
-  mutate(facility_name_clean = map(facility_name_clean, first),
-         facility_name_clean = as.character(facility_name_clean))
+```{r filter out federal facilities}
+df_mid <- df_mid %>%
+  filter(federal_bool == FALSE)
 ```
 
 ```{r facility merge checks, include = FALSE}
 # show instances where merge didn't identify a clean name
-ck <- anti_join(df_out, id_xwalk, 
-                by = c("name_merging" = "facility_name_raw_merging", 
-                          "State" = "State"))
-print(ck)
+df_mid %>%
+  filter(Name == "NULL")
+
 # Any other "GEO groups" reported in FL?
 # No
 df_mid %>%
@@ -141,41 +110,31 @@ df_mid <- df_mid %>%
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
 
 ```{r concat duplicate date/facilities}
-n_distinct(df_out)
-nrow(df_mid)
-nrow(distinct(df_mid, sheet_name, facility_name_clean))
-see_if(nrow(df_mid) == nrow(distinct(df_mid, sheet_name, facility_name_clean)))
+nrow(distinct(df_mid, date, Name))
+see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, date)))
 
-df_mid %<>% 
-  group_by(facility_name_clean, sheet_name) %>%
-  mutate(dupe_fac_date = n() > 1) %>%
-  ungroup() %>%
-  relocate(dupe_fac_date, .before =) %>%
-  mutate(fac_date = glue::glue('{facility_name_clean}_{sheet_name}')) %>%
-  select(-id_xwalk)
+df_comb <- df_mid %>% 
+  behindbarstools::group_by_coalesce(., Name, date)
 
-df_comb <- df_mid %>%
-  group_by(fac_date) %>%
-  summarise_all(coalesce_by_column) %>%
-  ungroup()
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, date)))
 
 # Fix coalesce instance where it selected 0 rather than 1
-df_comb$Staff.Confirmed[df_comb$fac_date == "LAKE CITY CF_4.17.20"] <- 1
+df_comb$Staff.Confirmed[(df_comb$Name == "LAKE CITY CF") & (df_comb$date == "2020-04-17")] <- 1
 
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, facility_name_clean)))
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, date)))
 ```
 
 Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
 ```{r plot cases/deaths}
-df_comb <- flag_noncumulative_cases(df_comb, facility_name_clean)
-df_comb <- flag_noncumulative_deaths(df_comb, facility_name_clean, Resident.Deaths)
+df_comb <- flag_noncumulative_cases(df_comb, Name)
+df_comb <- flag_noncumulative_deaths(df_comb, Name, Resident.Deaths)
 
 # lag cases overall 
 df_comb %>%
-  filter(facility_name_clean != "STATEWIDE") %>%
+  filter(Name != "STATEWIDE") %>%
   ggplot(data = ., 
-         aes(x = date, y = lag_change_cases, group = facility_name_clean)) +
+         aes(x = date, y = lag_change_cases, group = Name)) +
     geom_line(alpha=0.6 , size=.5, color = "black") +
     scale_x_date(date_labels = "%m") + 
     labs(x = "Date",
@@ -183,9 +142,9 @@ df_comb %>%
 
 # lag deaths overall
 df_comb %>%
-  filter(facility_name_clean != "STATEWIDE") %>%
+  filter(Name != "STATEWIDE") %>%
   ggplot(data = ., 
-         aes(x = date, y = lag_change_deaths, group = facility_name_clean)) +
+         aes(x = date, y = lag_change_deaths, group = Name)) +
     geom_line(alpha=0.6 , size=.5, color = "black") +
     scale_x_date(date_labels = "%m") + 
     labs(x = "Date",
@@ -194,7 +153,7 @@ df_comb %>%
 # plot lag counts by facility
 lag_case_plots <- plot_lags(df_comb, "date", 
                             y_var = "lag_change_cases",
-                            grp_var = facility_name_clean)
+                            grp_var = Name)
 ```
 
 Investigate apparent non-cumulative counts at St. Luce County Jail. There was no death data reported for St. Luce, so we don't deal with any non-cumulative death counts for that facility.
@@ -206,17 +165,17 @@ df_comb %>%
               Residents.Confirmed, lag_change_cases, cumulative_cases)
 
 lag_case_plots %>% 
-  filter(facility_name_clean == "ST LUCE COUNTY JAIL") %>% 
+  filter(Name == "ST LUCE COUNTY JAIL") %>% 
   pull(plot)
 
 # ST LUCE COUNTY JAIL
 # Active cases --> cumulative cases
 df_comb <- df_comb %>% 
-  group_by(facility_name_clean) %>% 
+  group_by(Name) %>% 
   arrange(date) %>%
   mutate(temp_cumulative_cases_var = cumsum(Residents.Confirmed)) %>%
   ungroup %>%
-  mutate(Residents.Confirmed = ifelse(facility_name_clean == "ST LUCE COUNTY JAIL",
+  mutate(Residents.Confirmed = ifelse(Name == "ST LUCE COUNTY JAIL",
                        temp_cumulative_cases_var, Residents.Confirmed)) %>%
   select(-temp_cumulative_cases_var)
 ```
@@ -229,7 +188,7 @@ Note that between 9/29 and 10/26, the facility-specific death counts stopped get
 # before 10/28, statewide = statewide + (minimum) sum of all facilities
 # after 10/28, statewide = statewide
 deaths_by_date <- df_comb %>%
-  filter(facility_name_clean != "STATEWIDE") %>%
+  filter(Name != "STATEWIDE") %>%
   group_by(date) %>%
   summarise(all_res_deaths = behindbarstools::sum_na_rm(Resident.Deaths))
 
@@ -237,46 +196,43 @@ df_sw <- left_join(df_comb, deaths_by_date, by = "date")
 
 df_sw <- df_sw %>%
   mutate(Resident.Deaths = case_when(
-    date < as.Date("2020-10-30") & facility_name_clean == "STATEWIDE" ~ behindbarstools::vector_sum_na_rm(Resident.Deaths, all_res_deaths),
+    (date < as.Date("2020-10-30")) & (Name == "STATEWIDE") ~ 
+      behindbarstools::vector_sum_na_rm(Resident.Deaths, all_res_deaths),
     TRUE ~ Resident.Deaths)) 
 
 # flag dates when the facility-specific death counts failed
 # between 9/29 and 10/26 
 df_sw$scraper_failed <- ifelse(((df_sw$date >= as.Date("2020-09-29") & 
                                    df_sw$date < as.Date("2020-10-28")) & 
-                                  df_sw$facility_name_clean != "STATEWIDE"),
+                                  df_sw$Name != "STATEWIDE"),
                                TRUE, FALSE)
 
 df_sw <- df_sw %>%
   mutate(Resident.Deaths = ifelse(scraper_failed == TRUE,
                                   NA, Resident.Deaths))
-
-df_sw %>%
-  filter(facility_name_clean == "STATEWIDE" | facility_name_clean == "UNION CI") %>%
-  select(facility_name_clean, date, Resident.Deaths, lag_change_deaths, all_res_deaths, scraper_failed) 
 ```
 
 ```{r plot cleaned death data}
-df_sw <- flag_noncumulative_deaths(df_sw, facility_name_clean, Resident.Deaths)
+df_sw <- flag_noncumulative_deaths(df_sw, Name, Resident.Deaths)
 lag_death_plots <- plot_lags(df_sw, "date", 
                              y_var = "lag_change_deaths",
-                             grp_var = facility_name_clean)
-df_sw %>%
-  filter(cumulative_deaths == "FALSE") %>%
-  select(date, facility_name_clean, Resident.Deaths, previous_date_value_deaths)
+                             grp_var = Name)
+# df_sw %>%
+#   filter(cumulative_deaths == "FALSE") %>%
+#   select(date, Name, Resident.Deaths, previous_date_value_deaths)
 
 ## save death plots
 # for (i in 1:nrow(lag_death_plots)){
-#   facility_name <- lag_death_plots$facility_name_clean[[i]]
+#   facility_name <- lag_death_plots$Name[[i]]
 #   plot_name <- paste0(facility_name, ".png")
 #   ggsave(paste0(plot_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
 #          path = file.path(base_path, "plots", "FL"))
 # }
 
 df_sw %>%
-  filter(facility_name_clean != "STATEWIDE") %>%
+  filter(Name != "STATEWIDE") %>%
   ggplot(data = ., 
-         aes(x = date, y = lag_change_deaths, group = facility_name_clean)) +
+         aes(x = date, y = lag_change_deaths, group = Name)) +
     geom_line(alpha=0.6 , size=.5, color = "black") +
     scale_x_date(date_labels = "%m") + 
     labs(x = "Date",
@@ -287,28 +243,28 @@ Highlight places with large (absolute value) lag change in deaths, counts.
 
 ```{r abs lag change - deaths}
 investigate <- df_sw %>%
-  group_by(facility_name_clean) %>%
+  group_by(Name) %>%
   summarise(sum_covid_cases = sum(abs(lag_change_cases), na.rm = TRUE),
             sum_covid_deaths = sum(abs(lag_change_deaths), na.rm = TRUE))
 # write_csv(investigate, file.path(base_path, "data", "outputs", "FLCovidByFacility.csv"))
 
 monthly_deaths <- df_sw %>%
-  filter(facility_name_clean != "STATEWIDE") %>%
-  group_by(month = month(date), year = year(date), facility_name_clean) %>%
+  filter(Name != "STATEWIDE") %>%
+  group_by(month = month(date), year = year(date), Name) %>%
   summarise(sum_covid_deaths = sum(lag_change_deaths, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(yr_month = glue('{year}_{month}'))
 #write_csv(monthly_deaths, file.path(base_path, "data", "outputs", "FLCovidByFacilityMonth.csv"))
 
-lag_death_plots %>% 
-  filter(facility_name_clean == "RMC") %>% 
-  pull(plot)
+# lag_death_plots %>% 
+#   filter(Name == "RMC") %>% 
+#   pull(plot)
 
 # View(df_sw %>% filter(Name == "RMC") %>%
 #        select(date, Resident.Deaths, lag_change_deaths, cumulative_deaths))
 ```
 
-Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was misread. 
+Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
 ```{r}
 dates <- df_sw %>%
@@ -328,14 +284,14 @@ ggplot(data = dates,
 
 ## get 7-day percentage change in cases
 percentage_change <- df_sw %>%
-    dplyr::arrange(facility_name_clean, date) %>%
+    dplyr::arrange(Name, date) %>%
     mutate(
         week_ago = dplyr::lag(Residents.Confirmed, n = 7),
         seven_day_change = (Residents.Confirmed - week_ago) / (week_ago + 0.00001) ,
         n_increase = Residents.Confirmed - week_ago,
         denom_zero = ifelse(week_ago == 0, TRUE, FALSE)
     ) %>%
-    select(State, facility_name_clean, date, Residents.Confirmed, 
+    select(State, Name, date, Residents.Confirmed, 
            week_ago, seven_day_change, denom_zero, n_increase) %>%
     ungroup()
 
@@ -343,7 +299,7 @@ percentage_change <- df_sw %>%
 
 ## COLUMBIA CI
 df_sw %>%
-  filter(facility_name_clean == "COLUMBIA CI") %>%
+  filter(Name == "COLUMBIA CI") %>%
   ggplot(data = ., 
          aes(x = date, y = Residents.Confirmed)) +
       geom_line(linetype = "dashed")+
@@ -355,13 +311,13 @@ df_sw %>%
     y = "# of People Incarcerated Infected with COVID-19")
 
 # df_sw %>%
-#   filter(facility_name_clean == "COLUMBIA CI") %>% 
+#   filter(Name == "COLUMBIA CI") %>% 
 #   select(date, Residents.Confirmed) %>%
 #   View()
 
 ## MAYO ANNEX
 df_sw %>%
-  filter(facility_name_clean == "MAYO ANNEX") %>%
+  filter(Name == "MAYO ANNEX") %>%
   ggplot(data = ., 
          aes(x = date, y = Residents.Confirmed)) +
       geom_line(linetype = "dashed")+
@@ -375,7 +331,7 @@ df_sw %>%
 
 ## SANTA ROSA CI 
 df_sw %>%
-  filter(facility_name_clean == "SANTA ROSA CI") %>%
+  filter(Name == "SANTA ROSA CI") %>%
   ggplot(data = ., 
          aes(x = date, y = Residents.Confirmed)) +
       geom_line(linetype = "dashed")+
@@ -387,46 +343,20 @@ df_sw %>%
     y = "# of People Incarcerated Infected with COVID-19")
 ```
 
-Filter down the columns to only the ones we want to save.
+Filter down and re-order columns in order to rbind them to latest data.
+
 
 ```{r}
-## Vars not present that ARE in current scraped data: 
-## Staff.Tested, Staff.Negative, Staff.Pending, Staff.Quarantine
-## Residents.Released (newly scraped only), Residents.Active (historical scraped only)
-
-out <- df_sw %>%
-  select(
-    date, State, facility_name_clean,
-    Residents.Confirmed, Staff.Confirmed, 
-    Resident.Deaths, Staff.Deaths,
-    Residents.Recovered, Staff.Recovered, # what to do with these? make all null?
-    Residents.Negative, 
-    Residents.Tested,                     # what to do about Residents.Tested vs T.Admin
-    Residents.Pending, 
-    Resident.Population, 
-    Residents.Quarantine, 
-    Website, Facility, hifld_id, Address, Zipcode, City, County, 
-    Latitude, Longitude, County.FIPS, Notes
-    ) %>%  
-  mutate(jurisdiction = "") %>%                # mapping from this to county, federal, state
-  rename(
-    Date = date,
-    Name = facility_name_clean,
-    StateLong = State,
-    Residents.Population = Resident.Population,
-    source = Website
-    ) %>%
-  mutate(
-    State = behindbarstools::translate_state(StateLong, reverse = TRUE)
-    ) %>%
-  select(-c(StateLong, Facility)) 
-
-#write_csv(out, file.path(base_path, "data", "florida_adult_facility_covid_counts_historical.csv"))
-
-hist_to_bind <- df_sw %>%
-    rename(Residents.Deaths = Resident.Death) %>%
-    select(Name, date,Residents.Confirmed, Staff.Confirmed,
-         Residents.Deaths, Staff.Deaths, City)
+df_hist <- behindbarstools::reorder_cols(df_sw)
+df_hist_final <- df_hist %>%
+  mutate(source = Website,
+         Residents.Deaths = Resident.Deaths,
+         Date = date,
+         jurisdiction = Facility,
+         Residents.Population = Resident.Population,
+         ID = Count.ID) %>%
+  select(-c(Website, Resident.Deaths, Resident.Death, date))
+df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -441,29 +371,33 @@ recent_dat <- hist_dat %>%
   bind_rows(today_dat)
 
 recent_dat <- recent_dat %>%
-  mutate(date = lubridate::mdy(Date)) %>%
+  mutate(Date = lubridate::mdy(Date)) %>%
   filter(State == "Florida",
-         date > as.Date('2020-11-04'))
+         jurisdiction != "federal",
+         Date > as.Date('2020-11-04')) 
 
-recent_comb <- recent_dat %>%
-  group_by(Name, date) %>%
-  summarise_all(coalesce_by_column) %>%
-  ungroup()
+recent_dat_cln <- behindbarstools::clean_facility_name(recent_dat) %>%
+  select(-name_xwalk)
 
-clean_recent_dat <- recent_comb %>%
-  select(Name, date,Residents.Confirmed, Staff.Confirmed,
-         Residents.Deaths, Staff.Deaths, City)
+recent_comb <- recent_dat_cln %>%
+  behindbarstools::group_by_coalesce(., Name, Date) 
+
+recent_final <- behindbarstools::reorder_cols(recent_comb, rm_extra_cols = TRUE)
 ```
 Then, bind it to the historical cleaned data from this script. 
 
-```{r}
-all_dat <- bind_rows(hist_to_bind, clean_recent_dat)
+```{r bind historical and recent}
+all_dat <- bind_rows(df_hist_final, recent_final)
 n_distinct(all_dat$Name)
 ```
 
-Finally, merge in population data.
+```{r write csv}
+write_csv(all_dat, file.path(base_path, "data", "florida_adult_facility_covid_counts_historical.csv"))
+```
 
-````{r}
+Finally, merge in population data. This isn't working right now because of naming issues!
+
+````{r merge-population}
 pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/Merg_Pop.csv') %>%
   mutate(Name = behindbarstools::clean_fac_col_txt(Name,to_upper = TRUE))
 
