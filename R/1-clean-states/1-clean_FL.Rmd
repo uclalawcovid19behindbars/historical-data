@@ -15,7 +15,8 @@ Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ##Load packages into session 
 lapply(.packages, require, character.only=TRUE)
-devtools::install_github("uclalawcovid19behindbars/behindbarstools", force = TRUE)
+devtools::install_github("uclalawcovid19behindbars/behindbarstools")
+help(package=behindbarstools)
 ```
 
 ## Intro & Credits
@@ -104,7 +105,7 @@ Remove "GEO Group" observations for July 8, 10, and 11. These observations were 
 
 ```{r drop geo-group observations}
 df_mid <- df_mid %>%
-  filter(!(Name == "GEO Group Inc" & (date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))))
+  filter(!(Name == "NULL" & (date >= as.Date("2020-07-08") & date <= as.Date("2020-07-11"))))
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
@@ -357,6 +358,8 @@ df_hist_final <- df_hist %>%
          ID = Count.ID) %>%
   select(-c(Website, Resident.Deaths, Resident.Death, date))
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
+# add back in Residents.Tested (will only be present for historical data)
+df_hist_final$Residents.Tested <- df_hist$Residents.Tested
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -383,6 +386,7 @@ recent_comb <- recent_dat_cln %>%
   behindbarstools::group_by_coalesce(., Name, Date) 
 
 recent_final <- behindbarstools::reorder_cols(recent_comb, rm_extra_cols = TRUE)
+recent_final$Residents.Tested <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
 
@@ -390,6 +394,18 @@ Then, bind it to the historical cleaned data from this script.
 all_dat <- bind_rows(df_hist_final, recent_final)
 n_distinct(all_dat$Name)
 ```
+Merge in facility information (address, city, county, etc.).
+
+```{r}
+fac_info <- behindbarstools::read_fac_info() %>%
+  filter(State == "Florida") %>%
+  mutate(Name = behindbarstools::clean_fac_col_txt(Name))
+final_dat <- left_join(all_dat, fac_info, 
+                  by = "Name",
+                  suffix = c(".x", "")) %>%
+  select(-ends_with(".x"))
+```
+
 
 ```{r write csv}
 write_csv(all_dat, file.path(base_path, "data", "florida_adult_facility_covid_counts_historical.csv"))
