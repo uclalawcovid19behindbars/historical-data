@@ -10,7 +10,7 @@ In an effort to make publicly accessible the limited data that correctional agen
 
 ## Prison and jail data overview
 
-We primarily collect data from federal, state, and local correctional agency websites using web scraping programs we developed to automatically collect reported data three to four times per week. Our updated scraped data is available [here](https://github.com/uclalawcovid19behindbars/data/blob/master/Adult%20Facility%20Counts/adult_facility_covid_counts_today_latest.csv). 
+We primarily collect data from federal, state, and local correctional agency websites using web scraping programs we developed to automatically collect reported data three to four times per week. Our newly scraped data, updated 3-4 times a week, is available in our [data repository](https://github.com/uclalawcovid19behindbars/data/blob/master/Adult%20Facility%20Counts/adult_facility_covid_counts_today_latest.csv). For details on the specific code we use for scraping data, please visit our [scraper repository](https://github.com/uclalawcovid19behindbars/covid19_behind_bars_scrapers).
 
 Our core data of interest include:
 
