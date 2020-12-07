@@ -85,4 +85,12 @@ Our data is licensed under a [Creative Commons Attribution-NonCommercial-ShareAl
 - Population data not yet present (as of posting on December 3rd 2020). Except to have this in within the next few weeks.
 - Removed two observations of "GEO" prison that had no data associated with them. 
 
+## North Carolina Notes
+The following facilities seem to be reporting active cases rather than cumulative cases in the column `Residents.Confirmed`:
+* Wilkes CC 
+* Marion CI 
+* Foothills CI 
+* Central Prison 
+* Alexander CI 
 
+Because the facilities did not provide any specification, we're leaving the counts as-scraped. 

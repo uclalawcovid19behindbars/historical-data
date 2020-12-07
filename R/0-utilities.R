@@ -6,7 +6,7 @@ library(lubridate)
 read_sheets <- function(xlsx_file){
   xlsx_file %>%
     excel_sheets() %>%
-    set_names() %>%
+    rlang::set_names() %>%
     map_df(~ read_excel(path = xlsx_file, sheet = .x, col_types = "text"), .id = 'sheet_name') %>%
     select(sheet_name, everything())
 }
@@ -49,7 +49,7 @@ load_data <- function(data_path,
 flag_noncumulative_cases <- function(dat, grp_var) {
   dat <- dat %>% 
     group_by({{grp_var}}) %>%
-    mutate(previous_date_value_cases = lag(Residents.Confirmed, order_by = date)) %>%
+    mutate(previous_date_value_cases = lag(Residents.Confirmed, order_by = Date)) %>%
     mutate(lag_change_cases = Residents.Confirmed - previous_date_value_cases,
            cumulative_cases = ifelse(lag_change_cases >= 0, TRUE, FALSE)) %>%
     ungroup() 
@@ -59,7 +59,7 @@ flag_noncumulative_cases <- function(dat, grp_var) {
 flag_noncumulative_deaths <- function(dat, grp_var, death_var) {
   dat <- dat %>% 
     group_by({{grp_var}}) %>%
-    mutate(previous_date_value_deaths = lag({{death_var}}, order_by = date)) %>%
+    mutate(previous_date_value_deaths = lag({{death_var}}, order_by = Date)) %>%
     mutate(lag_change_deaths = {{death_var}} - previous_date_value_deaths,
            cumulative_deaths = ifelse(lag_change_deaths >= 0, TRUE, FALSE)) %>%
     ungroup() 
