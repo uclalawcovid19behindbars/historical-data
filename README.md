@@ -94,3 +94,7 @@ The following facilities seem to be reporting active cases rather than cumulativ
 * Alexander CI 
 
 Because the facilities did not provide any specification, we're leaving the counts as-scraped. 
+
+## Wisconsin Notes
+- Population data not yet present (as of posting on December 10th 2020). Except to have this in within the next few weeks.
+- Removed youth facilities for now. Will add these back in within the next few days, when we decide on a naming pattern for them.
