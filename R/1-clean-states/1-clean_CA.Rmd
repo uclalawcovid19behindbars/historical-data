@@ -70,7 +70,10 @@ df_out <- df_out %>%
 ```
 
 ```{r standardize facility names}
-df_mid <- behindbarstools::clean_facility_name(df_out) %>%
+df_cln <- df_out %>%
+  mutate(Name = str_replace(Name, "-CDCR", "CDCR")) 
+
+df_mid <- behindbarstools::clean_facility_name(df_cln) %>%
   select(-name_xwalk)
 ```
 
@@ -80,9 +83,10 @@ df_mid <- df_mid %>%
 ```
 
 ```{r facility merge checks, include = FALSE}
-## TO DO : Come back and deal with these 
 df_mid %>%
   filter(Name == "NULL") %>% 
+  select(scrape_name_clean) %>%
+  unique() %>% 
   View()
 ```
 
@@ -140,16 +144,15 @@ recent_dat <- recent_dat %>%
          jurisdiction != "federal",
          Date > as.Date('2020-11-04')) 
 
-## TO DO: Add "STATE-WIDE" to CA xwalk
-
 recent_dat_cln <- behindbarstools::clean_facility_name(recent_dat) %>%
   select(-name_xwalk)
 
-recent_dat_cln %>%
-  filter(Name == "NULL") %>%
-  View()
+# recent_dat_cln %>%
+#   filter(Name == "NULL") %>%
+#   View()
 
 recent_dat_cln <- recent_dat_cln %>%
+  mutate(Name = ifelse(scrape_name_clean == "STATEWIDE", "STATEWIDE", Name)) %>%
   filter(Name != "NULL")
 
 recent_comb <- recent_dat_cln %>%
@@ -166,8 +169,6 @@ all_dat <- bind_rows(df_hist_final, recent_final)
 n_distinct(all_dat$Name)
 ```
 Merge in facility information (address, city, county, etc.).
-
-TO DO : Fill in missing info, especially lat/lon, in "facility_info" sheet.
 
 ```{r}
 fac_info <- behindbarstools::read_fac_info() %>%
@@ -281,9 +282,5 @@ table(is.na(dat_with_pop$Population))
 
 
 ```{r write csv}
-final_dat <- final_dat %>%
-  select(-c(previous_date_value_deaths,
-            lag_change_deaths, cumulative_deaths))
-  
-write_csv(final_dat, file.path(base_path, "data", "ca_adult_facility_covid_counts_historical.csv"))
+write_csv(final_dat, file.path(base_path, "data", "CA_adult_facility_covid_counts_historical.csv"))
 ```
