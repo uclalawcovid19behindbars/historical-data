@@ -146,7 +146,12 @@ recent_dat_cln <- behindbarstools::clean_facility_name(recent_dat) %>%
 
 recent_dat_cln %>%
   filter(Name == "NULL") %>%
+  select(scrape_name_clean, Date, source) %>%
   View()
+
+# recent_dat_cln %>% 
+#   filter(scrape_name_clean == "RACINE CORRECTIONAL INSTITUTION" | 
+#            grepl("RACINE", Name))
 
 recent_dat_cln <- recent_dat_cln %>%
   filter(Name != "NULL")
@@ -165,8 +170,6 @@ all_dat <- bind_rows(df_hist_final, recent_final)
 n_distinct(all_dat$Name)
 ```
 Merge in facility information (address, city, county, etc.).
-
-TO DO : Fill in missing info, especially lat/lon, in "facility_info" sheet.
 
 ```{r}
 fac_info <- behindbarstools::read_fac_info() %>%
@@ -243,29 +246,28 @@ percentage_change <- final_dat %>%
 # View(percentage_change)
 ```
 
-Finally, merge in population data. This isn't working right now because of naming issues!
-
-TO DO: also check "/Users/hope/Downloads/wi.csv"
+Finally, merge in population data. Fill in missing dates with the previous value. 
 
 ````{r merge-population}
-pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/Merg_Pop.csv') %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE)) %>%
-  filter(State == "Wisconsin")
-head(pop)
+pop <- read_csv(file.path(data_path, "wi_pop_clean.csv")) %>%
+  mutate(name_cln = behindbarstools::clean_fac_col_txt(facility_name_clean, to_upper = TRUE))
 
-pop_alt <- read_csv(file.path("~", "Downloads", "wi.csv")) %>%
-  mutate(Name_cln = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE)) %>%
-  mutate(population_date = Date ) %>%
-  select(-c(State, Date))
+pop_filled <- pop %>%
+  select(-facility_name_clean) %>% 
+  pivot_wider(names_from = name_cln, values_from = Population) %>%
+  complete(Date = seq.Date(min(Date), max(Date), by = "day")) %>%
+  fill(-Date) %>%
+  pivot_longer(!Date, names_to = "name_cln", values_to = "Population")
 
-dat_with_pop <- test %>%
-  left_join(pop_alt, by = c("Name" = "Name_cln",
-                            "Date" = "population_date"))
+dat_with_pop <- final_dat %>%
+  left_join(pop_filled, by = c("Name" = "name_cln",
+                            "Date" = "Date")) %>%
+  select(-POPULATION)
 
 table(is.na(dat_with_pop$Population))
 ```
 
 
 ```{r write csv}
-write_csv(final_dat, file.path(base_path, "data", "WI_adult_facility_covid_counts_historical.csv"))
+write_csv(dat_with_pop, file.path(base_path, "data", "WI_adult_facility_covid_counts_historical.csv"))
 ```

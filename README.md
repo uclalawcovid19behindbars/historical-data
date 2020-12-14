@@ -59,11 +59,12 @@ When data are not available publicly, we make every effort to obtain missing inf
 * `County`: County where the facility is located
 * `County.FIPS`: County FIPS code for the county where the facility is located
 * `TYPE`: Facility type
-* `POPULATION`: Facility population
+* `POPULATION`: Facility population from HIFLD. We cannot know what date the population was reported, and so this population should not be relied upon. The date at which this population was reported likely varies across facilities. 
 * `SECURELVL`: Facility security level
-* `CAPACITY`: Facility capacity
+* `CAPACITY`: Facility capacity from HIFLD
 * `federal_prison_type`: Facility federal prison type (only relevant for federal prison)
 * `Website`: Facility website, if it has one
+* `Population`: When available, population data merged by our team. This is historically accurate population. See state-specific notes for source.  
 
 ## Citations 
 
@@ -96,5 +97,5 @@ The following facilities seem to be reporting active cases rather than cumulativ
 Because the facilities did not provide any specification, we're leaving the counts as-scraped. 
 
 ## Wisconsin Notes
-- Population data not yet present (as of posting on December 10th 2020). Except to have this in within the next few weeks.
+- Population data source was compiled by weekly reports, available here: https://doc.wi.gov/Pages/DataResearch/DataAndReports.aspx 
 - Removed youth facilities for now. Will add these back in within the next few days, when we decide on a naming pattern for them.

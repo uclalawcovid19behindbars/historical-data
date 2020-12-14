@@ -59,12 +59,13 @@ df_out <- df_typed %>%
   select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
 
 df_out <- df_out %>% 
-  mutate(Resident.Deaths = coalesce_with_warnings(Resident.Deaths, Resident.Death))
+  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death))
 ```
 
 ```{r create date var}
 df_out <- df_out %>%
   mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
+table(is.na(df_out$Residents.Tested), df_out$da)
 ```
 
 ```{r standardize facility names}
