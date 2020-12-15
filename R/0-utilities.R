@@ -81,4 +81,37 @@ plot_lags <- function(dat, date, y_var, grp_var, y_lab = NULL) {
   return(plots)
 }
 
+# State monitoring helpers --------------------------------------------------
+
+filter_statewide_NA <- function(dat, var) {
+  out <- dat %>% 
+    filter(
+      !(str_detect(Name, "(?i)state") & str_detect(Name, "(?i)wide"))) %>%
+    filter(!is.na({{var}})) 
+  return(out)
+}
+
+## function that eliminates state-wide and NA observations, 
+## groups by facility name, and returns the most recent value of an input variable
+## chronologically. should be used for cumulative variables!
+get_last_value <- function(dat, var, labeller) {
+  label_ = as_label(expr(labeller)) # not working
+  last_values <- dat %>% 
+    filter_statewide_NA({{var}}) %>%
+    group_by(Name) %>%
+    summarise(label_ = last({{var}}, order_by = Date))
+  return(last_values)
+}
+
+## function that eliminates state-wide and NA observations, 
+## and returns the unique value on non-NA facilities present for a given input variable
+get_fac_n <- function(dat, var) {
+  fac_n <- dat %>%
+    filter_statewide_NA({{var}}) %>%
+    pull(Name) %>%
+    unique() %>%
+    length()
+  return(fac_n)
+}
+
 
