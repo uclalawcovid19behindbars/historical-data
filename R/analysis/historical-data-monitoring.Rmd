@@ -132,67 +132,34 @@ We have data on the number of **tests administered** for `r fac_t_admin_n` facil
 Stopped here! 
 Up next:
 - Week-to-week increase over time --> beeswarm plots 
-- Malabahari distance
-- Small multiples 
-
-
-
-
-
-
-
-
-
-
-We can also analyze how the incarcerated population is doing with respect to the general population for any given state. Below we plot the infection fatality rate for both the incarcerated population and the general population for each state and DC where confirmed and death data is available. We see that the fatality rate is generally lower although this is largely due to the younger general age of the prison population compared to the general population. Note, however, that there are several significant outliers.
-
-```{R warning=FALSE, message=FALSE, echo=FALSE}
-state_deaths <- slist$current_data %>%
-    filter(jurisdiction == "state") %>%
-    group_by(State) %>%
-    summarize(
-        IFR = sum_na_rm(Residents.Deaths) / sum_na_rm(Residents.Confirmed),
-        .groups = "drop")
-
-sc_plot <- slist$current_state %>%
-    mutate(pop_ifr = death/positive) %>%
-    mutate(State = translate_state(state)) %>%
-    select(pop_ifr, State) %>%
-    right_join(state_deaths, by = "State") %>%
-    rename(`State IFR` = pop_ifr, `Prison IFR` = IFR) %>%
-    ggplot(aes(x = `State IFR`, y = `Prison IFR`, text = State)) +
-    geom_point() +
-    geom_abline() +
-    theme_classic() +
-    labs(x = "State IFR", y = "Incarcerated Population IFR") +
-    ggtitle("Infection Fatality Rate Comparison") +
-    ylim(c(0, .07)) +
-    xlim(c(0, .07))
-
-ggplotly(sc_plot)
-
-```
+- Malabahari distance ?
+--> Using IFR = Deaths / Cases
 
 Below, we compare infection rates in the general population to the incarcerated population (by facility). This allows us to highlight which carceral facilities diverge most from the state-wide infection rate.
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-facilities <- slist$hist_data %>%
-  mutate(Date = lubridate::mdy(Date)) %>%
-  filter(jurisdiction == "state") %>%
-  group_by(State, Name) 
-
-## !this is buggy
-percentage_change <- facilities %>%
-    mutate(
-        ten_days_ago = dplyr::lag(Residents.Confirmed, n = 10, order_by = Date),
-        ten_day_change = (Residents.Confirmed - ten_days_ago) / (ten_days_ago + 0.00001) 
-    ) %>%
-    dplyr::arrange(desc(Date)) %>%
-    filter(!is.infinite(ten_day_change)) %>%  
-    slice_head(n = 1) %>%
-    select(Name, State, Date, Residents.Confirmed, ten_days_ago, ten_day_change) %>%
-    ungroup() %>%
-    mutate(StateFull = behindbarstools::translate_state(State))
+percentage_change <- hist_data %>%
+  mutate(case_rate = Residents.Confirmed / Population,
+         death_rate = Residents.Deaths / Population) %>%
+  group_by(Name) %>%
+  mutate(
+      lag_cases = dplyr::lag(Residents.Confirmed, order_by = Date),
+      lag_deaths = dplyr::lag(Residents.Deaths, order_by = Date),
+      lag_case_rate = dplyr::lag(case_rate, order_by = Date),
+      lag_death_rate = dplyr::lag(death_rate, order_by = Date),
+      delta_cases = Residents.Confirmed - lag_cases,
+      delta_deaths = Residents.Deaths - lag_deaths, 
+      pch_cases = (Residents.Confirmed - lag_cases) / (lag_cases + 0.000000001),
+      pch_deaths = (Residents.Deaths - lag_deaths) / (lag_deaths + 0.000000001),
+      rch_cases = case_rate - lag_case_rate, 
+      rch_deaths = death_rate - lag_death_rate, 
+  ) %>%
+  ungroup() %>%
+  select(Date, Name, Population,
+         Residents.Confirmed, lag_cases, delta_cases, pch_cases, rch_cases,
+         Residents.Deaths, lag_deaths,delta_deaths, pch_deaths, rch_deaths,
+         ) %>%
+  arrange(-delta_cases)
 
 ## get top 3 facilities per state
 top_three_wide <- percentage_change %>%
