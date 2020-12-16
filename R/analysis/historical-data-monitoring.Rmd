@@ -1,12 +1,14 @@
 ---
 title: "Historical Data Monitoring"
-author: "Hope Johnson, Neal Marquez"
+author: "Hope Johnson, Neal Marquez, Michael Everett, Erika Tyagi"
 output: html_document
 ---
 
-## The UCLA COVID-19 Behind Bars Scraper
+## Introduction
 
-```{r load packages warning=FALSE, message=FALSE, echo=FALSE}
+The purpose of this file is to generate a coherent report on the historical data from a given state. We aim to highlight case and death COVID-19 spikes within specific facilities and time periods. This document is a work-in-progress!
+
+```{r load packages, warning=FALSE, message=FALSE, echo=FALSE}
 ##Define package list
 library(behindbarstools)
 Packages<-c("tidyverse", "plotly", "glue")
@@ -21,9 +23,9 @@ base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ```
+We are in the process of cleaning historical data, and not all of it is ready to monitor. The available states are:
 
-
-```{r load historical data}
+```{r load historical data, warning=FALSE, message=FALSE, echo=FALSE}
 data_path = file.path(base_path, "data")
 ## Available states for historical data monitoring
 (clean_states = list.files(path = data_path, pattern = "*.csv"))
@@ -73,11 +75,11 @@ This data is from `r unique(hist_data$State)`. We have been collecting data from
 
 The facility in `r unique(hist_data$State)` with the highest number of cumulative cases over the course of the pandemic is `r fac_cases_deaths$Name[fac_cases_deaths$cumulative_cases == max_cases]`. This facility has had `r max_cases` cases total.  
 
-The facility in `r unique(hist_data$State)` with the highest number of cumulative deaths over the course of the pandemic is `r fac_cases_deaths$Name[fac_cases_deaths$cumulative_deaths == max_deaths]`. This facility has had `r max_deaths` cases total.  
+The facility in `r unique(hist_data$State)` with the highest number of cumulative deaths over the course of the pandemic is `r fac_cases_deaths$Name[fac_cases_deaths$cumulative_deaths == max_deaths]`. This facility has had `r max_deaths` deaths total.  
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 fac_cases_deaths %>%
-    datatable()
+  arrange(-cumulative_cases)
 ```
 
 ## Testing
@@ -99,30 +101,29 @@ fac_res_tested_n <- hist_data %>%
 fac_tested <- hist_data %>%
   filter_statewide_NA(Residents.Tested) %>%
   group_by(Name) %>%
-  summarise(last_test_count = last(Residents.Tested, order_by = Date), .groups = "drop") %>%
+  mutate(last_test_count = last(Residents.Tested, order_by = Date), .groups = "drop") %>%
   ## TO DO: want to get date of last_test_count and population carried over
   # left_join(prison_pop, by = c("State" = "name")) %>%
-  mutate(test_rate = last_test_count / Population,
-         any_testing = ifelse(is.na(Tests_administered), "No testing", "Some testing")) 
+  mutate(test_rate = last_test_count / Population) 
 
-map_df <- usa_sf("laea") %>%
-    select(State = name, geometry) %>%
-    left_join(state_tested, by = "State")
-    
-map_plot <- map_df %>%
-    mutate(test_rate_cat = cut(test_rate, c(0,1,2,5,15))) %>%
-    ggplot(aes(fill = test_rate_cat, text = State)) +
-    geom_sf() +
-    theme_void() +
-    scale_fill_brewer(
-        palette = "Spectral", direction = 1, na.value = "grey50") +
-   geom_sf_text(aes(label = abbreviation))
-
-map_plot +
-    ggtitle(
-        "Incarcerated Population in State Prisons Testing Rate",
-        "Grey indicates no reported data") +
-    labs(fill = "Test Rate\nPer Resident")
+# map_df <- usa_sf("laea") %>%
+#     select(State = name, geometry) %>%
+#     left_join(state_tested, by = "State")
+#     
+# map_plot <- map_df %>%
+#     mutate(test_rate_cat = cut(test_rate, c(0,1,2,5,15))) %>%
+#     ggplot(aes(fill = test_rate_cat, text = State)) +
+#     geom_sf() +
+#     theme_void() +
+#     scale_fill_brewer(
+#         palette = "Spectral", direction = 1, na.value = "grey50") +
+#    geom_sf_text(aes(label = abbreviation))
+# 
+# map_plot +
+#     ggtitle(
+#         "Incarcerated Population in State Prisons Testing Rate",
+#         "Grey indicates no reported data") +
+#     labs(fill = "Test Rate\nPer Resident")
 
 ```
 
@@ -161,52 +162,7 @@ percentage_change <- hist_data %>%
          ) %>%
   arrange(-delta_cases)
 
-## get top 3 facilities per state
-top_three_wide <- percentage_change %>%
-    group_by(State) %>%
-    dplyr::arrange(desc(ten_day_change)) %>%
-    filter(!is.na(ten_day_change),
-           Residents.Confirmed > 1) %>%
-    slice_head(n = 3) %>%
-    ungroup()
-
-top_three_long <- top_three_wide %>%
-  rename(`Number infected (ten days ago)` = ten_days_ago,
-         `Number infected (today)` = Residents.Confirmed) %>%
-  pivot_longer(cols = c(`Number infected (ten days ago)`, `Number infected (today)`),
-               names_to = "Residents Infected")
-
-## get top five states (avg increase)
-top_five_states <- top_three_wide %>%
-  group_by(State) %>%
-  mutate(avg_inc = mean(ten_day_change)) %>%
-  ungroup() %>%
-  dplyr::arrange(desc(avg_inc)) %>%
-  distinct(State) %>%
-  slice_head(n = 5) %>%
-  pull(State)
-
-## make plots
-plot_bars_by_state <- function(dat, xvar, yvar, grpvar) {
-  plots <- dat %>% 
-    group_by(State) %>% 
-    do(plot=ggplot(data=.) +
-           aes_string(x = xvar, y = yvar, fill = grpvar) + 
-           geom_bar(stat = "identity", position = position_dodge()) + 
-           labs(title = glue('Prison COVID Infections in {unique(.$State)}'),
-                subtitle = "Rate of change in number of incarcerated individuals infected (past 10 days)",
-                x ="", y = "") + 
-         geom_text(aes_string(label=yvar), vjust=1.6, color="white",
-                   position = position_dodge(0.9), size=3.5) + 
-           scale_fill_brewer(palette="Paired")
-       )
-  return(plots)
-}
-
-plots <- top_three_long %>%
-    filter(State %in% top_five_states) %>%
-    plot_bars_by_state(., xvar = "Name", yvar = "value", grpvar = "`Residents Infected`")
-plots$plot
+percentage_change
 ```
 
 ## Historical Data
@@ -214,105 +170,105 @@ plots$plot
 A strength of our dataset compared to other groups who collect similar data, is that we not only collect information on state level aggregates but also facility level data. This enables us to act as a surveillance mechanism, tracking outbreaks at facilities. Below we see an example of an outbreak occurring within facilities with major outbreaks in the past week.
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
-fac_delta_df <-  slist$hist_data %>%
-    mutate(Date = lubridate::mdy(Date)) %>%
-    filter(!(str_detect(Name, "(?i)state") & str_detect(Name, "(?i)wide"))) %>%
-    filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
-    group_by(Name, State, jurisdiction) %>%
-    mutate(delta = last(Residents.Confirmed) - first(Residents.Confirmed)) %>%
-    ungroup() %>%
-    filter(delta %in% head(sort(unique(delta), decreasing = TRUE), n = 4)) %>%
-    select(jurisdiction, State, Name) %>%
-    unique() %>%
-    left_join( slist$hist_data, by = c("jurisdiction", "State", "Name"))
-
-fac_delta_df %>%
-    mutate(Date = lubridate::mdy(Date)) %>%
-    mutate(Title = str_c(State, ": ", Name)) %>%
-    ggplot(aes(x = Date, y = Residents.Confirmed)) +
-    geom_line() +
-    facet_wrap(~Title) +
-    labs(y = "Residents Confirmed") +
-    theme_bw() +
-    ggtitle(
-        "High Outbreak Facilities",
-        "Carceral Facilities with Largest Increase In Resident Cases in Past 7 Days"
-    ) +
-    theme(
-        legend.text = element_text(size=13),
-        legend.title = element_text(size=15),
-        axis.text = element_text(size=13),
-        axis.title = element_text(size=15),
-        title =  element_text(size=17))
+# fac_delta_df <-  slist$hist_data %>%
+#     mutate(Date = lubridate::mdy(Date)) %>%
+#     filter(!(str_detect(Name, "(?i)state") & str_detect(Name, "(?i)wide"))) %>%
+#     filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
+#     group_by(Name, State, jurisdiction) %>%
+#     mutate(delta = last(Residents.Confirmed) - first(Residents.Confirmed)) %>%
+#     ungroup() %>%
+#     filter(delta %in% head(sort(unique(delta), decreasing = TRUE), n = 4)) %>%
+#     select(jurisdiction, State, Name) %>%
+#     unique() %>%
+#     left_join( slist$hist_data, by = c("jurisdiction", "State", "Name"))
+# 
+# fac_delta_df %>%
+#     mutate(Date = lubridate::mdy(Date)) %>%
+#     mutate(Title = str_c(State, ": ", Name)) %>%
+#     ggplot(aes(x = Date, y = Residents.Confirmed)) +
+#     geom_line() +
+#     facet_wrap(~Title) +
+#     labs(y = "Residents Confirmed") +
+#     theme_bw() +
+#     ggtitle(
+#         "High Outbreak Facilities",
+#         "Carceral Facilities with Largest Increase In Resident Cases in Past 7 Days"
+#     ) +
+#     theme(
+#         legend.text = element_text(size=13),
+#         legend.title = element_text(size=15),
+#         axis.text = element_text(size=13),
+#         axis.title = element_text(size=15),
+#         title =  element_text(size=17))
 ```
 
 ## State Outbreak Comparison
 
 ```{r}
-delta_df <-  slist$hist_data %>%
-    filter(jurisdiction == "state") %>%
-    group_by(State, Date) %>%
-    summarize(Cases = sum(Residents.Confirmed, na.rm = TRUE), .groups = "drop") %>%
-    mutate(Date = lubridate::mdy(Date)) %>%
-    filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
-    filter(Date == max(Date) | Date == min(Date)) %>%
-    group_by(State) %>%
-    summarize(
-        prison_change = diff(Cases)/first(Cases)*100,
-        prison_cases = last(Cases), .groups = "drop") %>%
-    arrange(-prison_change)
-
-state_delta_data <- "https://api.covidtracking.com/v1/states/daily.csv" %>%
-    read_csv(col_types = cols()) %>%
-    mutate(Date = lubridate::ymd(as.character(date))) %>%
-    select(Date, state, positive) %>%
-    filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
-    filter(Date == max(Date) | Date == min(Date)) %>%
-    arrange(state, Date) %>%
-    group_by(state) %>%
-    summarize(
-        pop_change = diff(positive)/first(positive)*100,
-        pop_cases = last(positive), .groups = "drop") %>%
-    mutate(State = translate_state(state)) %>%
-    select(-state) %>%
-    right_join(delta_df, by = "State")
-
-chnge_plot <- state_delta_data %>%
-  mutate(text = str_c(
-    "State: ", State, "\n",
-    "State Cases: ", pop_cases, "\n",
-    "Prison Cases: ", prison_cases, "\n"
-  )) %>%
-  ggplot(aes(x = pop_change, y = prison_change, text = text)) +
-  geom_point() +
-  theme_bw() +
-  labs(x = "State Covid Percentage Increases", y = "Prison Covid Percentage Increases")
-
-ggplotly(chnge_plot)
+# delta_df <-  slist$hist_data %>%
+#     filter(jurisdiction == "state") %>%
+#     group_by(State, Date) %>%
+#     summarize(Cases = sum(Residents.Confirmed, na.rm = TRUE), .groups = "drop") %>%
+#     mutate(Date = lubridate::mdy(Date)) %>%
+#     filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
+#     filter(Date == max(Date) | Date == min(Date)) %>%
+#     group_by(State) %>%
+#     summarize(
+#         prison_change = diff(Cases)/first(Cases)*100,
+#         prison_cases = last(Cases), .groups = "drop") %>%
+#     arrange(-prison_change)
+# 
+# state_delta_data <- "https://api.covidtracking.com/v1/states/daily.csv" %>%
+#     read_csv(col_types = cols()) %>%
+#     mutate(Date = lubridate::ymd(as.character(date))) %>%
+#     select(Date, state, positive) %>%
+#     filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
+#     filter(Date == max(Date) | Date == min(Date)) %>%
+#     arrange(state, Date) %>%
+#     group_by(state) %>%
+#     summarize(
+#         pop_change = diff(positive)/first(positive)*100,
+#         pop_cases = last(positive), .groups = "drop") %>%
+#     mutate(State = translate_state(state)) %>%
+#     select(-state) %>%
+#     right_join(delta_df, by = "State")
+# 
+# chnge_plot <- state_delta_data %>%
+#   mutate(text = str_c(
+#     "State: ", State, "\n",
+#     "State Cases: ", pop_cases, "\n",
+#     "Prison Cases: ", prison_cases, "\n"
+#   )) %>%
+#   ggplot(aes(x = pop_change, y = prison_change, text = text)) +
+#   geom_point() +
+#   theme_bw() +
+#   labs(x = "State Covid Percentage Increases", y = "Prison Covid Percentage Increases")
+# 
+# ggplotly(chnge_plot)
 
 ```
 
 ## Death Inconsistancies
 
 ```{r}
-neg_death_df <- slist$hist_data %>%
-    select(jurisdiction, State, Name, Date, Residents.Deaths, Staff.Deaths) %>%
-    mutate(Date = lubridate::mdy(Date)) %>%
-    arrange(jurisdiction, State, Name, Date) %>%
-    group_by(jurisdiction, State, Name) %>% 
-    mutate(lag_death = Residents.Deaths - lag(Residents.Deaths)) %>%
-    mutate(lag_staff_death = Staff.Deaths - lag(Staff.Deaths)) %>%
-    mutate(any_neg = any(lag_death < 0 | lag_staff_death < 0, na.rm = TRUE)) %>%
-    filter(any_neg) %>%
-    ungroup()
-
-# every once in a while we get negative deaths record all instances here
-neg_death_df %>%
-    select(-Residents.Deaths, -Staff.Deaths, -any_neg) %>%
-    mutate(title = str_c(State, ": ", Name)) %>%
-    select(-State, -Name, -jurisdiction) %>%
-    pivot_longer(lag_death:lag_staff_death) %>%
-    ggplot(aes(x = Date, y = value, color = name, linetype = name)) +
-    geom_line() +
-    facet_wrap(~title)
+# neg_death_df <- slist$hist_data %>%
+#     select(jurisdiction, State, Name, Date, Residents.Deaths, Staff.Deaths) %>%
+#     mutate(Date = lubridate::mdy(Date)) %>%
+#     arrange(jurisdiction, State, Name, Date) %>%
+#     group_by(jurisdiction, State, Name) %>% 
+#     mutate(lag_death = Residents.Deaths - lag(Residents.Deaths)) %>%
+#     mutate(lag_staff_death = Staff.Deaths - lag(Staff.Deaths)) %>%
+#     mutate(any_neg = any(lag_death < 0 | lag_staff_death < 0, na.rm = TRUE)) %>%
+#     filter(any_neg) %>%
+#     ungroup()
+# 
+# # every once in a while we get negative deaths record all instances here
+# neg_death_df %>%
+#     select(-Residents.Deaths, -Staff.Deaths, -any_neg) %>%
+#     mutate(title = str_c(State, ": ", Name)) %>%
+#     select(-State, -Name, -jurisdiction) %>%
+#     pivot_longer(lag_death:lag_staff_death) %>%
+#     ggplot(aes(x = Date, y = value, color = name, linetype = name)) +
+#     geom_line() +
+#     facet_wrap(~title)
 ```
