@@ -269,7 +269,7 @@ ggplot(data = dates,
 Finally, merge in population data. This isn't working right now because of naming issues!
 
 ````{r merge-population}
-pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/Merg_Pop.csv') %>%
+pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/initial/Merg_Pop.csv') %>%
   mutate(Name = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE)) %>%
   filter(State == "California")
 head(pop)
@@ -282,5 +282,8 @@ table(is.na(dat_with_pop$Population))
 
 
 ```{r write csv}
+final_dat %<>%
+  select(-c(previous_date_value_deaths, lag_change_deaths, cumulative_deaths))
+
 write_csv(final_dat, file.path(base_path, "data", "CA_adult_facility_covid_counts_historical.csv"))
 ```

@@ -56,6 +56,9 @@ df_out <- df_typed %>%
   select(!c("Facility.", "Coder", "Housing.Type")) %>%
   select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
 names(df_out) 
+
+df_out %<>% 
+  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death))
 ```
 
 ```{r create date var}
@@ -64,8 +67,7 @@ df_out <- df_out %>%
 ```
 
 ```{r standardize facility names}
-df_mid <- behindbarstools::clean_facility_name(df_out) %>%
-  select(-name_xwalk)
+df_mid <- behindbarstools::clean_facility_name(df_out, debug = TRUE)
 ```
 
 ```{r filter out federal facilities}
@@ -121,6 +123,17 @@ Add in more recently scraped data (from November until present).
 First, read it in and clean it. 
 
 ```{r add in recently scraped data}
+recent_dat <- "http://nmmarquez.twilightparadox.com:3838/summary_data/" %>%
+    stringr::str_c("aggregated_data.csv") %>%
+    readr::read_csv(col_types = "Dccccddddddddddcddddddd") %>%
+    group_by(State, id, jurisdiction) %>%
+    filter(Date > as.Date("2020-12-13"),
+           State == "AZ") %>%
+    ungroup() %>%
+    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
+    behindbarstools::reorder_cols(rm_extra_cols = TRUE)
+
+
 slist <- read_rds(file.path(data_path, "scrape_details.rds"))
 hist_dat <- slist[["hist_data"]]
 today_dat <- slist[["current_data"]]
@@ -257,5 +270,7 @@ table(is.na(dat_with_pop$Population))
 
 
 ```{r write csv}
+# rename POPULATION --> hifld_pop
+
 write_csv(dat_with_pop, file.path(base_path, "data", "AZ_adult_facility_covid_counts_historical.csv"))
 ```

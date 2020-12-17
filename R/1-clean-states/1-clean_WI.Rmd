@@ -64,8 +64,7 @@ df_out <- df_out %>%
 ```
 
 ```{r standardize facility names}
-df_mid <- behindbarstools::clean_facility_name(df_out) %>%
-  select(-name_xwalk)
+df_mid <- behindbarstools::clean_facility_name(df_out, debug = TRUE)
 ```
 
 ```{r filter out federal facilities}
@@ -78,16 +77,8 @@ df_mid <- df_mid %>%
 ## DIVISION OF JUVENILE CORRECTIONS FACILITIES is missing
 ## DIVISION OF JUVENILE CORRECTIONS FIELD is missing
 df_mid %>%
-  filter(Name == "NULL") %>% 
-  select(scrape_name_clean)
-```
-
-Remove observations where we didn't pick up a clean name.
-
-```{r drop null name observations}
-df_mid <- df_mid %>%
-  filter(!is.na(scrape_name_clean),
-         Name != "NULL")
+  filter(name_match == "FALSE") %>% 
+  select(scrape_name_clean, Name)
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
@@ -124,43 +115,17 @@ Add in more recently scraped data (from November until present).
 First, read it in and clean it. 
 
 ```{r add in recently scraped data}
-slist <- read_rds(file.path(data_path, "scrape_details.rds"))
-hist_dat <- slist[["hist_data"]]
-today_dat <- slist[["current_data"]]
-recent_dat <- hist_dat %>%
-  bind_rows(today_dat)
+recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, state = "Wisconsin", debug = TRUE) %>%
+  filter(jurisdiction != "federal",
+       Date > as.Date('2020-11-04')) 
 
-recent_dat <- recent_dat %>%
-  mutate(Date = lubridate::mdy(Date)) %>%
-  filter(State == "Wisconsin",
-         jurisdiction != "federal",
-         Date > as.Date('2020-11-04')) 
-
-## TO DO : add NEW LISBON CORRECTIONAL INSTITUTIO into xwalk, and: 
-## RACINE CORRECTIONAL INSTITUTION 
+recent_dat %>%
+  filter(name_match == "FALSE") %>% 
+  select(scrape_name_clean, Name)
 
 ## TO DO: Come back to this once I've resolved "auxilary", "youth facilities", etc
 
-recent_dat_cln <- behindbarstools::clean_facility_name(recent_dat) %>%
-  select(-name_xwalk) 
-
-recent_dat_cln %>%
-  filter(Name == "NULL") %>%
-  select(scrape_name_clean, Date, source) %>%
-  View()
-
-# recent_dat_cln %>% 
-#   filter(scrape_name_clean == "RACINE CORRECTIONAL INSTITUTION" | 
-#            grepl("RACINE", Name))
-
-recent_dat_cln <- recent_dat_cln %>%
-  filter(Name != "NULL")
-
-recent_comb <- recent_dat_cln %>%
-  behindbarstools::group_by_coalesce(., Name, Date,
-                                     .ignore = c("source", "scrape_name_clean", "jurisdiction")) 
-
-recent_final <- behindbarstools::reorder_cols(recent_comb, rm_extra_cols = TRUE)
+recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
