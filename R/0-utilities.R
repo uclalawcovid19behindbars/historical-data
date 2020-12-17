@@ -67,7 +67,9 @@ flag_noncumulative_deaths <- function(dat, grp_var, death_var) {
 }
 
 plot_lags <- function(dat, date, y_var, grp_var, y_lab = NULL) {
-  y_label = ifelse(is.null(y_lab), y_var, y_lab)
+  if(is.null(y_lab)){ y_label <- y_var }
+  else { y_label <- y_lab }
+  # y_label = ifelse(is.null(y_lab), y_var, y_lab)
   plots <- dat %>% 
     group_by({{grp_var}}) %>% 
     do(plot=ggplot(data=.) +
