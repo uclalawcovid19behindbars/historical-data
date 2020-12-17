@@ -4,6 +4,9 @@ data/outputs/*
 outfiles/*
 Plots/*
 
+# Misc files to ignore
+R/analysis/ca_viz.Rmd
+
 # Written files 
 *.html
 *.docx
