@@ -1,7 +1,10 @@
 ---
 title: "Historical Data Monitoring"
 author: "Hope Johnson, Neal Marquez, Michael Everett, Erika Tyagi"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ## Introduction
@@ -11,7 +14,7 @@ The purpose of this file is to generate a coherent report on the historical data
 ```{r load packages, warning=FALSE, message=FALSE, echo=FALSE}
 ##Define package list
 library(behindbarstools)
-Packages<-c("tidyverse", "plotly", "glue")
+Packages<-c("tidyverse", "glue", "knitr")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -34,6 +37,9 @@ data_path = file.path(base_path, "data")
 state_to_clean = clean_states[4]
 
 hist_data <- read_csv(file.path(data_path, state_to_clean))
+
+# one of "historical population", "Residents.Population" (Feb 1st pop, or HIFLD when Feb. 1st unavailable)
+best_pop_var <- sym("Population")
 ```
 
 ## Scraper Details
@@ -67,22 +73,33 @@ fac_cases_deaths <- fac_rep_cases %>%
   full_join(fac_rep_deaths)
 
 max_cases = max(fac_cases_deaths$cumulative_cases, na.rm = TRUE)
-max_deaths = max(fac_cases_deaths$cumulative_deaths, na.rm = TRUE)
-  
+max_deaths = ifelse(is.infinite(max(fac_cases_deaths$cumulative_deaths, na.rm = TRUE)),
+                    NA,
+                    max(fac_cases_deaths$cumulative_deaths, na.rm = TRUE))
+max_case_facility <- fac_cases_deaths$Name[fac_cases_deaths$cumulative_cases == max_cases]
+max_deaths_facility <- ifelse(is.na(max_deaths),
+                    NA,
+                    fac_cases_deaths$Name[fac_cases_deaths$cumulative_deaths == max_deaths])
 ```
 
-This data is from `r unique(hist_data$State)`. We have been collecting data from `r min(hist_data$Date)` until `r max(hist_data$Date)`. We have collected information for `r prison_n` prisons throughout the state. In addition, we have collected data from `r jail_n` jails. For the purposes of this report, we ignore Federal Prisons located within `r unique(hist_data$State)`. 
+State: `r unique(hist_data$State)`
 
-The facility in `r unique(hist_data$State)` with the highest number of cumulative cases over the course of the pandemic is `r fac_cases_deaths$Name[fac_cases_deaths$cumulative_cases == max_cases]`. This facility has had `r max_cases` cases total.  
+Date collected: `r min(hist_data$Date)` - `r max(hist_data$Date)`
 
-The facility in `r unique(hist_data$State)` with the highest number of cumulative deaths over the course of the pandemic is `r fac_cases_deaths$Name[fac_cases_deaths$cumulative_deaths == max_deaths]`. This facility has had `r max_deaths` deaths total.  
+Data collected from `r prison_n` prisons and `r jail_n` jails (ignoring Federal prisons contained within the state)
 
-```{r warning=FALSE, message=FALSE, echo=FALSE}
+The facility in `r unique(hist_data$State)` with the highest number of cumulative cases over the course of the pandemic is `r max_case_facility`. This facility has had `r max_cases` cases total.  
+
+The facility in `r unique(hist_data$State)` with the highest number of cumulative deaths over the course of the pandemic is `r max_deaths_facility`. This facility has had `r max_deaths` deaths total.  
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, results='asis'}
+opts <- options(knitr.kable.NA = "")
 fac_cases_deaths %>%
-  arrange(-cumulative_cases)
+  arrange(-cumulative_cases) %>%
+  kable()
 ```
 
-## Testing
+## Testing Rates
 
 We collect testing information when available. Up until ~November 2020, the testing numbers we collected could have been the total number of tests administered OR the total number of individuals tested. We did not keep track of which number was being reported by the state. After November 2020, we started collected exclusively the number of tests administered. 
 
@@ -96,35 +113,30 @@ fac_res_tested <- hist_data %>%
 fac_res_tested_n <- hist_data %>%
   get_fac_n(Residents.Tested)
 
-# get the last date
-# use the population for that date
-fac_tested <- hist_data %>%
+fac_testing_rates <- hist_data %>%
   filter_statewide_NA(Residents.Tested) %>%
-  group_by(Name) %>%
-  mutate(last_test_count = last(Residents.Tested, order_by = Date), .groups = "drop") %>%
-  ## TO DO: want to get date of last_test_count and population carried over
-  # left_join(prison_pop, by = c("State" = "name")) %>%
-  mutate(test_rate = last_test_count / Population) 
+  mutate(res_tested_rate = Residents.Tested / !!best_pop_var,
+         tadmin_rate = Residents.Tadmin / !!best_pop_var) %>%
+  select(Date, Name, res_tested_rate, Residents.Tested, 
+         tadmin_rate, Residents.Tadmin, !!best_pop_var) %>%
+  arrange(res_tested_rate)
 
-# map_df <- usa_sf("laea") %>%
-#     select(State = name, geometry) %>%
-#     left_join(state_tested, by = "State")
-#     
-# map_plot <- map_df %>%
-#     mutate(test_rate_cat = cut(test_rate, c(0,1,2,5,15))) %>%
-#     ggplot(aes(fill = test_rate_cat, text = State)) +
-#     geom_sf() +
-#     theme_void() +
-#     scale_fill_brewer(
-#         palette = "Spectral", direction = 1, na.value = "grey50") +
-#    geom_sf_text(aes(label = abbreviation))
-# 
-# map_plot +
-#     ggtitle(
-#         "Incarcerated Population in State Prisons Testing Rate",
-#         "Grey indicates no reported data") +
-#     labs(fill = "Test Rate\nPer Resident")
+res_tested_plots <- plot_lags(fac_testing_rates, "Date", 
+                            y_var = "res_tested_rate",
+                            grp_var = Name) %>%
+  rename(res_tested_rate_plot = plot)
 
+
+t_admin_plots <- plot_lags(fac_testing_rates, "Date", 
+                            y_var = "tadmin_rate",
+                            grp_var = Name) %>%
+  rename(tadmin_rate_plot = plot)
+
+# would be cool to somehow glue these plots together to show both side-by-side! 
+testing_plots <- res_tested_plots %>%
+  left_join(t_admin_plots, by = "Name") # %>%
+  # mutate(plots = map2(res_tested_rate_plot, tadmin_rate_plot, c))
+head(testing_plots$res_tested_rate_plot)
 ```
 
 We have data on the number of **tests administered** for `r fac_t_admin_n` facilities. We have data on the number of **tests given** (ambiguous definition) for `r fac_res_tested_n` facilities.
