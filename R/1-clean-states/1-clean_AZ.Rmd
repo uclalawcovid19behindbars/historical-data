@@ -86,7 +86,7 @@ Remove observations where we didn't pick up a clean name.
 ```{r drop null name observations}
 df_mid <- df_mid %>%
   filter(!is.na(scrape_name_clean),
-         Name != FALSE)
+         name_match != FALSE)
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
