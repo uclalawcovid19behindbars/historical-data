@@ -21,7 +21,7 @@ help(package=behindbarstools)
 
 ## Intro & Credits
 
-This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Chase Hommeyer, Grace DiLaura, and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
+This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Erika Tyagi, Chase Hommeyer, Grace DiLaura, and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
 
 
 ## Load inputs
@@ -77,7 +77,7 @@ df_mid <- df_mid %>%
 
 ```{r facility merge checks, include = FALSE}
 df_mid %>%
-  filter(Name == "NULL") %>% 
+  filter(name_match == FALSE) %>% 
   select(scrape_name_clean)
 ```
 
@@ -86,7 +86,7 @@ Remove observations where we didn't pick up a clean name.
 ```{r drop null name observations}
 df_mid <- df_mid %>%
   filter(!is.na(scrape_name_clean),
-         Name != "NULL")
+         Name != FALSE)
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
@@ -123,45 +123,22 @@ Add in more recently scraped data (from November until present).
 First, read it in and clean it. 
 
 ```{r add in recently scraped data}
-recent_dat <- "http://nmmarquez.twilightparadox.com:3838/summary_data/" %>%
-    stringr::str_c("aggregated_data.csv") %>%
-    readr::read_csv(col_types = "Dccccddddddddddcddddddd") %>%
-    group_by(State, id, jurisdiction) %>%
-    filter(Date > as.Date("2020-12-13"),
-           State == "AZ") %>%
-    ungroup() %>%
-    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
-    behindbarstools::reorder_cols(rm_extra_cols = TRUE)
+recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
+                                                state = "Arizona", 
+                                                debug = TRUE) %>%
+  filter(jurisdiction != "federal",
+       Date > as.Date('2020-11-04')) 
 
+## view facility names without a match in the xwalk
+recent_dat %>%
+  filter(name_match == "FALSE") %>% 
+  select(scrape_name_clean, Name)
 
-slist <- read_rds(file.path(data_path, "scrape_details.rds"))
-hist_dat <- slist[["hist_data"]]
-today_dat <- slist[["current_data"]]
-recent_dat <- hist_dat %>%
-  bind_rows(today_dat)
+recent_dat_cln <- recent_dat %>%
+  filter(name_match != FALSE) %>%
+  select(-xwalk_name_clean)
 
-recent_dat <- recent_dat %>%
-  mutate(Date = lubridate::mdy(Date)) %>%
-  filter(State == "Arizona",
-         jurisdiction != "federal",
-         Date > as.Date('2020-11-04')) 
-
-recent_dat_cln <- behindbarstools::clean_facility_name(recent_dat) %>%
-  select(-name_xwalk) 
-
-recent_dat_cln %>%
-  filter(Name == "NULL") %>%
-  select(scrape_name_clean, Date, source) %>%
-  View()
-
-recent_dat_cln <- recent_dat_cln %>%
-  filter(Name != "NULL")
-
-recent_comb <- recent_dat_cln %>%
-  behindbarstools::group_by_coalesce(., Name, Date,
-                                     .ignore = c("source", "scrape_name_clean", "jurisdiction")) 
-
-recent_final <- behindbarstools::reorder_cols(recent_comb, rm_extra_cols = TRUE)
+recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
@@ -206,6 +183,7 @@ test %>%
 lag_case_plots <- plot_lags(test, "Date", 
                             y_var = "lag_change_cases",
                             grp_var = Name)
+lag_case_plots$plot
 ## save lag case plots
 # for (i in 1:nrow(lag_case_plots)){
 #   facility_name <- lag_case_plots$Name[[i]]
@@ -250,27 +228,28 @@ percentage_change <- final_dat %>%
 Finally, merge in population data. Fill in missing dates with the previous value. 
 
 ````{r merge-population}
-pop <- read_csv("https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/clean-data/wi_pop_clean.csv") %>%
-  mutate(name_cln = behindbarstools::clean_fac_col_txt(facility_name_clean, to_upper = TRUE))
+pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/initial/Merg_Pop.csv') %>%
+  mutate(Name = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE)) %>%
+  filter(State == "Arizona")
+head(pop)
 
-pop_filled <- pop %>%
-  select(-facility_name_clean) %>% 
-  pivot_wider(names_from = name_cln, values_from = Population) %>%
-  complete(Date = seq.Date(min(Date), max(Date), by = "day")) %>%
-  fill(-Date) %>%
-  pivot_longer(!Date, names_to = "name_cln", values_to = "Population")
+pop_clean <- pop %>%
+  behindbarstools::clean_facility_name(debug = TRUE)
+table(pop_clean$name_match) # no matches here
 
-dat_with_pop <- final_dat %>%
-  left_join(pop_filled, by = c("Name" = "name_cln",
-                            "Date" = "Date")) %>%
-  select(-POPULATION)
-
-table(is.na(dat_with_pop$Population))
+# dat_with_pop <- final_dat %>%
+#   left_join(pop_clean, by = c("Name" = "name_cln",
+#                             "Date" = "Date")) %>%
+#   select(-POPULATION)
+# 
+# table(is.na(dat_with_pop$Population))
 ```
 
 
 ```{r write csv}
 # rename POPULATION --> hifld_pop
-
-write_csv(dat_with_pop, file.path(base_path, "data", "AZ_adult_facility_covid_counts_historical.csv"))
+final_dat <- final_dat %>%
+  rename(hifld_pop = POPULATION)
+  
+write_csv(final_dat, file.path(base_path, "data", "AZ_adult_facility_covid_counts_historical.csv"))
 ```
