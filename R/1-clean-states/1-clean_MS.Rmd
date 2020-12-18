@@ -8,7 +8,7 @@ output: html_document
 ```{r package setup, include=FALSE}
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
-            "devtools", "magrittr")
+            "devtools", "magrittr", "skimr")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -43,7 +43,7 @@ source(util_path, local = knitr::knit_global())
 ```{r load data, message=FALSE}
 df <- load_data(data_path, 
                 "11420",
-                filter_state = "Arizona") 
+                filter_state = "Mississippi") 
 df_typed <- type_convert(df)
 ```
 
@@ -86,7 +86,7 @@ Remove observations where we didn't pick up a clean name.
 ```{r drop null name observations}
 df_mid <- df_mid %>%
   filter(!is.na(scrape_name_clean),
-         Name != FALSE)
+         name_match != FALSE)
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
@@ -97,13 +97,13 @@ see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, date)))
 
 df_comb <- df_mid %>% 
   behindbarstools::group_by_coalesce(., Name, date, 
-                                     .ignore = c("scrape_name_clean", "Facility", "source"))
+                                     .ignore = c("scrape_name_clean", "Facility", "source"),
+                                     .method = "sum")
 
 assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, date)))
 ```
 
 Filter down and re-order columns in order to row bind them to latest data.
-
 ```{r}
 df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
@@ -124,7 +124,7 @@ First, read it in and clean it.
 
 ```{r add in recently scraped data}
 recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
-                                                state = "Arizona", 
+                                                state = "Mississippi", 
                                                 debug = TRUE) %>%
   filter(jurisdiction != "federal",
        Date > as.Date('2020-11-04')) 
@@ -151,7 +151,7 @@ Merge in facility information (address, city, county, etc.).
 
 ```{r}
 fac_info <- behindbarstools::read_fac_info() %>%
-  filter(State == "Arizona") %>%
+  filter(State == "Mississippi") %>%
   mutate(Name = behindbarstools::clean_fac_col_txt(Name))
 final_dat <- left_join(all_dat, fac_info, 
                   by = "Name",
@@ -161,9 +161,10 @@ final_dat %<>%
   mutate(Latitude = behindbarstools::coalesce_with_warnings(Latitude.x, Latitude),
          Longitude = behindbarstools::coalesce_with_warnings(Longitude.x, Longitude)) %>%
   select(-ends_with(".x"))
+
+skim(final_dat)
 ```
 
-Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
 ```{r plot cases/deaths}
 test <- flag_noncumulative_cases(final_dat, Name)
@@ -230,7 +231,7 @@ Finally, merge in population data. Fill in missing dates with the previous value
 ````{r merge-population}
 pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/initial/Merg_Pop.csv') %>%
   mutate(Name = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE)) %>%
-  filter(State == "Arizona")
+  filter(State == "Mississippi")
 head(pop)
 
 pop_clean <- pop %>%
@@ -251,5 +252,5 @@ table(pop_clean$name_match) # no matches here
 final_dat <- final_dat %>%
   rename(hifld_pop = POPULATION)
   
-write_csv(final_dat, file.path(base_path, "data", "AZ_adult_facility_covid_counts_historical.csv"))
+write_csv(final_dat, file.path(base_path, "data", "MS_adult_facility_covid_counts_historical.csv"))
 ```
