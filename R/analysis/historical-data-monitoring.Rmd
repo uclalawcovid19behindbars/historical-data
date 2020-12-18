@@ -14,7 +14,7 @@ The purpose of this file is to generate a coherent report on the historical data
 ```{r load packages, warning=FALSE, message=FALSE, echo=FALSE}
 ##Define package list
 library(behindbarstools)
-Packages<-c("tidyverse", "glue", "knitr")
+Packages<-c("tidyverse", "glue", "knitr", "zoo")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -26,7 +26,7 @@ base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ```
-We are in the process of cleaning historical data, and not all of it is ready to monitor. The available states are:
+We are cleaning historical data, and not all of it is ready to monitor. The available states are:
 
 ```{r load historical data, warning=FALSE, message=FALSE, echo=FALSE}
 data_path = file.path(base_path, "data")
@@ -45,6 +45,11 @@ best_pop_var <- sym("Population")
 ## Scraper Details
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
+state_to_clean <- unique(hist_data$State)
+
+## Choose prison here for examples 
+focus_prison <- "OSHKOSH CORRECTIONAL INSTITUTION"
+
 prison_n <- hist_data %>%
     filter(jurisdiction != "Jail",
            jurisdiction != "county") %>%
@@ -82,21 +87,22 @@ max_deaths_facility <- ifelse(is.na(max_deaths),
                     fac_cases_deaths$Name[fac_cases_deaths$cumulative_deaths == max_deaths])
 ```
 
-State: `r unique(hist_data$State)`
+State: `r state_to_clean`
 
-Date collected: `r min(hist_data$Date)` - `r max(hist_data$Date)`
+Date collected: **`r min(hist_data$Date)` - `r max(hist_data$Date)`**
 
-Data collected from `r prison_n` prisons and `r jail_n` jails (ignoring Federal prisons contained within the state)
+Data collected from **`r prison_n`** prisons and **`r jail_n`** jails (ignoring Federal prisons contained within the state)
 
-The facility in `r unique(hist_data$State)` with the highest number of cumulative cases over the course of the pandemic is `r max_case_facility`. This facility has had `r max_cases` cases total.  
+The facility in `r unique(hist_data$State)` with the highest number of cumulative cases over the course of the pandemic is `r max_case_facility`. This facility has had **`r max_cases`** cases total within the incarcerated population.  
 
-The facility in `r unique(hist_data$State)` with the highest number of cumulative deaths over the course of the pandemic is `r max_deaths_facility`. This facility has had `r max_deaths` deaths total.  
+The facility in `r unique(hist_data$State)` with the highest number of cumulative deaths over the course of the pandemic is `r max_deaths_facility`. This facility has had **`r max_deaths`** deaths total.  
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE, results='asis'}
 opts <- options(knitr.kable.NA = "")
 fac_cases_deaths %>%
+  head(n = 7) %>%
   arrange(-cumulative_cases) %>%
-  kable()
+  kable(col.names = c('Facility Name', 'Cumulative cases (incarcerated pop.)', 'Cumulative deaths (incarcerated pop.)'))
 ```
 
 ## Testing Rates
@@ -123,164 +129,193 @@ fac_testing_rates <- hist_data %>%
 
 res_tested_plots <- plot_lags(fac_testing_rates, "Date", 
                             y_var = "res_tested_rate",
-                            grp_var = Name) %>%
+                            grp_var = Name,
+                            y_lab = "Total testing rate"
+                            ) %>%
   rename(res_tested_rate_plot = plot)
 
-
-t_admin_plots <- plot_lags(fac_testing_rates, "Date", 
+t_admin_plots <- plot_lags(fac_testing_rates, "Date",
                             y_var = "tadmin_rate",
-                            grp_var = Name) %>%
+                            grp_var = Name,
+                            y_lab = "Tests administered rate"
+                           ) %>%
   rename(tadmin_rate_plot = plot)
 
-# would be cool to somehow glue these plots together to show both side-by-side! 
 testing_plots <- res_tested_plots %>%
-  left_join(t_admin_plots, by = "Name") # %>%
-  # mutate(plots = map2(res_tested_rate_plot, tadmin_rate_plot, c))
-head(testing_plots$res_tested_rate_plot)
+  left_join(t_admin_plots, by = "Name") 
+
+## show plots if the data exists for any facilities
+if(fac_res_tested_n > 0){ head(testing_plots$res_tested_rate_plot)}
+if(fac_t_admin_n > 0){ head(testing_plots$tadmin_rate_plot)}
 ```
 
 We have data on the number of **tests administered** for `r fac_t_admin_n` facilities. We have data on the number of **tests given** (ambiguous definition) for `r fac_res_tested_n` facilities.
 
+## Cases by Facility
 
-Stopped here! 
-Up next:
-- Week-to-week increase over time --> beeswarm plots 
-- Malabahari distance ?
---> Using IFR = Deaths / Cases
+First, we calculate rolling averages to get the total average cases over the past 3 days, 7 days, and so-on. 
 
-Below, we compare infection rates in the general population to the incarcerated population (by facility). This allows us to highlight which carceral facilities diverge most from the state-wide infection rate.
+```{r rolling averages, warning=FALSE, message=FALSE, echo=FALSE}
+## heavily relied on this article: https://www.storybench.org/how-to-calculate-a-rolling-average-in-r/ 
 
-```{r warning=FALSE, message=FALSE, echo=FALSE}
-percentage_change <- hist_data %>%
-  mutate(case_rate = Residents.Confirmed / Population,
-         death_rate = Residents.Deaths / Population) %>%
-  group_by(Name) %>%
-  mutate(
-      lag_cases = dplyr::lag(Residents.Confirmed, order_by = Date),
-      lag_deaths = dplyr::lag(Residents.Deaths, order_by = Date),
-      lag_case_rate = dplyr::lag(case_rate, order_by = Date),
-      lag_death_rate = dplyr::lag(death_rate, order_by = Date),
-      delta_cases = Residents.Confirmed - lag_cases,
-      delta_deaths = Residents.Deaths - lag_deaths, 
-      pch_cases = (Residents.Confirmed - lag_cases) / (lag_cases + 0.000000001),
-      pch_deaths = (Residents.Deaths - lag_deaths) / (lag_deaths + 0.000000001),
-      rch_cases = case_rate - lag_case_rate, 
-      rch_deaths = death_rate - lag_death_rate, 
-  ) %>%
-  ungroup() %>%
-  select(Date, Name, Population,
-         Residents.Confirmed, lag_cases, delta_cases, pch_cases, rch_cases,
-         Residents.Deaths, lag_deaths,delta_deaths, pch_deaths, rch_deaths,
-         ) %>%
-  arrange(-delta_cases)
+hist_data <- hist_data %>%
+    dplyr::arrange(desc(Name)) %>% 
+    dplyr::group_by(Name) %>% 
+    dplyr::mutate(res.confirmed_03day = zoo::rollmean(Residents.Confirmed, k = 3, fill = NA),
+                  res.confirmed_05day = zoo::rollmean(Residents.Confirmed, k = 5, fill = NA),
+                  res.confirmed_07day = zoo::rollmean(Residents.Confirmed, k = 7, fill = NA),
+                  res.confirmed_15day = zoo::rollmean(Residents.Confirmed, k = 15, fill = NA),
+                  res.confirmed_21day = zoo::rollmean(Residents.Confirmed, k = 21, fill = NA)) %>% 
+  dplyr::ungroup()
 
-percentage_change
-```
+hist_data %>% 
+  dplyr::arrange(desc(Date)) %>% 
+  dplyr::filter(Name == focus_prison) %>% 
+  dplyr::select(Name,
+                Date,
+                Residents.Confirmed,
+                res.confirmed_03day:res.confirmed_07day) %>% 
+  utils::head(5) %>%
+  kable()
 
-## Historical Data
-
-A strength of our dataset compared to other groups who collect similar data, is that we not only collect information on state level aggregates but also facility level data. This enables us to act as a surveillance mechanism, tracking outbreaks at facilities. Below we see an example of an outbreak occurring within facilities with major outbreaks in the past week.
-
-```{r warning=FALSE, message=FALSE, echo=FALSE}
-# fac_delta_df <-  slist$hist_data %>%
-#     mutate(Date = lubridate::mdy(Date)) %>%
-#     filter(!(str_detect(Name, "(?i)state") & str_detect(Name, "(?i)wide"))) %>%
-#     filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
-#     group_by(Name, State, jurisdiction) %>%
-#     mutate(delta = last(Residents.Confirmed) - first(Residents.Confirmed)) %>%
-#     ungroup() %>%
-#     filter(delta %in% head(sort(unique(delta), decreasing = TRUE), n = 4)) %>%
-#     select(jurisdiction, State, Name) %>%
-#     unique() %>%
-#     left_join( slist$hist_data, by = c("jurisdiction", "State", "Name"))
-# 
-# fac_delta_df %>%
-#     mutate(Date = lubridate::mdy(Date)) %>%
-#     mutate(Title = str_c(State, ": ", Name)) %>%
-#     ggplot(aes(x = Date, y = Residents.Confirmed)) +
-#     geom_line() +
-#     facet_wrap(~Title) +
-#     labs(y = "Residents Confirmed") +
-#     theme_bw() +
-#     ggtitle(
-#         "High Outbreak Facilities",
-#         "Carceral Facilities with Largest Increase In Resident Cases in Past 7 Days"
-#     ) +
-#     theme(
-#         legend.text = element_text(size=13),
-#         legend.title = element_text(size=15),
-#         axis.text = element_text(size=13),
-#         axis.title = element_text(size=15),
-#         title =  element_text(size=17))
-```
-
-## State Outbreak Comparison
-
-```{r}
-# delta_df <-  slist$hist_data %>%
-#     filter(jurisdiction == "state") %>%
-#     group_by(State, Date) %>%
-#     summarize(Cases = sum(Residents.Confirmed, na.rm = TRUE), .groups = "drop") %>%
-#     mutate(Date = lubridate::mdy(Date)) %>%
-#     filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
-#     filter(Date == max(Date) | Date == min(Date)) %>%
-#     group_by(State) %>%
-#     summarize(
-#         prison_change = diff(Cases)/first(Cases)*100,
-#         prison_cases = last(Cases), .groups = "drop") %>%
-#     arrange(-prison_change)
-# 
-# state_delta_data <- "https://api.covidtracking.com/v1/states/daily.csv" %>%
-#     read_csv(col_types = cols()) %>%
-#     mutate(Date = lubridate::ymd(as.character(date))) %>%
-#     select(Date, state, positive) %>%
-#     filter(Date >= (lubridate::as_date((Sys.Date())) - lubridate::days(7))) %>%
-#     filter(Date == max(Date) | Date == min(Date)) %>%
-#     arrange(state, Date) %>%
-#     group_by(state) %>%
-#     summarize(
-#         pop_change = diff(positive)/first(positive)*100,
-#         pop_cases = last(positive), .groups = "drop") %>%
-#     mutate(State = translate_state(state)) %>%
-#     select(-state) %>%
-#     right_join(delta_df, by = "State")
-# 
-# chnge_plot <- state_delta_data %>%
-#   mutate(text = str_c(
-#     "State: ", State, "\n",
-#     "State Cases: ", pop_cases, "\n",
-#     "Prison Cases: ", prison_cases, "\n"
-#   )) %>%
-#   ggplot(aes(x = pop_change, y = prison_change, text = text)) +
-#   geom_point() +
-#   theme_bw() +
-#   labs(x = "State Covid Percentage Increases", y = "Prison Covid Percentage Increases")
-# 
-# ggplotly(chnge_plot)
+hist_data %>% 
+  dplyr::filter(Name == focus_prison) %>% 
+  tidyr::pivot_longer(names_to = "rolling_mean_key", 
+                    values_to = "rolling_mean_value", 
+                    cols = c(Residents.Confirmed, 
+                             res.confirmed_07day,
+                             res.confirmed_21day)) %>%
+  ggplot2::ggplot(aes(x = Date, 
+                      y = rolling_mean_value, 
+                      color = rolling_mean_key)) +
+  ggplot2::geom_line() +   
+  ggplot2::labs(title = glue("One {state_to_clean} prison's rolling average total COVID infections"), 
+                subtitle = focus_prison,
+                y = "Infections", 
+                color = "Metric",
+                x = "Date") 
 
 ```
 
-## Death Inconsistancies
+Next, we calculate new daily cases in each facility. 
 
-```{r}
-# neg_death_df <- slist$hist_data %>%
-#     select(jurisdiction, State, Name, Date, Residents.Deaths, Staff.Deaths) %>%
-#     mutate(Date = lubridate::mdy(Date)) %>%
-#     arrange(jurisdiction, State, Name, Date) %>%
-#     group_by(jurisdiction, State, Name) %>% 
-#     mutate(lag_death = Residents.Deaths - lag(Residents.Deaths)) %>%
-#     mutate(lag_staff_death = Staff.Deaths - lag(Staff.Deaths)) %>%
-#     mutate(any_neg = any(lag_death < 0 | lag_staff_death < 0, na.rm = TRUE)) %>%
-#     filter(any_neg) %>%
-#     ungroup()
-# 
-# # every once in a while we get negative deaths record all instances here
-# neg_death_df %>%
-#     select(-Residents.Deaths, -Staff.Deaths, -any_neg) %>%
-#     mutate(title = str_c(State, ": ", Name)) %>%
-#     select(-State, -Name, -jurisdiction) %>%
-#     pivot_longer(lag_death:lag_staff_death) %>%
-#     ggplot(aes(x = Date, y = value, color = name, linetype = name)) +
-#     geom_line() +
-#     facet_wrap(~title)
+```{r daily case counts, warning=FALSE, message=FALSE, echo=FALSE}
+new_cases <- hist_data %>%
+  group_by(Name, Date) %>% 
+  dplyr::summarize(
+    confirmed_sum = (sum(Residents.Confirmed, na.rm = TRUE))) %>% 
+  mutate(new_confirmed_cases = confirmed_sum - dplyr::lag(x = confirmed_sum, n = 1, 
+                                              order_by = Date)) %>% 
+  dplyr::select(Name, 
+                new_confirmed_cases, 
+                Date) %>% 
+  dplyr::left_join(., y = hist_data, 
+                   by = c("Name", "Date")) %>% 
+  dplyr::select(Name,
+                State,
+                Date,
+                Residents.Confirmed,
+                dplyr::contains("confirm"),
+                best_pop_var)
+
+new_cases %>% 
+  dplyr::filter(Name == focus_prison) %>% 
+  dplyr::select(Name, Date, Residents.Confirmed, new_confirmed_cases) %>% 
+  utils::head() %>%
+  kable()
 ```
+
+Calculate rolling averages for new cases, and plot them by facility.
+
+```{r rolling averages daily case counts, warning=FALSE, message=FALSE, echo=FALSE}
+new_cases <- new_cases %>%
+    dplyr::group_by(Name) %>% 
+    dplyr::mutate(
+      new_confirmed_03day = zoo::rollmean(new_confirmed_cases, k = 3, fill = NA),
+      new_confirmed_05day = zoo::rollmean(new_confirmed_cases, k = 5, fill = NA),
+      new_confirmed_07day = zoo::rollmean(new_confirmed_cases, k = 7, fill = NA),
+      new_confirmed_15day = zoo::rollmean(new_confirmed_cases, k = 15, fill = NA),
+      new_confirmed_21day = zoo::rollmean(new_confirmed_cases, k = 21, fill = NA)) %>% 
+  dplyr::ungroup()
+
+## pivot longer
+new_case_tidy <- new_cases %>% 
+  tidyr::pivot_longer(names_to = "new_conf_av_key", 
+                    values_to = "new_conf_av_value", 
+                    cols = c(new_confirmed_03day,
+                             new_confirmed_07day)) %>% 
+  dplyr::mutate(new_conf_av_key = dplyr::case_when(
+    new_conf_av_key == "new_confirmed_03day" ~ "3-day new confirmed cases",
+    new_conf_av_key == "new_confirmed_07day" ~ "7-day new confirmed cases",
+    TRUE ~ NA_character_)) %>% 
+  dplyr::select(Date, 
+                State, 
+                Name,
+                new_conf_av_value, 
+                new_conf_av_key)
+```
+
+```{r plot rolling averages, warning=FALSE, message=FALSE, echo=FALSE, out.height="500%" } 
+min_date <- min(new_case_tidy$Date, na.rm = TRUE)
+max_date <- max(new_case_tidy$Date, na.rm = TRUE)
+
+## Daily rolling averages
+## TO DO: some way of filtering these
+new_cases %>% 
+  filter(Name == focus_prison) %>%
+    ggplot2::ggplot(aes(x = Date, 
+                      y = new_confirmed_cases)) +
+    geom_col(alpha = 3/10, linetype = 0) + 
+    ggplot2::geom_line(data = (new_case_tidy %>% 
+                         filter(Name == focus_prison)), 
+                       mapping = aes(x = Date, 
+                                     y = new_conf_av_value, 
+                                     color = new_conf_av_key)) +  
+    ggplot2::facet_wrap( ~ Name)  +
+    ggplot2::labs(title = glue("{state_to_clean} rolling 3 and 7-day averages of new COVID cases"),
+                  y = "New Cases",
+                  color = "Metric:", 
+                  x = "Date") + 
+   scale_x_date(date_minor_breaks = "1 month", date_labels = "%m/%y", 
+              date_breaks = "1 month") + 
+      ggplot2::theme(legend.position = "top")
+```
+
+Up next, calculate by facility:
+
+- Total cases 
+
+- Total cases per capita per 100,000
+
+- Daily new cases, 7-day rolling average per capita 
+
+- Daily new cases, 7-day rolling average per capita per 100,000
+
+```{r table, warning=FALSE, message=FALSE, echo=FALSE}
+all_data <- hist_data %>%
+  left_join(new_cases, by = c("Name", "Date"), 
+            suffix = c("", ".x")) %>%
+  select(-ends_with(".x")) %>%
+  mutate(total_pc = Residents.Confirmed / Population, # cumulative per capita 
+         total_pc_p100 = total_pc / 100000,           # cumulative per capita per 100,000
+         daily_pc_7day = new_confirmed_07day / Population, # daily cases (seven day average) per capita
+         daily_pc_7day_p100 = daily_pc_7day / 100000 ) # daily cases (seven day average) per capita per 100,000
+
+all_data %>% 
+  filter(total_pc > 0.2) %>%
+  select(Name, Date, Population, total_pc, total_pc_p100,
+         daily_pc_7day, daily_pc_7day_p100) %>%
+  arrange(desc(total_pc_p100)) %>%
+  kable(col.names = c('Facility Name', 'Date', 'Pop.',
+                      'Cumulative cases per capita (incarcerated pop.)', 
+                      'Per 100,000',
+                      '7-day average, daily cases per capita (incarcerated pop.)', 
+                      'Per 100,000'))
+```
+
+## Outlier Analysis
+
+- Mahalanobis Distance ?
+
+- Using IFR = Deaths / Cases
+
