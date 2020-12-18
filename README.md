@@ -46,7 +46,7 @@ When data are not available publicly, we make every effort to obtain missing inf
 * `Residents.Quarantine`: Cumulative number of incarcerated individuals in quarantine from COVID-19
 * `Staff.Quarantine`: Cumulative number of incarcerated individuals in quarantine from COVID-19
 * `Residents.Active`: Non-cumulative number of incarcerated individuals infected with COVID-19
-* `Residents.Population`: Number of incarcerated individuals being held in a given facility, reported by the source
+* `Residents.Population`: Best facility-level population number available. This is historically up-to-date when available (reported by DOCs), and HIFLD population otherwise. 
 * `Notes`: Notes created by UCLA Law COVID-19 Behind Bars staff
 * `Residents.Tested`: Cumulative number of incarcerated individuals tested for COVID-19
 * `State`: State where the facility is located
@@ -59,12 +59,12 @@ When data are not available publicly, we make every effort to obtain missing inf
 * `County`: County where the facility is located
 * `County.FIPS`: County FIPS code for the county where the facility is located
 * `TYPE`: Facility type
-* `POPULATION`: Facility population from HIFLD. We cannot know what date the population was reported, and so this population should not be relied upon. The date at which this population was reported likely varies across facilities. 
+* `hifld_pop`: Facility population from HIFLD. We cannot know what date the population was reported, and so this population should not be relied upon. The date at which this population was reported likely varies across facilities. 
 * `SECURELVL`: Facility security level
 * `CAPACITY`: Facility capacity from HIFLD
 * `federal_prison_type`: Facility federal prison type (only relevant for federal prison)
 * `Website`: Facility website, if it has one
-* `Population`: When available, population data merged by our team. This is historically accurate population. See state-specific notes for source.  
+* `Population`: When available, historical population data merged by our team. This is historically accurate population. See state-specific notes for source.  
 
 ## Citations 
 
