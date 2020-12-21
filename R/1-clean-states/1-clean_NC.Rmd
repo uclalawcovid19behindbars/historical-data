@@ -1,7 +1,7 @@
 ---
 title: "Clean North Carolina - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "12/04/2020"
+date: "12/21/2020"
 output: html_document
 ---
 
@@ -21,7 +21,7 @@ help(package=behindbarstools)
 
 ## Intro & Credits
 
-This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Chase Hommeyer, Grace DiLaura, and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
+This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Erika Tyagi, Chase Hommeyer, Grace DiLaura,  and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
 
 
 ## Load inputs
@@ -69,8 +69,7 @@ df_out <- df_out %>%
 ```
 
 ```{r standardize facility names}
-df_mid <- behindbarstools::clean_facility_name(df_out) %>%
-  select(-name_xwalk)
+df_mid <- behindbarstools::clean_facility_name(df_out, debug = TRUE) 
 ```
 
 ```{r filter out federal facilities}
@@ -81,7 +80,8 @@ df_mid <- df_mid %>%
 ```{r facility merge checks, include = FALSE}
 # show instances where merge didn't identify a clean name
 df_mid %>%
-  filter(Name == "NULL" | is.na(scrape_name_clean))
+  filter(name_match == FALSE) %>% 
+  select(scrape_name_clean)
 ```
 
 Remove observations where we didn't pick up a clean name.
@@ -89,7 +89,7 @@ Remove observations where we didn't pick up a clean name.
 ```{r drop null name observations}
 df_mid <- df_mid %>%
   filter(!is.na(scrape_name_clean),
-         Name != "NULL")
+         name_match != FALSE)
 ```
 
 Remove observation where we clearly mis-scraped the data.
@@ -135,26 +135,22 @@ Add in more recently scraped data (from November until present).
 First, read it in and clean it. 
 
 ```{r add in recently scraped data}
-slist <- read_rds(file.path(data_path, "scrape_details.rds"))
-hist_dat <- slist[["hist_data"]]
-today_dat <- slist[["current_data"]]
-recent_dat <- hist_dat %>%
-  bind_rows(today_dat)
+recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
+                                                state = "North Carolina", 
+                                                debug = TRUE) %>%
+  filter(jurisdiction != "federal",
+       Date > as.Date('2020-11-04')) 
 
-recent_dat <- recent_dat %>%
-  mutate(Date = lubridate::mdy(Date)) %>%
-  filter(State == "North Carolina",
-         jurisdiction != "federal",
-         Date > as.Date('2020-11-04')) 
+## view facility names without a match in the xwalk
+recent_dat %>%
+  filter(name_match == "FALSE") %>% 
+  select(scrape_name_clean, Name)
 
-recent_dat_cln <- behindbarstools::clean_facility_name(recent_dat) %>%
-  select(-name_xwalk)
+recent_dat_cln <- recent_dat %>%
+  filter(name_match != FALSE) %>%
+  select(-xwalk_name_clean)
 
-recent_comb <- recent_dat_cln %>%
-  behindbarstools::group_by_coalesce(., Name, Date,
-                                     .ignore = "source") 
-
-recent_final <- behindbarstools::reorder_cols(recent_comb, rm_extra_cols = TRUE)
+recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
@@ -206,79 +202,36 @@ test_nc %>%
 lag_case_plots <- plot_lags(test_nc, "Date", 
                             y_var = "lag_change_cases",
                             grp_var = Name)
+lag_case_plots$plot
+
+# save lag case plots
+# for (i in 1:nrow(lag_case_plots)){
+#   facility_name <- lag_case_plots$Name[[i]]
+#   ggsave(paste0(facility_name, "_LagChangeCases.png"), lag_case_plots$plot[[i]],
+#          path = file.path(base_path, "plots", "NC", "cases"))
+# }
 
 ## confirmed Wilkes CC via way back machine
 ## confirmed Marion CI via way back machine
 ## confirmed Foothills CI via way back machine
 ## confirmed Central Prison via way back machine
 ## confirmed Alexander CI via way back machine
-```
 
-Starting on 10/28, we stopped getting facility-specific death counts. Instead, the state moved to reporting exclusively state-wide death counts (non facility-specific). Up until this point, the state-wide death counts were "STATE-WIDE FOR NON-SPECIFIC FACILITIES", in the range of 0-25. To calculate the state-wide death count up until 10/28, we add up this reported number with the sum of all deaths by facility.
-
-Note that between 9/29 and 10/26, the facility-specific death counts stopped getting properly scraped. So although these values were being provided by the state, we do not capture the counts in these data. Therefore, both the facility-specific death counts and the state-wide death count for this date range are absolute minimums.
-
-```{r clean death data}
-# before 10/28, statewide = statewide + (minimum) sum of all facilities
-# after 10/28, statewide = statewide
-deaths_by_date <- final_dat %>%
-  filter(Name != "STATEWIDE") %>%
-  group_by(Date) %>%
-  summarise(all_res_deaths = behindbarstools::sum_na_rm(Residents.Deaths))
-
-df_sw <- left_join(final_dat, deaths_by_date, by = "Date")
-
-df_sw <- df_sw %>%
-  mutate(Residents.Deaths = case_when(
-    (Date < as.Date("2020-10-30")) & (Name == "STATEWIDE") ~ 
-      behindbarstools::vector_sum_na_rm(Residents.Deaths, all_res_deaths),
-    TRUE ~ Residents.Deaths)) 
-
-# flag Dates when the facility-specific death counts failed
-# between 9/29 and 10/26 
-df_sw$scraper_failed <- ifelse(((df_sw$Date >= as.Date("2020-09-29") & 
-                                   df_sw$Date < as.Date("2020-10-28")) & 
-                                  df_sw$Name != "STATEWIDE"),
-                               TRUE, FALSE)
-
-df_sw <- df_sw %>%
-  mutate(Residents.Deaths = ifelse(scraper_failed == TRUE,
-                                  NA, Residents.Deaths))
-
-df_sw$scraper_failed <- NULL
-```
-
-```{r plot cleaned death data}
-df_sw <- flag_noncumulative_deaths(df_sw, Name, Residents.Deaths)
-lag_death_plots <- plot_lags(df_sw, "Date", 
-                             y_var = "lag_change_deaths",
-                             grp_var = Name)
-# df_sw %>%
-#   filter(cumulative_deaths == "FALSE") %>%
-#   select(date, Name, Resident.Deaths, previous_date_value_deaths)
-
-## save death plots
+lag_death_plots <- plot_lags(test_nc, "Date", 
+                            y_var = "lag_change_deaths",
+                            grp_var = Name)
+# save lag death plots
 # for (i in 1:nrow(lag_death_plots)){
 #   facility_name <- lag_death_plots$Name[[i]]
-#   plot_name <- paste0(facility_name, ".png")
-#   ggsave(paste0(plot_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
-#          path = file.path(base_path, "plots", "FL"))
+#   ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
+#          path = file.path(base_path, "plots", "NC", "deaths"))
 # }
-
-df_sw %>%
-  filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
-         aes(x = Date, y = lag_change_deaths, group = Name)) +
-    geom_line(alpha=0.6 , size=.5, color = "black") +
-    scale_x_date(date_labels = "%m") + 
-    labs(x = "Date",
-      y = "lag_change_deaths")
 ```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
 ```{r}
-dates <- df_sw %>%
+dates <- final_dat %>%
   arrange(Date) %>%
   count(Date)
 dates
@@ -293,7 +246,7 @@ ggplot(data = dates,
 ```{r find infection spikes, include=FALSE }
 ## Find historical spikes over time.
 ## get 7-day percentage change in cases
-percentage_change <- df_sw %>%
+percentage_change <- final_dat %>%
     dplyr::arrange(Name, Date) %>%
     mutate(
         week_ago = dplyr::lag(Residents.Confirmed, n = 7),
@@ -311,12 +264,12 @@ percentage_change <- df_sw %>%
 Finally, merge in population data. This isn't working right now because of naming issues!
 
 ````{r merge-population}
-pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/Merg_Pop.csv') %>%
+pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/initial/Merg_Pop.csv') %>%
   mutate(Name = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE)) %>%
   filter(State == "North Carolina")
 head(pop)
 
-dat_with_pop <- df_sw %>%
+dat_with_pop <- final_pop %>%
   left_join(pop, by = "Name")
 
 table(is.na(dat_with_pop$Population))
@@ -324,9 +277,9 @@ table(is.na(dat_with_pop$Population))
 
 
 ```{r write csv}
-final_dat <- df_sw %>%
-  select(-c(all_res_deaths, previous_date_value_deaths,
-            lag_change_deaths, cumulative_deaths))
-  
-write_csv(final_dat, file.path(base_path, "data", "nc_adult_facility_covid_counts_historical.csv"))
+out <- final_dat %>%
+  rename(hifld_pop = POPULATION) %>%
+  reorder_historical_cols(rm_extra_cols = TRUE)
+
+write_csv(out, file.path(base_path, "data", "NC_adult_facility_covid_counts_historical.csv"))
 ```
