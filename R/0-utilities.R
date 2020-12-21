@@ -89,9 +89,9 @@ reorder_historical_cols <- function(data, add_missing_cols=TRUE, rm_extra_cols=F
                     "Staff.Recovered", "Residents.Tadmin", "Staff.Tested", "Residents.Negative",
                     "Staff.Negative", "Residents.Pending", "Staff.Pending", "Residents.Quarantine",
                     "Staff.Quarantine", "Residents.Active", "Residents.Tested",
-                    "Residents.Population", "Residents.Released",
+                    "Residents.Population", 
                     "Address", "Zipcode", "City", "County", "Latitude", "Longitude", "County.FIPS",
-                    "hifld_id", "TYPE", "SECURELVL", "CAPACITY", "federal_prison_type", "hifld_pop",
+                    "hifld_id", "TYPE", "SECURELVL", "CAPACITY", "federal_prison_type", "HIFLD.Population",
                     "Website","Notes")
   these_cols <- names(data)
   missing_cols <- if(all(historical_cols %in% these_cols)) { NULL } else(base::setdiff(historical_cols, these_cols))
@@ -100,12 +100,12 @@ reorder_historical_cols <- function(data, add_missing_cols=TRUE, rm_extra_cols=F
   data <- data %>%
     relocate(any_of(historical_cols))
   
-  if(rm_extra_cols & (length(additional_cols) > 1 )){
+  if(rm_extra_cols & (length(additional_cols) > 0 )){
     add_out = data %>%
       select(-all_of(additional_cols))
   }
   else{
-    if(length(additional_cols) > 1) {
+    if(length(additional_cols) > 0) {
       warning(paste0("Input data has ", length(additional_cols),
                      " additional columns: ", paste0(additional_cols, collapse = ", "),
                      ". Moving these to the end of the data set."))
@@ -116,14 +116,14 @@ reorder_historical_cols <- function(data, add_missing_cols=TRUE, rm_extra_cols=F
       add_out = data
     }
   }
-  if(!add_missing_cols & (length(missing_cols) > 1 )) {
+  if(!add_missing_cols & (length(missing_cols) > 0 )) {
     warning(paste0("Input data has ", length(missing_cols),
                    " missing columns: ", paste0(missing_cols, collapse = ", "),
                    ". Do you need to rename a column?"))
     missing_out <- add_out
   }
   else{
-    if(length(missing_cols) > 1) {
+    if(length(missing_cols) > 0) {
       warning(paste0("Input data has ", length(missing_cols),
                      " missing columns: ", paste0(missing_cols, collapse = ", "),
                      ". Adding these columns in as NA rows."))
