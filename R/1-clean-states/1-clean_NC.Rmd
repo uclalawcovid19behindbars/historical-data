@@ -8,7 +8,7 @@ output: html_document
 ```{r package setup, include=FALSE}
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
-            "devtools", "magrittr")
+            "devtools", "magrittr", "skimr")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -124,7 +124,7 @@ df_hist_final <- df_hist %>%
          Date = date,
          jurisdiction = Facility,
          ID = Count.ID) %>%
-  select(-c(Website, Resident.Deaths, Resident.Death, date)) 
+  select(-c(Website, Resident.Deaths, Resident.Death, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
@@ -153,6 +153,7 @@ recent_dat_cln <- recent_dat %>%
 recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
 ```
+
 Then, bind it to the historical cleaned data from this script. 
 
 ```{r bind historical and recent}
@@ -278,8 +279,11 @@ table(is.na(dat_with_pop$Population))
 
 ```{r write csv}
 out <- final_dat %>%
-  rename(hifld_pop = POPULATION) %>%
+  rename(HIFLD.Population = POPULATION) %>%
   reorder_historical_cols(rm_extra_cols = TRUE)
+
+## check nothing strange is happening!
+skim(out)
 
 write_csv(out, file.path(base_path, "data", "NC_adult_facility_covid_counts_historical.csv"))
 ```

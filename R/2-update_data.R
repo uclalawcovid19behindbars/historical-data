@@ -50,7 +50,8 @@ update_historical_data <- function(state_select) {
   check_bindable <- all_equal(hist_dat, latest_dat, ignore_col_order = FALSE)
   
   all_dat <- hist_dat %>%
-    bind_rows(latest_dat)
+    bind_rows(latest_dat) %>%
+    unique() # only keep unique rows 
   
   ## Write results to historical data repo 
   write_csv(all_dat, glue('data/{hfile}'))
