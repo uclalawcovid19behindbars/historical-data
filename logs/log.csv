@@ -1,0 +1,16 @@
+state,date,warning
+NC,2020-12-23,"Group Date: 2020-12-21, Name: NCCI WOMEN, State: North Carolina, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values NCCIW, NC CI WOMEN"
+NC,2020-12-23,"- Different types for column `State`: character vs character
+- Different types for column `Staff.Confirmed`: logical vs double
+- Different types for column `Staff.Recovered`: logical vs double
+- Different types for column `Residents.Tadmin`: logical vs double
+- Different types for column `Staff.Tested`: logical vs double
+- Different types for column `Staff.Negative`: logical vs double
+- Different types for column `Residents.Pending`: logical vs double
+- Different types for column `Staff.Pending`: logical vs double
+- Different types for column `Residents.Quarantine`: logical vs double
+- Different types for column `Staff.Quarantine`: logical vs double
+- Different types for column `Residents.Active`: logical vs double
+- Different types for column `Residents.Population`: logical vs double
+- Different types for column `Notes`: character vs logical
+"

@@ -8,66 +8,69 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 
-## columns for rbinding 
-historical_cols <- c("ID", "jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
-                     "Staff.Confirmed", "Residents.Deaths", "Staff.Deaths", "Residents.Recovered",
-                     "Staff.Recovered", "Residents.Tadmin", "Staff.Tested", "Residents.Negative",
-                     "Staff.Negative", "Residents.Pending", "Staff.Pending", "Residents.Quarantine",
-                     "Staff.Quarantine", "Residents.Active", "Residents.Tested",
-                     "Residents.Population", 
-                     "Address", "Zipcode", "City", "County", "Latitude", "Longitude", "County.FIPS",
-                     "hifld_id", "TYPE", "SECURELVL", "CAPACITY", "federal_prison_type", "HIFLD.Population",
-                     "Website","Notes")
 
-## columns that could be present but shouldn't be 
-to_rm <- c("Facility", "scrape_name_clean", "federal_bool", "xwalk_name_clean",
-          "name_match", "Count.ID", "Population", "Residents.Released")
-
-## select state
-## eventually, try "state in states" with list for available states
-state_select <- "NC"
-state_full <- behindbarstools::translate_state(state_select)
-
-## Read latest data from “data” repo
-quiet_read_scrape_data <- quietly(behindbarstools::read_scrape_data)
-latest <- quiet_read_scrape_data(state = state_full,
-                                      debug = TRUE)
-latest_dat <- latest$result %>%
-  behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
-  select(-any_of(to_rm)) %>%
-  relocate(any_of(historical_cols))
-
-## Read data from historical data repo for x state
-hurl_start <- 'https://raw.githubusercontent.com/uclalawcovid19behindbars/historical-data/main/data/'
-hurl_end <- '_adult_facility_covid_counts_historical.csv'
-hurl <- glue('{hurl_start}{state_select}{hurl_end}')
-
-hist_dat <- hurl %>%
-  read_csv(col_types = cols()) %>%
-  behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
-  select(-any_of(to_rm)) %>%
-  relocate(any_of(historical_cols))
+update_historical_data <- function(state_select) {
+  ## columns for rbinding 
+  historical_cols <- c("ID", "jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
+                       "Staff.Confirmed", "Residents.Deaths", "Staff.Deaths", "Residents.Recovered",
+                       "Staff.Recovered", "Residents.Tadmin", "Staff.Tested", "Residents.Negative",
+                       "Staff.Negative", "Residents.Pending", "Staff.Pending", "Residents.Quarantine",
+                       "Staff.Quarantine", "Residents.Active", "Residents.Tested",
+                       "Residents.Population", 
+                       "Address", "Zipcode", "City", "County", "Latitude", "Longitude", "County.FIPS",
+                       "hifld_id", "TYPE", "SECURELVL", "CAPACITY", "federal_prison_type", "HIFLD.Population",
+                       "Website","Notes")
   
-## Append historical data and latest data
-check_bindable <- all_equal(hist_dat, latest_dat, ignore_col_order = FALSE)
+  ## columns that could be present but shouldn't be 
+  to_rm <- c("Facility", "scrape_name_clean", "federal_bool", "xwalk_name_clean",
+             "name_match", "Count.ID", "Population", "Residents.Released")
+  
+  state_full <- behindbarstools::translate_state(state_select)
+  
+  ## Read latest data from “data” repo
+  quiet_read_scrape_data <- quietly(behindbarstools::read_scrape_data)
+  latest <- quiet_read_scrape_data(state = state_full,
+                                   debug = TRUE)
+  latest_dat <- latest$result %>%
+    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
+    select(-any_of(to_rm)) %>%
+    relocate(any_of(historical_cols))
+  
+  ## Read data from historical data repo for x state
+  hfile_end <- '_adult_facility_covid_counts_historical.csv'
+  hfile <- glue('{state_select}{hfile_end}')
+  
+  hist_dat <- file.path('data', hfile) %>%
+    read_csv(col_types = cols()) %>%
+    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
+    select(-any_of(to_rm)) %>%
+    relocate(any_of(historical_cols))
+  
+  ## Append historical data and latest data
+  check_bindable <- all_equal(hist_dat, latest_dat, ignore_col_order = FALSE)
+  
+  all_dat <- hist_dat %>%
+    bind_rows(latest_dat)
+  
+  ## Write results to historical data repo 
+  write_csv(all_dat, glue('data/{hfile}'))
+  
+  ## Write warnings to log
+  latest_warnings <- tibble(state = state_select,
+                            date = Sys.Date(),
+                            warning = latest$warnings) %>%
+    filter(warning != "Missing column names filled in: 'X1' [1]" ) %>%
+    add_row(state = state_select,
+            date = Sys.Date(),
+            warning = check_bindable)
+  warnings <- read_csv('logs/log.csv')
+  warnings_out <- warnings %>%
+    bind_rows(latest_warnings)
+  
+  # copy the log to a text file
+  write_csv(warnings_out, 'logs/log.csv')
+}
 
-all_dat <- hist_dat %>%
-  bind_rows(latest_dat)
+update_historical_data("NC")
 
-## Write results to historical data repo 
-write_csv(all_dat, 'data/{state_select}{hurl_end}')
 
-## Write warnings to log
-latest_warnings <- tibble(state = state_select,
-                          date = Sys.Date(),
-                          warning = latest$warnings) %>%
-  filter(warning != "Missing column names filled in: 'X1' [1]" ) %>%
-  add_row(state = state_select,
-          date = Sys.Date(),
-          warning = check_bindable)
-warnings <- readr::read_log('https://raw.githubusercontent.com/uclalawcovid19behindbars/historical-data/main/logs/historical-bind.log')
-warnings_out <- warnings %>%
-  bind_rows(latest_warnings)
-
-# copy the log to a text file
-write_csv(warnings_out, 'logs/log.csv')
