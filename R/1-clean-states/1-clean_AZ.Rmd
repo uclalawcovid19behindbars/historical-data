@@ -1,7 +1,7 @@
 ---
 title: "Clean Arizona - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "12/15/2020"
+date: "12/23/2020"
 output: html_document
 ---
 
@@ -78,7 +78,8 @@ df_mid <- df_mid %>%
 ```{r facility merge checks, include = FALSE}
 df_mid %>%
   filter(name_match == FALSE) %>% 
-  select(scrape_name_clean)
+  select(scrape_name_clean) %>%
+  unique()
 ```
 
 Remove observations where we didn't pick up a clean name.
@@ -112,7 +113,7 @@ df_hist_final <- df_hist %>%
          Date = date,
          jurisdiction = Facility,
          ID = Count.ID) %>%
-  select(-c(Website, Resident.Deaths, date)) 
+  select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
@@ -144,6 +145,7 @@ recent_final$Residents.Tested <- NA
 Then, bind it to the historical cleaned data from this script. 
 
 ```{r bind historical and recent}
+all_equal(df_hist_final, recent_final, ignore_col_order = FALSE)
 all_dat <- bind_rows(df_hist_final, recent_final)
 n_distinct(all_dat$Name)
 ```
@@ -247,9 +249,12 @@ table(pop_clean$name_match) # no matches here
 
 
 ```{r write csv}
-# rename POPULATION --> hifld_pop
-final_dat <- final_dat %>%
-  rename(hifld_pop = POPULATION)
+out <- final_dat %>%
+  rename(HIFLD.Population = POPULATION) %>%
+  reorder_historical_cols(rm_extra_cols = TRUE)
+
+## check nothing strange is happening!
+skim(out)
   
-write_csv(final_dat, file.path(base_path, "data", "AZ_adult_facility_covid_counts_historical.csv"))
+write_csv(out, file.path(base_path, "data", "AZ_adult_facility_covid_counts_historical.csv"))
 ```
