@@ -77,6 +77,11 @@ df_mid <- behindbarstools::clean_facility_name(df_cln, debug = TRUE)
 ```
 
 ```{r filter out federal facilities}
+df_mid <- df_mid %>%
+  filter(federal_bool == FALSE)
+```
+
+```{r check name mismatches}
 # show instances where merge didn't identify a clean name
 df_mid %>%
   filter(name_match == FALSE) %>% 
