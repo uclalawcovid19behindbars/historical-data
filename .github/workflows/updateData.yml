@@ -3,7 +3,7 @@ name: Update historical data
 # on:
 #   schedule:
 #     # * is a special character in YAML so you have to quote this string
-#     - cron:  '0 11 2-30/2 * *' 
+#     - cron:  '0 6 2-30/2 * *' 
 #     # Runs on all even number days at 11 am UTC! 
 
 on: push # used for debugging
@@ -18,7 +18,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v1
         with:
           r-version: '3.5.3' # The R version to download (if necessary) and use.
-      - run: Rscript -e ./R/test.R
+      - run: Rscript -e R/test.R
       - name: check for changes
         run: git status
       - name: stage changed files
