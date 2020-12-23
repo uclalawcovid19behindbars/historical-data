@@ -32,10 +32,21 @@ update_historical_data <- function(state_select) {
   latest <- quiet_read_scrape_data(state = state_full,
                                    debug = TRUE)
   latest_dat <- latest$result %>%
-    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
+    filter(jurisdiction != "federal") %>%
+    behindbarstools::reorder_cols(add_missing_cols = TRUE)
+  
+  no_match <- latest_dat %>%
+    filter(name_match == "FALSE") %>%
+    mutate(state = state_select,
+           date = Sys.Date(),
+           warning = glue("no match: {scrape_name_clean}")) %>%
+    select(state, date, warning) %>%
+    unique() 
+
+  latest_dat <- latest_dat %>%
     select(-any_of(to_rm)) %>%
     relocate(any_of(historical_cols))
-  
+
   ## Read data from historical data repo for x state
   hfile_end <- '_adult_facility_covid_counts_historical.csv'
   hfile <- glue('{state_select}{hfile_end}')
@@ -63,7 +74,8 @@ update_historical_data <- function(state_select) {
     filter(warning != "Missing column names filled in: 'X1' [1]" ) %>%
     add_row(state = state_select,
             date = Sys.Date(),
-            warning = check_bindable)
+            warning = check_bindable) %>%
+    bind_rows(no_match)
   warnings <- read_csv('logs/log.csv')
   warnings_out <- warnings %>%
     bind_rows(latest_warnings)
@@ -73,5 +85,10 @@ update_historical_data <- function(state_select) {
 }
 
 update_historical_data("NC")
+update_historical_data("CA")
+update_historical_data("AZ")
+update_historical_data("WI")
+update_historical_data("MS")
+update_historical_data("FL")
 
 
