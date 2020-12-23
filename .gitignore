@@ -3,6 +3,7 @@ data/inputs/*
 data/outputs/*
 outfiles/*
 Plots/*
+*.Rproj
 
 # Misc files to ignore
 R/analysis/ca_viz.Rmd
