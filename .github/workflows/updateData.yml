@@ -26,4 +26,4 @@ jobs:
       - name: commit changed files
         run: git commit -m "Auto updating test.csv"
       - name: push code to master
-        run: git push origin HEAD:master
+        run: git push
