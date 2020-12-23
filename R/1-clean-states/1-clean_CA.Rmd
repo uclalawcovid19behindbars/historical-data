@@ -80,7 +80,8 @@ df_mid <- behindbarstools::clean_facility_name(df_cln, debug = TRUE)
 # show instances where merge didn't identify a clean name
 df_mid %>%
   filter(name_match == FALSE) %>% 
-  select(scrape_name_clean)
+  select(scrape_name_clean, Name) %>%
+  unique()
 ```
 
 Remove observations where we didn't pick up a clean name.

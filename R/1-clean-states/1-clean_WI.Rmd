@@ -1,7 +1,7 @@
 ---
 title: "Clean Wisconsin - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "12/07/2020"
+date: "12/23/2020"
 output: html_document
 ---
 
@@ -78,7 +78,8 @@ df_mid <- df_mid %>%
 ## DIVISION OF JUVENILE CORRECTIONS FIELD is missing
 df_mid %>%
   filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean, Name)
+  select(scrape_name_clean, Name) %>%
+  unique()
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
@@ -104,7 +105,7 @@ df_hist_final <- df_hist %>%
          Date = date,
          jurisdiction = Facility,
          ID = Count.ID) %>%
-  select(-c(Website, Resident.Deaths, date)) 
+  select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
@@ -115,13 +116,16 @@ Add in more recently scraped data (from November until present).
 First, read it in and clean it. 
 
 ```{r add in recently scraped data}
-recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, state = "Wisconsin", debug = TRUE) %>%
+recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
+                                                state = "Wisconsin", 
+                                                debug = TRUE) %>%
   filter(jurisdiction != "federal",
        Date > as.Date('2020-11-04')) 
 
 recent_dat %>%
   filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean, Name)
+  select(scrape_name_clean, Name) %>%
+  unique()
 
 ## TO DO: Come back to this once I've resolved "auxilary", "youth facilities", etc
 
@@ -131,6 +135,7 @@ recent_final$Residents.Tested <- NA
 Then, bind it to the historical cleaned data from this script. 
 
 ```{r bind historical and recent}
+all_equal(df_hist_final, recent_final, ignore_col_order = FALSE)
 all_dat <- bind_rows(df_hist_final, recent_final)
 n_distinct(all_dat$Name)
 ```
@@ -226,13 +231,20 @@ pop_filled <- pop %>%
 
 dat_with_pop <- final_dat %>%
   left_join(pop_filled, by = c("Name" = "name_cln",
-                            "Date" = "Date")) %>%
-  select(-POPULATION)
+                            "Date" = "Date"))
 
 table(is.na(dat_with_pop$Population))
 ```
 
 
 ```{r write csv}
-write_csv(dat_with_pop, file.path(base_path, "data", "WI_adult_facility_covid_counts_historical.csv"))
+out <- dat_with_pop %>%
+  rename(HIFLD.Population = POPULATION,
+         Historical.Population = Population) %>%
+  reorder_historical_cols(rm_extra_cols = TRUE)
+
+## check nothing strange is happening!
+skim(out)
+
+write_csv(out, file.path(base_path, "data", "WI_adult_facility_covid_counts_historical.csv"))
 ```
