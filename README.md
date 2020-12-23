@@ -64,7 +64,7 @@ When data are not available publicly, we make every effort to obtain missing inf
 * `HIFLD.Population`: Facility population from HIFLD. We cannot know what date the population was reported, and so this population should not be relied upon. The date at which this population was reported likely varies across facilities. 
 * `Website`: Facility website, if it has one
 * `Notes`: Notes created by UCLA Law COVID-19 Behind Bars staff
-* `Population`: When available, historical population data merged by our team. This is historically accurate population. See state-specific notes for source.  
+* `Historical.Population`: When available, historical population data merged by our team. This is historically accurate population. See state-specific notes for source.  
 
 ## Citations 
 
