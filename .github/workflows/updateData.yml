@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages(c("devtools"))
+          install.packages(c("devtools", "remotes", "usethis"))
         shell: Rscript {0}
 
       - name: Cache R packages
