@@ -21,9 +21,9 @@ jobs:
         with:
           r-version: '3.5.3'   
 
-      - name: Install dependencies
+      - name: Query dependencies
         run: |
-          install.packages(c("devtools", "remotes", "usethis"))
+          install.packages('remotes')
         shell: Rscript {0}
 
       - name: Cache R packages
@@ -32,8 +32,20 @@ jobs:
           path: ~/.local/share/renv
           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
           restore-keys: ${{ runner.os }}-renv-
+      
+      - name: Install macOS system dependencies
+        run: |
+          brew install libgit2
+          brew install imagemagick@6
+        
+      - name: Install dependencies
+        run: |
+          install.packages('usethis')
+          install.packages('devtools')
+        shell: Rscript {0}
         
       - run: Rscript ./R/test.R
+        
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Auto-update historical data
