@@ -28,6 +28,7 @@ When data are not available publicly, we make every effort to obtain missing inf
 
 * `ID`: Internal ID number (unreliable for merging purposes)
 * `jurisdiction`: One of {federal, prison, or jail}. Only present in newly scraped data
+* `State`: State where the facility is located
 * `Name`: Facility name
 * `Date`: Date data was collected (note: this is *not* necessarily when the data last updated. E.g., we might have collected data on August 30th, but the date the data was last updated on a DOC website was August 15th.)
 * `source`: Source from which the data was scraped
@@ -46,31 +47,31 @@ When data are not available publicly, we make every effort to obtain missing inf
 * `Residents.Quarantine`: Cumulative number of incarcerated individuals in quarantine from COVID-19
 * `Staff.Quarantine`: Cumulative number of incarcerated individuals in quarantine from COVID-19
 * `Residents.Active`: Non-cumulative number of incarcerated individuals infected with COVID-19
-* `Residents.Population`: Best facility-level population number available. This is historically up-to-date when available (reported by DOCs), and HIFLD population otherwise. 
-* `Notes`: Notes created by UCLA Law COVID-19 Behind Bars staff
 * `Residents.Tested`: Cumulative number of incarcerated individuals tested for COVID-19
-* `State`: State where the facility is located
-* `hifld_id`: Homeland Infrastructure Foundation-Level Data ID for each facility
+* `Residents.Population`: Facility-level population reported by DOC websites, when available
 * `Address`: Facility address
-* `City`: City where the facility is located
 * `Zipcode`: Zipcode where the facility is located
+* `City`: City where the facility is located
+* `County`: County where the facility is located
 * `Latitude`: Coordinates of facility location
 * `Longitude`: Coordinates of facility location
-* `County`: County where the facility is located
 * `County.FIPS`: County FIPS code for the county where the facility is located
-* `TYPE`: Facility type
-* `hifld_pop`: Facility population from HIFLD. We cannot know what date the population was reported, and so this population should not be relied upon. The date at which this population was reported likely varies across facilities. 
-* `SECURELVL`: Facility security level
-* `CAPACITY`: Facility capacity from HIFLD
+* `hifld_id`: Homeland Infrastructure Foundation-Level Data ID for each facility
+* `TYPE`: Facility type (from HIFLD data)
+* `SECURELVL`: Facility security level (from HIFLD data)
+* `CAPACITY`: Facility capacity (from HIFLD data)
 * `federal_prison_type`: Facility federal prison type (only relevant for federal prison)
+* `HIFLD.Population`: Facility population from HIFLD. We cannot know what date the population was reported, and so this population should not be relied upon. The date at which this population was reported likely varies across facilities. 
 * `Website`: Facility website, if it has one
+* `Notes`: Notes created by UCLA Law COVID-19 Behind Bars staff
 * `Population`: When available, historical population data merged by our team. This is historically accurate population. See state-specific notes for source.  
 
 ## Citations 
 
 Citations for academic publications and research reports:
 
-    Sharon Dolovich, Aaron Littman, Kalind Parish, Grace DiLaura, Chase Hommeyer,  Michael Everett, Hope Johnson, Neal Marquez, and Erika Tykagi. UCLA Law Covid-19 Behind Bars Data Project: Jail/Prison Confirmed Cases Dataset [date you downloaded the data]. UCLA Law, 2020, https://uclacovidbehindbars.org/.
+    Sharon Dolovich,
+     Aaron Littman, Kalind Parish, Grace DiLaura, Chase Hommeyer,  Michael Everett, Hope Johnson, Neal Marquez, and Erika Tykagi. UCLA Law Covid-19 Behind Bars Data Project: Jail/Prison Confirmed Cases Dataset [date you downloaded the data]. UCLA Law, 2020, https://uclacovidbehindbars.org/.
  
 Citations for media outlets, policy briefs, and online resources:
 
@@ -87,6 +88,8 @@ Our data is licensed under a [Creative Commons Attribution-NonCommercial-ShareAl
 - Removed two observations of "GEO" prison that had no data associated with them. 
 
 ## North Carolina Notes
+- Population data not yet present (as of posting in December 2020). Not sure yet when this will become available. 
+
 The following facilities seem to be reporting active cases rather than cumulative cases in the column `Residents.Confirmed`:
 * Wilkes CC 
 * Marion CI 
@@ -98,4 +101,4 @@ Because the facilities did not provide any specification, we're leaving the coun
 
 ## Wisconsin Notes
 - Population data source was compiled by weekly reports, available here: https://doc.wi.gov/Pages/DataResearch/DataAndReports.aspx 
-- Removed youth facilities for now. Will add these back in within the next few days, when we decide on a naming pattern for them.
+- Removed youth facilities for now. Will add these back in by January 2021.
