@@ -711,3 +711,137 @@ FL,2020-12-27,"- Different types for column `ID`: logical vs double
 - Different types for column `Residents.Population`: logical vs double
 - Different types for column `Notes`: character vs logical
 "
+NC,2020-12-28,"Group Date: 2020-12-25, Name: NCCI WOMEN, State: North Carolina, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values NCCIW, NC CI WOMEN"
+NC,2020-12-28,"- Different types for column `State`: character vs character
+- Different types for column `Staff.Confirmed`: logical vs double
+- Different types for column `Staff.Recovered`: logical vs double
+- Different types for column `Residents.Tadmin`: logical vs double
+- Different types for column `Staff.Tested`: logical vs double
+- Different types for column `Staff.Negative`: logical vs double
+- Different types for column `Residents.Pending`: logical vs double
+- Different types for column `Staff.Pending`: logical vs double
+- Different types for column `Residents.Quarantine`: logical vs double
+- Different types for column `Staff.Quarantine`: logical vs double
+- Different types for column `Residents.Active`: logical vs double
+- Different types for column `Residents.Population`: logical vs double
+- Different types for column `Notes`: character vs logical
+"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: ASP AVENAL STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values AVENAL STATE PRISON ASP, AVENAL STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CAC CALIFORNIA CITY CORRECTIONAL FACILITY, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA CITY CORRECTIONAL FACILITY CAC, CALIFORNIA CITY CORRECTIONAL FACILITY"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CAL CALIPATRIA STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIPATRIA STATE PRISON CAL, CALIPATRIA STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CCC CALIFORNIA CORRECTIONAL CENTER, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA CORRECTIONAL CENTER CCC, CA CORRECTIONAL CENTER"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CCI CALIFORNIA CORRECTIONAL INSTITUTION, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA CORRECTIONAL INSTITUTION CCI, CA CORRECTIONAL INSTITUTION"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CCWF CENTRAL CA WOMENS FACILITY, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CENTRAL CALIFORNIA WOMENS FACILITY CCWF, CENTRAL CA WOMENS FACILITY"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CEN CALIFORNIA STATE PRISON CENTINELA, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA STATE PRISON CENTINELA CEN, CENTINELA STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CIM CALIFORNIA INSTITUTION FOR MEN, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA INSTITUTION FOR MEN CIM, CA INSTITUTION FOR MEN"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CIW CALIFORNIA INSTITUTION FOR WOMEN, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA INSTITUTION FOR WOMEN CIW, CA INSTITUTION FOR WOMEN"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CMC CALIFORNIA MENS COLONY, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA MENS COLONY CMC, CA MENS COLONY"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CMF CALIFORNIA MEDICAL FACILITY, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA MEDICAL FACILITY CMF, CA MEDICAL FACILITY"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: COR CALIFORNIA STATE PRISON CORCORAN, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA STATE PRISON CORCORAN COR, CA STATE PRISON CORCORAN"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CRC CALIFORNIA REHABILITATION CENTER, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA REHABILITATION CENTER CRC, CA REHABILITATION CENTER"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CTF CORRECTIONAL TRAINING FACILITY, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CORRECTIONAL TRAINING FACILITY CTF, CORRECTIONAL TRAINING FACILITY"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: CVSP CHUCKAWALLA VALLEY STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CHUCKAWALLA VALLEY STATE PRISON CVSP, CHUCKAWALLA VALLEY STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: DVI DEUEL VOCATIONAL INSTITUTION, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values DEUEL VOCATIONAL INSTITUTION DVI, DEUEL VOCATIONAL INSTITUTION"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: FSP FOLSOM STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values FOLSOM STATE PRISON FSP, FOLSOM STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: HDSP HIGH DESERT STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values HIGH DESERT STATE PRISON HDSP, HIGH DESERT STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: ISP IRONWOOD STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values IRONWOOD STATE PRISON ISP, IRONWOOD STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: KVSP KERN VALLEY STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values KERN VALLEY STATE PRISON KVSP, KERN VALLEY STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: LAC CALIFORNIA STATE PRISON LOS ANGELES COUNTY, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA STATE PRISON LOS ANGELES COUNTY LAC, CA STATE PRISON LA COUNTY"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: MCSP MULE CREEK STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values MULE CREEK STATE PRISON MCSP, MULE CREEK STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: NKSP NORTH KERN STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values NORTH KERN STATE PRISON NKSP, NORTH KERN STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: PBSP PELICAN BAY STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values PELICAN BAY STATE PRISON PBSP, PELICAN BAY STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: PVSP PLEASANT VALLEY STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values PLEASANT VALLEY STATE PRISON PVSP, PLEASANT VALLEY STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: RJD RICHARD J DONOVAN CORRECTIONAL FACILITY, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values RICHARD J DONOVAN CORRECTIONAL FACILITY RJD, RJ DONOVAN CORR FAC ROCK MTN"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: SAC CALIFORNIA STATE PRISON SACRAMENTO, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA STATE PRISON SACRAMENTO SAC, CA STATE PRISON SACRAMENTO"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: SCC SIERRA CONSERVATION CENTER, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values SIERRA CONSERVATION CENTER SCC, SIERRA CONSERVATION CENTER"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: SOL CALIFORNIA STATE PRISON SOLANO, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values CALIFORNIA STATE PRISON SOLANO SOL, CA STATE PRISON SOLANO"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: SQ CA STATE PRISON SAN QUENTIN, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values SAN QUENTIN STATE PRISON SQ, CA STATE PRISON SAN QUENTIN"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: SVSP SALINAS VALLEY STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values SALINAS VALLEY STATE PRISON SVSP, SALINAS VALLEY STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: VSP VALLEY STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values VALLEY STATE PRISON VSP, VALLEY STATE PRISON"
+CA,2020-12-28,"Group Date: 2020-12-25, Name: WSP WASCO STATE PRISON, State: California, jurisdiction: state has multiple values that do not match for column scrape_name_clean. Only using first observed value from the following unique values WASCO STATE PRISON WSP, WASCO STATE PRISON"
+CA,2020-12-28,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Tadmin`: logical vs double
+- Different types for column `Staff.Tested`: logical vs double
+- Different types for column `Residents.Negative`: logical vs double
+- Different types for column `Staff.Negative`: logical vs double
+- Different types for column `Staff.Pending`: logical vs double
+- Different types for column `Residents.Quarantine`: logical vs double
+- Different types for column `Staff.Quarantine`: logical vs double
+- Different types for column `Residents.Active`: logical vs double
+- Different types for column `Residents.Population`: logical vs double
+- Different types for column `Notes`: character vs logical
+"
+CA,2020-12-28,no match: CALIFORNIA HEALTH CARE FACILITY CHCF STOCKTON
+CA,2020-12-28,no match: CALIFORNIA SUBSTANCE ABUSE TREATMENT FACILITY AND STATE PRISON CORCORAN SATF-CSP CORCORAN
+CA,2020-12-28,no match: CDCRCCHCS WORKSITE LOCATION SAN FRANCISCO COUNTY
+CA,2020-12-28,no match: CDCRCCHCS WORKSITE LOCATION YOLO COUNTY
+CA,2020-12-28,no match: STATEWIDE
+AZ,2020-12-28,"- Different types for column `State`: character vs character
+- Different types for column `Staff.Recovered`: logical vs double
+- Different types for column `Residents.Tadmin`: logical vs double
+- Different types for column `Staff.Tested`: logical vs double
+- Different types for column `Staff.Negative`: logical vs double
+- Different types for column `Staff.Pending`: logical vs double
+- Different types for column `Residents.Quarantine`: logical vs double
+- Different types for column `Staff.Quarantine`: logical vs double
+- Different types for column `Residents.Active`: logical vs double
+- Different types for column `Residents.Population`: logical vs double
+- Different types for column `Notes`: character vs logical
+"
+WI,2020-12-28,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Deaths`: logical vs double
+- Different types for column `Staff.Deaths`: logical vs double
+- Different types for column `Staff.Recovered`: logical vs double
+- Different types for column `Residents.Tadmin`: logical vs double
+- Different types for column `Staff.Tested`: logical vs double
+- Different types for column `Staff.Negative`: logical vs double
+- Different types for column `Residents.Pending`: logical vs double
+- Different types for column `Staff.Pending`: logical vs double
+- Different types for column `Residents.Quarantine`: logical vs double
+- Different types for column `Staff.Quarantine`: logical vs double
+- Different types for column `Residents.Active`: logical vs double
+- Different types for column `Residents.Population`: logical vs double
+- Different types for column `Notes`: character vs logical
+"
+WI,2020-12-28,no match: AUXILIARY UNITS
+WI,2020-12-28,no match: CRIMINAL JUSTICE FACILITY
+WI,2020-12-28,no match: DIVISION OF COMMUNITY CORRECTIONS TOTAL
+WI,2020-12-28,no match: DIVISION OF JUVENILE CORRECTIONS FACILITIES
+WI,2020-12-28,no match: DIVISION OF JUVENILE CORRECTIONS FIELD
+WI,2020-12-28,no match: HOUSE OF CORRECTION
+WI,2020-12-28,no match: JUVENILE JUSTICE CENTER
+WI,2020-12-28,no match: RACINE CORRECTIONAL INSTITUTION
+MS,2020-12-28,"- Different types for column `State`: character vs character
+- Different types for column `Staff.Confirmed`: logical vs double
+- Different types for column `Staff.Deaths`: logical vs double
+- Different types for column `Staff.Recovered`: logical vs double
+- Different types for column `Residents.Tadmin`: logical vs double
+- Different types for column `Staff.Tested`: logical vs double
+- Different types for column `Residents.Negative`: logical vs double
+- Different types for column `Staff.Negative`: logical vs double
+- Different types for column `Residents.Pending`: logical vs double
+- Different types for column `Staff.Pending`: logical vs double
+- Different types for column `Residents.Quarantine`: logical vs double
+- Different types for column `Staff.Quarantine`: logical vs double
+- Different types for column `Residents.Active`: logical vs double
+- Different types for column `Residents.Tested`: logical vs double
+- Different types for column `Residents.Population`: logical vs double
+- Different types for column `Notes`: character vs logical
+"
+FL,2020-12-28,"- Different types for column `ID`: logical vs double
+- Different types for column `State`: character vs character
+- Different types for column `Residents.Recovered`: logical vs double
+- Different types for column `Staff.Recovered`: logical vs double
+- Different types for column `Residents.Tadmin`: logical vs double
+- Different types for column `Staff.Tested`: logical vs double
+- Different types for column `Residents.Negative`: logical vs double
+- Different types for column `Staff.Negative`: logical vs double
+- Different types for column `Residents.Pending`: logical vs double
+- Different types for column `Staff.Pending`: logical vs double
+- Different types for column `Residents.Quarantine`: logical vs double
+- Different types for column `Staff.Quarantine`: logical vs double
+- Different types for column `Residents.Active`: logical vs double
+- Different types for column `Residents.Tested`: logical vs double
+- Different types for column `Residents.Population`: logical vs double
+- Different types for column `Notes`: character vs logical
+"
