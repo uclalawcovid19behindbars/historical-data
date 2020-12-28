@@ -71,14 +71,16 @@ update_historical_data <- function(state_select) {
   latest_warnings <- tibble(state = state_select,
                             date = Sys.Date(),
                             warning = latest$warnings) %>%
-    filter(warning != "Missing column names filled in: 'X1' [1]" ) %>%
+    filter(warning != "Missing column names filled in: 'X1' [1]",
+           !str_detect(warning, 'multiple values that do not match for column scrape_name_clean')) %>%
     add_row(state = state_select,
             date = Sys.Date(),
             warning = check_bindable) %>%
     bind_rows(no_match)
   warnings <- read_csv('logs/log.csv')
   warnings_out <- warnings %>%
-    bind_rows(latest_warnings)
+    bind_rows(latest_warnings) %>%
+    distinct(state, warning, .keep_all = TRUE) # only keep new warnings
   
   # copy the log to a text file
   write_csv(warnings_out, 'logs/log.csv')
