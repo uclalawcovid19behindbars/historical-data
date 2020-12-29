@@ -10,6 +10,7 @@ devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 
 
 update_historical_data <- function(state_select) {
+  browser()
   ## columns for rbinding 
   historical_cols <- c("ID", "jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
                        "Staff.Confirmed", "Residents.Deaths", "Staff.Deaths", "Residents.Recovered",
@@ -72,11 +73,19 @@ update_historical_data <- function(state_select) {
                             date = Sys.Date(),
                             warning = latest$warnings) %>%
     filter(warning != "Missing column names filled in: 'X1' [1]",
-           !str_detect(warning, 'multiple values that do not match for column scrape_name_clean')) %>%
+           !str_detect(warning, 'multiple values that do not match for column scrape_name_clean'),
+           !str_detect(warning, 'Name: AIRWAY HEIGHTS CORRECTIONS CENTER')) %>%
     add_row(state = state_select,
             date = Sys.Date(),
             warning = check_bindable) %>%
     bind_rows(no_match)
+  
+  if(state_select != "federal"){
+    latest_warnings <- latest_warnings %>%
+      filter(!str_detect(warning, 'State: Federal'),
+             !str_detect(warning, 'jurisdiction: federal'))
+  }
+  
   warnings <- read_csv('logs/log.csv')
   warnings_out <- warnings %>%
     bind_rows(latest_warnings) %>%
