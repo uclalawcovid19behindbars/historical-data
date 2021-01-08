@@ -1,12 +1,12 @@
 name: Update historical data
 
-on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron:  '0 1 * * *' 
-    # Runs every day at 1am 
+# on:
+#   schedule:
+#     # * is a special character in YAML so you have to quote this string
+#     - cron:  '0 1 * * *' 
+#     # Runs every day at 1am 
 
-# on: push # used for debugging
+on: push # used for debugging
 
 jobs:
   update-data:
