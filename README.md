@@ -2,7 +2,7 @@
 
 ## Background
 
-The UCLA Law Covid-19 Behind Bars Data Project, launched in March 2020, tracks the spread and impact of Covid-19 in American carceral facilities and pushes for greater transparency and accountability around the pandemic response of the carceral system. For more information on the organization as a whole, see our website at: http://covid19behindbars.org/.
+The UCLA Law Covid-19 Behind Bars Data Project, launched in March 2020, tracks the spread and impact of Covid-19 in American carceral facilities and pushes for greater transparency and accountability around the pandemic response of the carceral system. For more information on the organization as a whole, see our website at: http://uclacovid19behindbars.org/.
 
 Since the beginning of the Covid-19 pandemic, the public’s ability to assess the extent and impact of the spread of the virus has been limited by shortcomings in data reporting in the United States. This is particularly true, and presents especially severe consequences, for data concerning Covid-19 in U.S. prisons, jails, immigration detention centers, and other carceral settings that confine over two million individuals. The overcrowding and subpar healthcare systems in carceral facilities make them hotspots for viral spread, and the people who work and are incarcerated in these facilities do not have the option to socially distance. Epidemiological data reporting in these settings are limited, often vaguely-defined, and generally not comparable between jurisdictions. To save lives, advocates and organizers need data to demonstrate the urgency of this public health crisis, and ultimately to push for the release of enough incarcerated people to limit the spread. 
 
@@ -26,8 +26,8 @@ When data are not available publicly, we make every effort to obtain missing inf
 
 ## Data dictionary
 
-* `ID`: Internal ID number (unreliable for merging purposes)
-* `jurisdiction`: One of {federal, prison, or jail}. Only present in newly scraped data
+* `ID`: Integer ID that uniquely identifies every facility
+* `jurisdiction`: Whether the facility falls under `state`, `county` or `federal` jurisdiction
 * `State`: State where the facility is located
 * `Name`: Facility name
 * `Date`: Date data was collected (note: this is *not* necessarily when the data last updated. E.g., we might have collected data on August 30th, but the date the data was last updated on a DOC website was August 15th.)
@@ -38,7 +38,7 @@ When data are not available publicly, we make every effort to obtain missing inf
 * `Staff.Deaths`: Cumulative number of staff who died from COVID-19
 * `Residents.Recovered`: Cumulative number of incarcerated individuals who recovered from COVID-19
 * `Staff.Recovered`: Cumulative number of staff who recovered from COVID-19
-* `Residents.Tadmin`: Non-cumulative number of incarcerated individuals tested for COVID-19
+* `Residents.Tadmin`: Cumulative number of incarcerated individuals tested for COVID-19
 * `Staff.Tested`: Cumulative number of staff tested for COVID-19
 * `Residents.Negative`: Cumulative number of incarcerated individuals who tested negative for COVID-19
 * `Staff.Negative`: Cumulative number of staff who tested negative for COVID-19
