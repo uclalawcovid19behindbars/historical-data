@@ -1,7 +1,7 @@
 ---
 title: "Clean North Carolina - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "12/21/2020"
+date: "1/14/21"
 output: html_document
 ---
 
@@ -81,7 +81,8 @@ df_mid <- df_mid %>%
 # show instances where merge didn't identify a clean name
 df_mid %>%
   filter(name_match == FALSE) %>% 
-  select(scrape_name_clean)
+  select(scrape_name_clean) %>%
+  unique()
 ```
 
 Remove observations where we didn't pick up a clean name.
@@ -122,12 +123,14 @@ df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths,
          Date = date,
-         jurisdiction = Facility,
-         ID = Count.ID) %>%
+         Jurisdiction = Facility,
+         Facility.ID = Count.ID) %>%
   select(-c(Website, Resident.Deaths, Resident.Death, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
+## add back in Residents.Population (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
+df_hist_final$Residents.Population <- df_hist$Residents.Population
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -138,13 +141,16 @@ First, read it in and clean it.
 recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
                                                 state = "North Carolina", 
                                                 debug = TRUE) %>%
-  filter(jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) 
+  filter(Jurisdiction != "federal",
+       Date > as.Date('2020-11-04')) %>%
+  mutate(Zipcode = as.numeric(Zipcode),
+         County.FIPS = as.numeric(County.FIPS))
 
 ## view facility names without a match in the xwalk
 recent_dat %>%
   filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean, Name)
+  select(scrape_name_clean) %>%
+  unique()
 
 recent_dat_cln <- recent_dat %>%
   filter(name_match != FALSE) %>%
@@ -152,11 +158,13 @@ recent_dat_cln <- recent_dat %>%
 
 recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
+recent_final$Residents.Population <- NA
 ```
 
 Then, bind it to the historical cleaned data from this script. 
 
 ```{r bind historical and recent}
+all_equal(df_hist_final, recent_final, ignore_col_order = FALSE)
 all_dat <- bind_rows(df_hist_final, recent_final)
 n_distinct(all_dat$Name)
 ```
@@ -168,7 +176,14 @@ fac_info <- behindbarstools::read_fac_info() %>%
   mutate(Name = behindbarstools::clean_fac_col_txt(Name))
 final_dat <- left_join(all_dat, fac_info, 
                   by = "Name",
-                  suffix = c(".x", "")) %>%
+                  suffix = c(".x", ""))
+
+final_dat %<>% 
+  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
+         Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
+         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
+         City = behindbarstools::coalesce_with_warnings(City.x, City),
+         County = behindbarstools::coalesce_with_warnings(County.x, County)) %>%
   select(-ends_with(".x"))
 ```
 
@@ -262,28 +277,12 @@ percentage_change <- final_dat %>%
 # View(percentage_change)
 ```
 
-Finally, merge in population data. This isn't working right now because of naming issues!
-
-````{r merge-population}
-pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/initial/Merg_Pop.csv') %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name, to_upper = TRUE)) %>%
-  filter(State == "North Carolina")
-head(pop)
-
-dat_with_pop <- final_pop %>%
-  left_join(pop, by = "Name")
-
-table(is.na(dat_with_pop$Population))
-```
-
-
 ```{r write csv}
 out <- final_dat %>%
-  rename(HIFLD.Population = POPULATION) %>%
   reorder_historical_cols(rm_extra_cols = TRUE)
 
 ## check nothing strange is happening!
 skim(out)
 
-write_csv(out, file.path(base_path, "data", "NC_adult_facility_covid_counts_historical.csv"))
+write_csv(out, file.path(base_path, "data", "NC-historical-data.csv"))
 ```
