@@ -70,7 +70,7 @@ update_historical_data <- function(state_in) {
     unique() # only keep unique rows 
   
   ## Write results to historical data repo 
-  write_csv(all_dat, glue('data/{hfile}'))
+  write_csv(all_dat, glue('data/{state_in}'))
   
   ## Write warnings to log
   latest_warnings <- tibble(state = state_select,
