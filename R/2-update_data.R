@@ -12,15 +12,20 @@ devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 update_historical_data <- function(state_select) {
   browser()
   ## columns for rbinding 
-  historical_cols <- c("ID", "jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
+  historical_cols <- c("Facility.ID", "Jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
                        "Staff.Confirmed", "Residents.Deaths", "Staff.Deaths", "Residents.Recovered",
                        "Staff.Recovered", "Residents.Tadmin", "Staff.Tested", "Residents.Negative",
                        "Staff.Negative", "Residents.Pending", "Staff.Pending", "Residents.Quarantine",
                        "Staff.Quarantine", "Residents.Active", "Residents.Tested",
                        "Residents.Population", 
-                       "Address", "Zipcode", "City", "County", "Latitude", "Longitude", "County.FIPS",
-                       "hifld_id", "TYPE", "SECURELVL", "CAPACITY", "federal_prison_type", "HIFLD.Population",
-                       "Website","Notes")
+                       "Address", "Zipcode", "City", "County", "County.FIPS",
+                       "Latitude", "Longitude",
+                       "Description", "Security", "Age", "Gender", 
+                       "Is.Different.Operator", "Different.Operator", 
+                       "Population.Feb20", "Source.Population.Feb20",
+                       "Capacity", "Source.Capacity", 
+                       "HIFLD.ID", "BJS.ID",
+                       "Website")
   
   ## columns that could be present but shouldn't be 
   to_rm <- c("Facility", "scrape_name_clean", "federal_bool", "xwalk_name_clean",
@@ -33,8 +38,10 @@ update_historical_data <- function(state_select) {
   latest <- quiet_read_scrape_data(state = state_full,
                                    debug = TRUE)
   latest_dat <- latest$result %>%
-    filter(jurisdiction != "federal") %>%
-    behindbarstools::reorder_cols(add_missing_cols = TRUE)
+    filter(Jurisdiction != "federal") %>%
+    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
+    mutate(Zipcode = as.numeric(Zipcode),
+           County.FIPS = as.numeric(County.FIPS))
   
   no_match <- latest_dat %>%
     filter(name_match == "FALSE") %>%
@@ -49,7 +56,7 @@ update_historical_data <- function(state_select) {
     relocate(any_of(historical_cols))
 
   ## Read data from historical data repo for x state
-  hfile_end <- '_adult_facility_covid_counts_historical.csv'
+  hfile_end <- '-historical-data.csv'
   hfile <- glue('{state_select}{hfile_end}')
   
   hist_dat <- file.path('data', hfile) %>%
@@ -83,7 +90,7 @@ update_historical_data <- function(state_select) {
   if(state_select != "federal"){
     latest_warnings <- latest_warnings %>%
       filter(!str_detect(warning, 'State: Federal'),
-             !str_detect(warning, 'jurisdiction: federal'))
+             !str_detect(warning, 'Jurisdiction: federal'))
   }
   
   warnings <- read_csv('logs/log.csv')
@@ -101,5 +108,3 @@ update_historical_data("AZ")
 update_historical_data("WI")
 update_historical_data("MS")
 update_historical_data("FL")
-
-
