@@ -9,8 +9,8 @@ lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 
 
-update_historical_data <- function(state_select) {
-  browser()
+update_historical_data <- function(state_in) {
+  state_select <- substr(state_in, 1, 2)
   ## columns for rbinding 
   historical_cols <- c("Facility.ID", "Jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
                        "Staff.Confirmed", "Residents.Deaths", "Staff.Deaths", "Residents.Recovered",
@@ -56,10 +56,7 @@ update_historical_data <- function(state_select) {
     relocate(any_of(historical_cols))
 
   ## Read data from historical data repo for x state
-  hfile_end <- '-historical-data.csv'
-  hfile <- glue('{state_select}{hfile_end}')
-  
-  hist_dat <- file.path('data', hfile) %>%
+  hist_dat <- file.path('data', state_in) %>%
     read_csv(col_types = cols()) %>%
     behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
     select(-any_of(to_rm)) %>%
@@ -102,9 +99,13 @@ update_historical_data <- function(state_select) {
   write_csv(warnings_out, 'logs/log.csv')
 }
 
-update_historical_data("NC")
-update_historical_data("CA")
-update_historical_data("AZ")
-update_historical_data("WI")
-update_historical_data("MS")
-update_historical_data("FL")
+for (fileName in fileNames) {
+  # read data:
+  sample <- read.csv(fileName,
+                     header = TRUE,
+                     sep = ",")
+  # add more stuff here
+}
+
+file.list <- dir(path = 'data', pattern = "*-historical-data.csv")
+lapply(file.list, update_historical_data)
