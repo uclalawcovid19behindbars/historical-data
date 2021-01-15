@@ -1,14 +1,14 @@
 ---
 title: "Clean California - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "12/09/2020"
+date: "1/15/21"
 output: html_document
 ---
 
 ```{r package setup, include=FALSE}
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
-            "devtools", "magrittr")
+            "devtools", "magrittr", "skimr")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -71,7 +71,9 @@ df_out <- df_out %>%
 
 ```{r standardize facility names}
 df_cln <- df_out %>%
-  mutate(Name = str_replace(Name, "-CDCR", "CDCR")) 
+  mutate(
+    Name = str_replace(Name, "-CDCR", "CDCR"))
+      # Name = str_replace(Name, "-CDCRCCHCS WORKSITE LOCATION", ))
 
 df_mid <- behindbarstools::clean_facility_name(df_cln, debug = TRUE) 
 ```
@@ -85,7 +87,7 @@ df_mid <- df_mid %>%
 # show instances where merge didn't identify a clean name
 df_mid %>%
   filter(name_match == FALSE) %>% 
-  select(scrape_name_clean, Name) %>%
+  select(scrape_name_clean) %>%
   unique()
 ```
 
@@ -118,12 +120,14 @@ df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths,
          Date = date,
-         jurisdiction = Facility,
-         ID = Count.ID) %>%
+         Jurisdiction = Facility,
+         Facility.ID = Count.ID,
+         HIFLD.ID = hifld_id) %>%
   select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
+df_hist_final$Residents.Population <- df_hist$Residents.Population
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -134,8 +138,10 @@ First, read it in and clean it.
 recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
                                                 state = "California", 
                                                 debug = TRUE) %>%
-  filter(jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) 
+  filter(Jurisdiction != "federal",
+       Date > as.Date('2020-11-04')) %>%
+  mutate(Zipcode = as.numeric(Zipcode),
+         County.FIPS = as.numeric(County.FIPS))
 
 ## view facility names without a match in the xwalk
 recent_dat %>%
@@ -149,6 +155,7 @@ recent_dat_cln <- recent_dat %>%
 
 recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
+recent_final$Residents.Population <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
 
@@ -272,11 +279,10 @@ table(is.na(dat_with_pop$Population))
 
 ```{r write csv}
 out <- final_dat %>%
-  rename(HIFLD.Population = POPULATION) %>%
   reorder_historical_cols(rm_extra_cols = TRUE)
 
 ## check nothing strange is happening!
 skim(out)
 
-write_csv(out, file.path(base_path, "data", "CA_adult_facility_covid_counts_historical.csv"))
+write_csv(out, file.path(base_path, "data", "CA-historical-data.csv"))
 ```
