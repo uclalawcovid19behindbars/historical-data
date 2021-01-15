@@ -99,13 +99,5 @@ update_historical_data <- function(state_in) {
   write_csv(warnings_out, 'logs/log.csv')
 }
 
-for (fileName in fileNames) {
-  # read data:
-  sample <- read.csv(fileName,
-                     header = TRUE,
-                     sep = ",")
-  # add more stuff here
-}
-
 file.list <- dir(path = 'data', pattern = "*-historical-data.csv")
 lapply(file.list, update_historical_data)
