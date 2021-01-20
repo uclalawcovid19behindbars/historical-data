@@ -29,7 +29,7 @@ update_historical_data <- function(state_in) {
   
   ## columns that could be present but shouldn't be 
   to_rm <- c("Facility", "scrape_name_clean", "federal_bool", "xwalk_name_clean",
-             "name_match", "Count.ID", "Population", "Residents.Released")
+             "name_match", "Count.ID", "Population", "Residents.Released", "jurisdiction")
   
   state_full <- behindbarstools::translate_state(state_select)
   
@@ -58,12 +58,28 @@ update_historical_data <- function(state_in) {
   ## Read data from historical data repo for x state
   hist_dat <- file.path('data', state_in) %>%
     read_csv(col_types = cols()) %>%
+    ## account for any changes in facility xwalks
+    behindbarstools::clean_facility_name(., debug = TRUE) %>%
+    rename(Facility.ID = Facility.ID.y) %>%
+    select(-Facility.ID.x)
+  
+  ## Get non-matches from historical data
+  no_match_hist <- hist_dat %>%
+    filter(name_match == FALSE) %>% 
+    mutate(state = state_select,
+           date = Sys.Date(),
+           warning = glue("no match: {scrape_name_clean}")) %>%
+    select(state, date, warning) %>%
+    unique()
+  
+  ## Clean up historical data columns
+  hist_dat_merging <- hist_dat %>%
     behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
     select(-any_of(to_rm)) %>%
     relocate(any_of(historical_cols))
   
   ## Append historical data and latest data
-  check_bindable <- all_equal(hist_dat, latest_dat, ignore_col_order = FALSE)
+  check_bindable <- all_equal(hist_dat_merging, latest_dat, ignore_col_order = FALSE)
   
   all_dat <- hist_dat %>%
     bind_rows(latest_dat) %>%
@@ -81,7 +97,8 @@ update_historical_data <- function(state_in) {
     add_row(state = state_select,
             date = Sys.Date(),
             warning = check_bindable) %>%
-    bind_rows(no_match)
+    bind_rows(no_match) %>%
+    bind_rows(no_match_hist) 
   
   if(state_select != "federal"){
     latest_warnings <- latest_warnings %>%
