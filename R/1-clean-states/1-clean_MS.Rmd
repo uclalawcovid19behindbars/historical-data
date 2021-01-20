@@ -1,7 +1,7 @@
 ---
 title: "Clean Mississippi - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "12/15/2020"
+date: "1/19/21"
 output: html_document
 ---
 
@@ -111,12 +111,13 @@ df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths,
          Date = date,
-         jurisdiction = Facility,
-         ID = Count.ID) %>%
+         Jurisdiction = Facility,
+         Facility.ID = Count.ID) %>%
   select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
+df_hist_final$Residents.Population <- df_hist$Residents.Population
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -127,13 +128,15 @@ First, read it in and clean it.
 recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
                                                 state = "Mississippi", 
                                                 debug = TRUE) %>%
-  filter(jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) 
+  filter(Jurisdiction != "federal",
+       Date > as.Date('2020-11-04')) %>%
+  mutate(Zipcode = as.numeric(Zipcode),
+         County.FIPS = as.numeric(County.FIPS))
 
 ## view facility names without a match in the xwalk
 recent_dat %>%
   filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean, Name)
+  select(Name)
 
 recent_dat_cln <- recent_dat %>%
   filter(name_match != FALSE) %>%
@@ -141,6 +144,7 @@ recent_dat_cln <- recent_dat %>%
 
 recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
+recent_final$Residents.Population <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
 
@@ -160,8 +164,11 @@ final_dat <- left_join(all_dat, fac_info,
                   suffix = c(".x", ""))
 
 final_dat %<>% 
-  mutate(Latitude = behindbarstools::coalesce_with_warnings(Latitude.x, Latitude),
-         Longitude = behindbarstools::coalesce_with_warnings(Longitude.x, Longitude)) %>%
+  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
+         Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
+         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
+         City = behindbarstools::coalesce_with_warnings(City.x, City),
+         County = behindbarstools::coalesce_with_warnings(County.x, County)) %>%
   select(-ends_with(".x"))
 
 ```
@@ -250,11 +257,10 @@ table(pop_clean$name_match) # no matches here
 
 ```{r write csv}
 out <- final_dat %>%
-  rename(HIFLD.Population = POPULATION) %>%
   reorder_historical_cols(rm_extra_cols = TRUE)
 
 ## check nothing strange is happening!
 skim(out)
   
-write_csv(out, file.path(base_path, "data", "MS_adult_facility_covid_counts_historical.csv"))
+write_csv(out, file.path(base_path, "data", "MS-historical-data.csv"))
 ```
