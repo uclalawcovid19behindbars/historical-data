@@ -77,8 +77,7 @@ update_historical_data <- function(state_in) {
                             date = Sys.Date(),
                             warning = latest$warnings) %>%
     filter(warning != "Missing column names filled in: 'X1' [1]",
-           !str_detect(warning, 'multiple values that do not match for column scrape_name_clean'),
-           !str_detect(warning, 'Name: AIRWAY HEIGHTS CORRECTIONS CENTER')) %>%
+           !str_detect(warning, 'multiple values that do not match for column scrape_name_clean')) %>%
     add_row(state = state_select,
             date = Sys.Date(),
             warning = check_bindable) %>%
