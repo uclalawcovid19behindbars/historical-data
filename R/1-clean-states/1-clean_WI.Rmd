@@ -1,7 +1,7 @@
 ---
 title: "Clean Wisconsin - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "12/23/2020"
+date: "1/20/21"
 output: html_document
 ---
 
@@ -78,7 +78,7 @@ df_mid <- df_mid %>%
 ## DIVISION OF JUVENILE CORRECTIONS FIELD is missing
 df_mid %>%
   filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean, Name) %>%
+  select(scrape_name_clean) %>%
   unique()
 ```
 
@@ -101,14 +101,15 @@ Filter down and re-order columns in order to row bind them to latest data.
 df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
-         Residents.Deaths = Resident.Deaths,
          Date = date,
-         jurisdiction = Facility,
-         ID = Count.ID) %>%
-  select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
+         Jurisdiction = Facility,
+         Facility.ID = Count.ID) %>%
+  select(-c(Website, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
+## add back in Residents.Population (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
+df_hist_final$Residents.Population <- df_hist$Residents.Population
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -119,18 +120,19 @@ First, read it in and clean it.
 recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
                                                 state = "Wisconsin", 
                                                 debug = TRUE) %>%
-  filter(jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) 
+  filter(Jurisdiction != "federal",
+       Date > as.Date('2020-11-04')) %>%
+    mutate(Zipcode = as.numeric(Zipcode),
+         County.FIPS = as.numeric(County.FIPS))
 
 recent_dat %>%
   filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean, Name) %>%
+  select(scrape_name_clean) %>%
   unique()
-
-## TO DO: Come back to this once I've resolved "auxilary", "youth facilities", etc
 
 recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
 recent_final$Residents.Tested <- NA
+recent_final$Residents.Population <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
 
@@ -150,8 +152,11 @@ final_dat <- left_join(all_dat, fac_info,
                   suffix = c(".x", ""))
 
 final_dat %<>% 
-  mutate(Latitude = behindbarstools::coalesce_with_warnings(Latitude.x, Latitude),
-         Longitude = behindbarstools::coalesce_with_warnings(Longitude.x, Longitude)) %>%
+  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
+         Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
+         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
+         City = behindbarstools::coalesce_with_warnings(City.x, City),
+         County = behindbarstools::coalesce_with_warnings(County.x, County)) %>%
   select(-ends_with(".x"))
 ```
 
@@ -239,12 +244,11 @@ table(is.na(dat_with_pop$Population))
 
 ```{r write csv}
 out <- dat_with_pop %>%
-  rename(HIFLD.Population = POPULATION,
-         Historical.Population = Population) %>%
+  rename(Historical.Population = Population) %>%
   reorder_historical_cols(rm_extra_cols = TRUE)
 
 ## check nothing strange is happening!
 skim(out)
 
-write_csv(out, file.path(base_path, "data", "WI_adult_facility_covid_counts_historical.csv"))
+write_csv(out, file.path(base_path, "data", "WI-historical-data.csv"))
 ```
