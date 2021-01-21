@@ -8,8 +8,8 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 
-
 update_historical_data <- function(state_in) {
+  browser()
   state_select <- substr(state_in, 1, 2)
   ## columns for rbinding 
   historical_cols <- c("Facility.ID", "Jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
@@ -59,7 +59,7 @@ update_historical_data <- function(state_in) {
   hist_dat <- file.path('data', state_in) %>%
     read_csv(col_types = cols()) %>%
     ## account for any changes in facility xwalks
-    behindbarstools::clean_facility_name(., debug = TRUE) %>%
+    behindbarstools::clean_facility_name(., debug = TRUE) %>% 
     rename(Facility.ID = Facility.ID.y) %>%
     select(-Facility.ID.x)
   
@@ -106,7 +106,7 @@ update_historical_data <- function(state_in) {
              !str_detect(warning, 'Jurisdiction: federal'))
   }
   
-  warnings <- read_csv('logs/log.csv')
+  warnings <- read_csv('logs/log.csv', col_types = "cDc") 
   warnings_out <- warnings %>%
     bind_rows(latest_warnings) %>%
     distinct(state, warning, .keep_all = TRUE) # only keep new warnings
