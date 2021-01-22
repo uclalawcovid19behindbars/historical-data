@@ -1,5 +1,5 @@
 ## Define package list
-Packages<-c("tidyverse", "devtools", "purrr", "glue")
+Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr")
 .packages = Packages
 ## Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -9,7 +9,6 @@ lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 
 update_historical_data <- function(state_in) {
-  browser()
   state_select <- substr(state_in, 1, 2)
   ## columns for rbinding 
   historical_cols <- c("Facility.ID", "Jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
@@ -46,18 +45,42 @@ update_historical_data <- function(state_in) {
   no_match <- latest_dat %>%
     filter(name_match == "FALSE") %>%
     mutate(state = state_select,
-           date = Sys.Date(),
-           warning = glue("no match: {scrape_name_clean}")) %>%
-    select(state, date, warning) %>%
-    unique() 
+           date = Date,
+           warning_type = "no match",
+           warning = scrape_name_clean) %>%
+    select(state, date, warning_type, warning) 
 
   latest_dat <- latest_dat %>%
     select(-any_of(to_rm)) %>%
     relocate(any_of(historical_cols))
-
+  
   ## Read data from historical data repo for x state
   hist_dat <- file.path('data', state_in) %>%
-    read_csv(col_types = cols()) %>%
+    read_csv(col_types = cols(
+      Residents.Confirmed = "d",
+      Staff.Confirmed = "d",
+      Residents.Deaths = "d",
+      Staff.Deaths = "d",
+      Residents.Recovered = "d",
+      Staff.Recovered = "d",
+      Residents.Tadmin = "d",
+      Staff.Tested = "d",
+      Residents.Negative = "d",
+      Staff.Negative = "d",
+      Residents.Pending = "d",
+      Staff.Pending = "d",
+      Residents.Quarantine = "d",
+      Staff.Quarantine = "d",
+      Residents.Active = "d",
+      Residents.Tested = "d",
+      Residents.Population = "d",
+      Population.Feb20 = "d",
+      Security = "c",
+      Different.Operator = "c",
+      BJS.ID = "d"
+      )) %>%
+    select(all_of(historical_cols)) %>%
+    relocate(all_of(historical_cols)) %>%
     ## account for any changes in facility xwalks
     behindbarstools::clean_facility_name(., debug = TRUE) %>% 
     rename(Facility.ID = Facility.ID.y) %>%
@@ -67,21 +90,22 @@ update_historical_data <- function(state_in) {
   no_match_hist <- hist_dat %>%
     filter(name_match == FALSE) %>% 
     mutate(state = state_select,
-           date = Sys.Date(),
-           warning = glue("no match: {scrape_name_clean}")) %>%
-    select(state, date, warning) %>%
-    unique()
+           date = Date,
+           warning_type = "no match",
+           warning = scrape_name_clean) %>%
+    select(state, date, warning_type, warning)
   
   ## Clean up historical data columns
   hist_dat_merging <- hist_dat %>%
-    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
-    select(-any_of(to_rm)) %>%
+    # add in any missing cols in from latest data
+    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>% 
+    select(-any_of(to_rm)) %>% 
     relocate(any_of(historical_cols))
   
   ## Append historical data and latest data
   check_bindable <- all_equal(hist_dat_merging, latest_dat, ignore_col_order = FALSE)
   
-  all_dat <- hist_dat %>%
+  all_dat <- hist_dat_merging %>%
     bind_rows(latest_dat) %>%
     unique() # only keep unique rows 
   
@@ -93,7 +117,9 @@ update_historical_data <- function(state_in) {
                             date = Sys.Date(),
                             warning = latest$warnings) %>%
     filter(warning != "Missing column names filled in: 'X1' [1]",
-           !str_detect(warning, 'multiple values that do not match for column scrape_name_clean')) %>%
+           !str_detect(warning, 'multiple values that do not match for column scrape_name_clean'),
+           !str_detect(warning, 'Input data has 16 additional columns')
+           ) %>%
     add_row(state = state_select,
             date = Sys.Date(),
             warning = check_bindable) %>%
@@ -106,7 +132,7 @@ update_historical_data <- function(state_in) {
              !str_detect(warning, 'Jurisdiction: federal'))
   }
   
-  warnings <- read_csv('logs/log.csv', col_types = "cDc") 
+  warnings <- read_csv('logs/log.csv', col_types = "cDcc") 
   warnings_out <- warnings %>%
     bind_rows(latest_warnings) %>%
     distinct(state, warning, .keep_all = TRUE) # only keep new warnings

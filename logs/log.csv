@@ -1,318 +1,115 @@
-state,date,warning
-NC,NA,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Confirmed`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Notes`: character vs logical
+state,date,warning_type,warning
+AZ,2021-01-22,NA,"- Different types for column `State`: character vs character
 "
-CA,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Residents.Negative`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Notes`: character vs logical
+AZ,2021-01-13,no match,ICE CCA FLORENCE CORRECTIONAL CENTER
+AZ,2021-01-13,no match,ICE ELOY FEDERAL CONTRACT FACILITY
+AZ,2021-01-13,no match,ICE FLORENCE SERVICE PROCESSING CENTER
+AZ,2021-01-13,no match,ICE LA PALMA CORRECTIONAL CENTER
+AZ,2021-01-13,no match,ICE SAN LUIS REGIONAL DETENTION CENTER
+CA,2021-01-22,NA,"- Different types for column `State`: character vs character
 "
-CA,NA,no match: CDCRCCHCS WORKSITE LOCATION SAN FRANCISCO COUNTY
-CA,NA,no match: CDCRCCHCS WORKSITE LOCATION YOLO COUNTY
-CA,NA,no match: STATEWIDE
-AZ,NA,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Notes`: character vs logical
+CA,2021-01-20,no match,ALMEDA COUNTY
+CA,2021-01-20,no match,FRESNO COUNTY
+CA,2021-01-20,no match,HUMBOLDT COUNTY
+CA,2021-01-20,no match,IMPERIAL COUNTY
+CA,2021-01-20,no match,KERN COUNTY
+CA,2021-01-20,no match,LOS ANGELES COUNTY
+CA,2021-01-20,no match,MENDOCINO COUNTY
+CA,2021-01-20,no match,MERCED COUNTY
+CA,2021-01-20,no match,MONTEREY COUNTY
+CA,2021-01-20,no match,ORANGE COUNTY
+CA,2021-01-20,no match,RIVERSIDE COUNTY
+CA,2021-01-20,no match,SACRAMENTO COUNTY
+CA,2021-01-20,no match,SAN BERNARDINO COUNTY
+CA,2021-01-20,no match,SAN DIEGO COUNTY
+CA,2021-01-20,no match,SAN FRANCISCO COUNTY
+CA,2021-01-20,no match,SAN JOAQUIN COUNTY
+CA,2021-01-20,no match,SAN LUIS OBISPO COUNTY
+CA,2021-01-20,no match,SAN MATEO COUNTY
+CA,2021-01-20,no match,SANTA BARBARA COUNTY
+CA,2021-01-20,no match,SANTA CLARA COUNTY
+CA,2021-01-20,no match,SOLANO COUNTY
+CA,2021-01-20,no match,STANISLAUS COUNTY
+CA,2021-01-20,no match,TULARE COUNTY
+CA,2021-01-20,no match,VENTURA COUNTY
+CA,2021-01-20,no match,YOLO COUNTY
+CA,2021-01-13,no match,ADELANTO ICE PROCESSING CENTER
+CA,2021-01-13,no match,ALAMEDA COUNTY
+CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION FRESNO COUNTY
+CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION IMPERIAL COUNTY
+CA,2020-12-25,no match,CDCRCCHCS WORKSITE LOCATION KERN COUNTY
+CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION MENDOCINO COUNTY
+CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION ORANGE COUNTY
+CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION SAN LUIS OBISPO COUNTY
+CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION SANTA CLARA COUNTY
+CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATIONKERN COUNTY
+CA,2021-01-13,no match,ICE GOLDEN STATE ANNEX FACILITY
+CA,2021-01-13,no match,ICE IMPERIAL REGIONAL DETENTION FACILITY
+CA,2021-01-13,no match,ICE MESA VERDE DETENTION FACILITY
+CA,2021-01-13,no match,ICE OTAY MESA DETENTION CENTER SAN DIEGO CDF
+FL,2021-01-22,NA,"- Different types for column `State`: character vs character
 "
-WI,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Deaths`: logical vs double
-- Different types for column `Staff.Deaths`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Notes`: character vs logical
+FL,2020-03-31,no match,BLACKWATER CF
+FL,2020-03-31,no match,COMMUNITY CORRECTIONS REGION 3
+FL,2020-03-31,no match,COMMUNITY CORRECTIONS REGION 4
+FL,2020-04-03,no match,COMMUNITY CORRECTIONS REGION 2
+FL,2020-04-03,no match,SANTA ROSA CI
+FL,2020-04-03,no match,SOUTH BAY CF
+FL,2020-04-07,no match,CROSS CITY CI
+FL,2020-04-09,no match,GADSDEN CF
+FL,2020-04-14,no match,LAKE CITY CF
+FL,2020-04-17,no match,BAY CF
+FL,2020-04-17,no match,COMMUNITY CORRECTIONS REGION 1
+FL,2020-04-17,no match,GRACEVILLE CF
+FL,2020-04-17,no match,MOORE HAVEN CF
+FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 1
+FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 2
+FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 3
+FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 4
+FL,2020-11-05,no match,BAY CF THE GEO GROUP INC
+FL,2020-11-05,no match,BLACKWATER CF THE GEO GROUP INC
+FL,2020-11-05,no match,GRACEVILLE CF THE GEO GROUP INC
+FL,2020-11-05,no match,MOORE HAVEN CF THE GEO GROUP INC
+FL,2020-11-05,no match,SOUTH BAY CF THE GEO GROUP INC
+MS,2021-01-22,NA,"- Different types for column `State`: character vs character
 "
-WI,NA,no match: AUXILIARY UNITS
-WI,NA,no match: CRIMINAL JUSTICE FACILITY
-WI,NA,no match: DIVISION OF COMMUNITY CORRECTIONS TOTAL
-WI,NA,no match: DIVISION OF JUVENILE CORRECTIONS FACILITIES
-WI,NA,no match: DIVISION OF JUVENILE CORRECTIONS FIELD
-WI,NA,no match: FELMERS O CHANEY CORRECTIONAL C ENTER
-WI,NA,no match: GREEN BA Y CORRECTIONAL INSTITUTION
-WI,NA,no match: HOUSE OF CORRECTION
-WI,NA,no match: JUVENILE JUSTICE CENTER
-WI,NA,no match: RACINE CORRECTIONAL INSTITUTION
-WI,NA,no match: RACINE YOUTHFUL OFFEND ER CORRECTIONAL FACILITY
-MS,NA,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Confirmed`: logical vs double
-- Different types for column `Staff.Deaths`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Residents.Negative`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Tested`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Notes`: character vs logical
+MS,2020-08-15,no match,CENTRA MISSISSIPPI CORRECTIONAL FACILITY PEARL
+MS,2020-10-12,no match,JEFFERSON COUNTY CORRECTIONAL FACILITY
+MS,2020-08-15,no match,KEMPER-NESHOBA COUNTY CORRECTIONA FACILITY
+MS,2020-06-28,no match,PRIVATE INSTITUTIONS
+MS,2020-08-15,no match,SOUTH MISSISSIPPI CORRECTIONA INSTITUTION LEAKESVILLE
+MS,2020-04-13,no match,STATE PENITENTIARY
+MS,2020-03-31,no match,STATEWIDE
+MS,2020-04-13,no match,STATEWIDE FOR NON-SPECIFIC FACILITIES
+MS,2021-01-13,no match,ICE ADAMS COUNTY DETENTION CENTER
+MS,2021-01-13,no match,ICE HANCOCK COUNTY JAIL
+NC,2021-01-22,NA,"- Different types for column `State`: character vs character
 "
-FL,NA,"- Different types for column `ID`: logical vs double
-- Different types for column `State`: character vs character
-- Different types for column `Residents.Recovered`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Residents.Negative`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Tested`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Notes`: character vs logical
+NC,2020-04-08,no match,BALDEN CC
+NC,2020-04-28,no match,BLADEN CC
+NC,2020-04-28,no match,RALEIGH CCW
+NC,2020-03-31,no match,STATEWIDE
+NC,2020-05-12,no match,STATEWIDE FOR NON-SPECIFIC FACILITIES
+NC,2020-04-08,no match,STATEWIDE STAFF ONLY
+NC,2020-11-26,no match,CENTRAL PRISON HCF
+NC,2020-12-13,no match,DART CHERRY
+NJ,2021-01-22,NA,"- Different types for column `State`: character vs character
 "
-CA,NA,no match: CALIFORNIA HEALTH CARE FACILITY CHCF STOCKTON
-CA,NA,no match: CALIFORNIA SUBSTANCE ABUSE TREATMENT FACILITY AND STATE PRISON CORCORAN SATF-CSP CORCORAN
-CA,NA,no match: SACRAMENTO COUNTY JAIL
-CA,NA,no match: SANTA CLARA COUNTY JAIL
-CA,NA,no match: SANTA RITA JAIL
-CA,NA,no match: CDCRCCHCS WORKSITE LOCATION HUMBOLDT COUNTY
-CA,NA,no match: SAN DIEGO COUNTY JAILS
-WI,NA,no match: U
-CA,NA,no match: CDCRCCHCS WORKSITE LOCATIONALAMEDA COUNTY
-CA,NA,no match: CDCRCCHCS WORKSITE LOCATIONMERCED COUNTY
-CA,NA,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Deaths`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Residents.Negative`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `BJS.ID`: logical vs double
+NJ,2020-06-26,no match,MOUNTAINVIEW YOUTH CORRECTIONAL FACILITY
+NJ,2020-04-03,no match,MOUTAINVIEW YOUTH CORRECTIONAL FACILITY
+NJ,2020-03-31,no match,STATEWIDE
+NJ,2020-04-06,no match,STU
+WI,2021-01-22,NA,"- Different types for column `State`: character vs character
 "
-CA,NA,no match: ALAMEDA COUNTY
-CA,NA,no match: FRESNO COUNTY
-CA,NA,no match: HUMBOLDT COUNTY
-CA,NA,no match: IMPERIAL COUNTY
-CA,NA,no match: KERN COUNTY
-CA,NA,no match: LOS ANGELES COUNTY
-CA,NA,no match: MENDOCINO COUNTY
-CA,NA,no match: MERCED COUNTY
-CA,NA,no match: MONTEREY COUNTY
-CA,NA,no match: ORANGE COUNTY
-CA,NA,no match: RIVERSIDE COUNTY
-CA,NA,no match: SACRAMENTO COUNTY
-CA,NA,no match: SAN BERNARDINO COUNTY
-CA,NA,no match: SAN DIEGO COUNTY
-CA,NA,no match: SAN FRANCISCO COUNTY
-CA,NA,no match: SAN JOAQUIN COUNTY
-CA,NA,no match: SAN LUIS OBISPO COUNTY
-CA,NA,no match: SAN MATEO COUNTY
-CA,NA,no match: SANTA BARBARA COUNTY
-CA,NA,no match: SANTA CLARA COUNTY
-CA,NA,no match: SOLANO COUNTY
-CA,NA,no match: STANISLAUS COUNTY
-CA,NA,no match: TULARE COUNTY
-CA,NA,no match: VENTURA COUNTY
-CA,NA,no match: ALMEDA COUNTY
-AZ,2021-01-22,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `BJS.ID`: logical vs double
-"
-AZ,2021-01-22,no match: ICE CCA FLORENCE CORRECTIONAL CENTER
-AZ,2021-01-22,no match: ICE ELOY FEDERAL CONTRACT FACILITY
-AZ,2021-01-22,no match: ICE FLORENCE SERVICE PROCESSING CENTER
-AZ,2021-01-22,no match: ICE LA PALMA CORRECTIONAL CENTER
-AZ,2021-01-22,no match: ICE SAN LUIS REGIONAL DETENTION CENTER
-CA,2021-01-22,no match: YOLO COUNTY
-CA,2021-01-22,no match: ADELANTO ICE PROCESSING CENTER
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATION FRESNO COUNTY
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATION IMPERIAL COUNTY
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATION KERN COUNTY
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATION MENDOCINO COUNTY
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATION ORANGE COUNTY
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATION SAN LUIS OBISPO COUNTY
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATION SANTA CLARA COUNTY
-CA,2021-01-22,no match: CDCRCCHCS WORKSITE LOCATIONKERN COUNTY
-CA,2021-01-22,no match: ICE GOLDEN STATE ANNEX FACILITY
-CA,2021-01-22,no match: ICE IMPERIAL REGIONAL DETENTION FACILITY
-CA,2021-01-22,no match: ICE MESA VERDE DETENTION FACILITY
-CA,2021-01-22,no match: ICE OTAY MESA DETENTION CENTER SAN DIEGO CDF
-FL,2021-01-22,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Recovered`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Residents.Negative`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Tested`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Security`: logical vs character
-- Different types for column `Different.Operator`: logical vs character
-"
-FL,2021-01-22,no match: BLACKWATER CF
-FL,2021-01-22,no match: COMMUNITY CORRECTIONS REGION 3
-FL,2021-01-22,no match: COMMUNITY CORRECTIONS REGION 4
-FL,2021-01-22,no match: COMMUNITY CORRECTIONS REGION 2
-FL,2021-01-22,no match: SANTA ROSA CI
-FL,2021-01-22,no match: SOUTH BAY CF
-FL,2021-01-22,no match: CROSS CITY CI
-FL,2021-01-22,no match: GADSDEN CF
-FL,2021-01-22,no match: LAKE CITY CF
-FL,2021-01-22,no match: BAY CF
-FL,2021-01-22,no match: COMMUNITY CORRECTIONS REGION 1
-FL,2021-01-22,no match: GRACEVILLE CF
-FL,2021-01-22,no match: MOORE HAVEN CF
-FL,2021-01-22,no match: COMMUNITY CORRECTIONSREGION 1
-FL,2021-01-22,no match: COMMUNITY CORRECTIONSREGION 2
-FL,2021-01-22,no match: COMMUNITY CORRECTIONSREGION 3
-FL,2021-01-22,no match: COMMUNITY CORRECTIONSREGION 4
-FL,2021-01-22,no match: BAY CF THE GEO GROUP INC
-FL,2021-01-22,no match: BLACKWATER CF THE GEO GROUP INC
-FL,2021-01-22,no match: GRACEVILLE CF THE GEO GROUP INC
-FL,2021-01-22,no match: MOORE HAVEN CF THE GEO GROUP INC
-FL,2021-01-22,no match: SOUTH BAY CF THE GEO GROUP INC
-MS,2021-01-22,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Confirmed`: logical vs double
-- Different types for column `Staff.Deaths`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Residents.Negative`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Tested`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Security`: logical vs character
-- Different types for column `Different.Operator`: logical vs character
-"
-MS,2021-01-22,no match: CENTRA MISSISSIPPI CORRECTIONAL FACILITY PEARL
-MS,2021-01-22,no match: JEFFERSON COUNTY CORRECTIONAL FACILITY
-MS,2021-01-22,no match: KEMPER-NESHOBA COUNTY CORRECTIONA FACILITY
-MS,2021-01-22,no match: PRIVATE INSTITUTIONS
-MS,2021-01-22,no match: SOUTH MISSISSIPPI CORRECTIONA INSTITUTION LEAKESVILLE
-MS,2021-01-22,no match: STATE PENITENTIARY
-MS,2021-01-22,no match: STATEWIDE
-MS,2021-01-22,no match: STATEWIDE FOR NON-SPECIFIC FACILITIES
-MS,2021-01-22,no match: ICE ADAMS COUNTY DETENTION CENTER
-MS,2021-01-22,no match: ICE HANCOCK COUNTY JAIL
-NC,2021-01-22,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Confirmed`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Different.Operator`: logical vs character
-"
-NC,2021-01-22,no match: BALDEN CC
-NC,2021-01-22,no match: BLADEN CC
-NC,2021-01-22,no match: RALEIGH CCW
-NC,2021-01-22,no match: STATEWIDE
-NC,2021-01-22,no match: STATEWIDE FOR NON-SPECIFIC FACILITIES
-NC,2021-01-22,no match: STATEWIDE STAFF ONLY
-NC,2021-01-22,no match: NA
-NC,2021-01-22,no match: CENTRAL PRISON HCF
-NC,2021-01-22,no match: DART CHERRY
-NJ,2021-01-22,"- Different types for column `State`: character vs character
-- Different types for column `Staff.Deaths`: logical vs double
-- Different types for column `Residents.Recovered`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Residents.Negative`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Tested`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-"
-NJ,2021-01-22,no match: MOUNTAINVIEW YOUTH CORRECTIONAL FACILITY
-NJ,2021-01-22,no match: MOUTAINVIEW YOUTH CORRECTIONAL FACILITY
-NJ,2021-01-22,no match: STATEWIDE
-NJ,2021-01-22,no match: STU
-WI,2021-01-22,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Deaths`: logical vs double
-- Different types for column `Staff.Deaths`: logical vs double
-- Different types for column `Staff.Recovered`: logical vs double
-- Different types for column `Residents.Tadmin`: logical vs double
-- Different types for column `Staff.Tested`: logical vs double
-- Different types for column `Staff.Negative`: logical vs double
-- Different types for column `Residents.Pending`: logical vs double
-- Different types for column `Staff.Pending`: logical vs double
-- Different types for column `Residents.Quarantine`: logical vs double
-- Different types for column `Staff.Quarantine`: logical vs double
-- Different types for column `Residents.Active`: logical vs double
-- Different types for column `Residents.Population`: logical vs double
-- Different types for column `Different.Operator`: logical vs character
-"
-WI,2021-01-22,no match: BUREAU OF CORRECTIONAL ENTERPRISES
-WI,2021-01-22,no match: COMMUNITY CORRECTIONS REGION 2 KENOSHA RACINE WALWORTH
-WI,2021-01-22,no match: COMMUNITY CORRECTIONS REGION 3 MILWAUKEE
-WI,2021-01-22,no match: RACINE CI-STURTEVANT TF
-WI,2021-01-22,no match: STATEWIDE
-WI,2021-01-22,no match: STATEWIDE FOR NON-FACILITY
-WI,2021-01-22,no match: 0
-WI,2021-01-22,no match: CRIMINALJUSTICE FACILITY
-WI,2021-01-22,no match: GRAND TOTAL
-WI,2021-01-22,no match: JUVENILE JUST
-WI,2021-01-22,no match: NEW LISBON CORRECTIONAL INSTITUTIO
+WI,2020-07-15,no match,BUREAU OF CORRECTIONAL ENTERPRISES
+WI,2020-05-14,no match,COMMUNITY CORRECTIONS REGION 2 KENOSHA RACINE WALWORTH
+WI,2020-04-08,no match,COMMUNITY CORRECTIONS REGION 3 MILWAUKEE
+WI,2020-04-09,no match,RACINE CI-STURTEVANT TF
+WI,2020-08-31,no match,STATEWIDE
+WI,2020-04-17,no match,STATEWIDE FOR NON-FACILITY
+WI,2020-12-13,no match,0
+WI,2020-11-12,no match,CRIMINALJUSTICE FACILITY
+WI,2020-11-05,no match,GRAND TOTAL
+WI,2020-12-13,no match,JUVENILE JUST
+WI,2020-11-12,no match,NEW LISBON CORRECTIONAL INSTITUTIO
+WI,2021-01-06,no match,U
