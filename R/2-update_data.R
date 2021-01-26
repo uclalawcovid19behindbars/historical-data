@@ -118,7 +118,8 @@ update_historical_data <- function(state_in) {
                             warning = latest$warnings) %>%
     filter(warning != "Missing column names filled in: 'X1' [1]",
            !str_detect(warning, 'multiple values that do not match for column scrape_name_clean'),
-           !str_detect(warning, 'Input data has 16 additional columns')
+           !str_detect(warning, 'Input data has 17 additional columns'), # no warning on debug columns (these get rm'd later)
+           !str_detect(warning, 'unique values state, state'), # no warning on coalesce by jurisdiction if both = state
            ) %>%
     add_row(state = state_select,
             date = Sys.Date(),
