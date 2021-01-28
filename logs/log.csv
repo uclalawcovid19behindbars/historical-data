@@ -209,3 +209,67 @@ WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: WAUPUN CORRECTIONAL INSTITUTION,
 WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: WINNEBAGO CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1708 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
 WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: WISCONSIN SECURE PROGRAM FACILITY, State: Wisconsin, jurisdiction: state, Facility.ID: 1710 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
 WI,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+AZ,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+AZ,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"
+CA,2021-01-28,NA,"Group Date: 2021-01-27, Name: LOS ANGELES JAILS, State: California, jurisdiction: county, Facility.ID: 135 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values county, county"
+CA,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+CA,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"
+FL,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+FL,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"
+MS,2021-01-28,NA,"2 parsing failures.
+  row  col   expected    actual                                                                      file
+21454 Date date like  2020-10-  'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+21454 NA   27 columns 1 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
+MS,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+MS,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"
+NC,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+NC,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"
+NJ,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+NJ,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"
+PA,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+PA,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+- Different types for column `Source.Population.Feb20`: logical vs character
+"
+PA,2020-08-23,no match,TOTAL
+WI,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
+WI,2021-01-28,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"

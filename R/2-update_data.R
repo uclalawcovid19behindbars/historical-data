@@ -17,6 +17,8 @@ update_historical_data <- function(state_in) {
                        "Staff.Negative", "Residents.Pending", "Staff.Pending", "Residents.Quarantine",
                        "Staff.Quarantine", "Residents.Active", "Residents.Tested",
                        "Residents.Population", 
+                       "Residents.Initiated", "Residents.Vadmin", 
+                       "Staff.Initiated", "Staff.Vadmin", 
                        "Address", "Zipcode", "City", "County", "County.FIPS",
                        "Latitude", "Longitude",
                        "Description", "Security", "Age", "Gender", 
@@ -40,7 +42,10 @@ update_historical_data <- function(state_in) {
     filter(Jurisdiction != "federal") %>%
     behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
     mutate(Zipcode = as.numeric(Zipcode),
-           County.FIPS = as.numeric(County.FIPS))
+           County.FIPS = as.numeric(County.FIPS),
+           Latitude = as.numeric(Latitude),
+           Longitude = as.numeric(Longitude),
+           Population.Feb20 = as.numeric(Population.Feb20))
   
   no_match <- latest_dat %>%
     filter(name_match == "FALSE") %>%
@@ -74,6 +79,10 @@ update_historical_data <- function(state_in) {
       Residents.Active = "d",
       Residents.Tested = "d",
       Residents.Population = "d",
+      Residents.Initiated = "d",
+      Residents.Vadmin = "d",
+      Staff.Initiated = "d",
+      Staff.Vadmin = "d",
       Population.Feb20 = "d",
       Security = "c",
       Different.Operator = "c",
@@ -120,6 +129,7 @@ update_historical_data <- function(state_in) {
            !str_detect(warning, 'multiple values that do not match for column scrape_name_clean'),
            !str_detect(warning, 'Input data has 17 additional columns'), # no warning on debug columns (these get rm'd later)
            !str_detect(warning, 'unique values state, state'), # no warning on coalesce by jurisdiction if both = state
+           !str_detect(warning, 'column `State`: character vs character')
            ) %>%
     add_row(state = state_select,
             date = Sys.Date(),
