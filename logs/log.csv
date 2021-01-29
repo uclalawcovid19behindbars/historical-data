@@ -273,3 +273,11 @@ WI,2021-01-28,NA,"- Different types for column `State`: character vs character
 - Different types for column `Staff.Initiated`: logical vs double
 - Different types for column `Staff.Vadmin`: logical vs double
 "
+AZ,2021-01-28,NA,- different number of columns: 49 vs 47
+CA,2021-01-28,NA,- different number of columns: 49 vs 47
+FL,2021-01-28,NA,- different number of columns: 49 vs 47
+MS,2021-01-28,NA,- different number of columns: 49 vs 47
+NC,2021-01-28,NA,- different number of columns: 49 vs 47
+NJ,2021-01-28,NA,- different number of columns: 49 vs 47
+PA,2021-01-28,NA,- different number of columns: 49 vs 47
+WI,2021-01-28,NA,- different number of columns: 49 vs 47
