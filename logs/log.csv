@@ -281,3 +281,44 @@ NC,2021-01-28,NA,- different number of columns: 49 vs 47
 NJ,2021-01-28,NA,- different number of columns: 49 vs 47
 PA,2021-01-28,NA,- different number of columns: 49 vs 47
 WI,2021-01-28,NA,- different number of columns: 49 vs 47
+AZ,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+AZ,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+"
+CA,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+CA,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+"
+FL,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+FL,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+"
+MS,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+MS,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+"
+NC,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+NC,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+"
+NJ,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+NJ,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+"
+PA,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+PA,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Source.Population.Feb20`: logical vs character
+"
+WI,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
+WI,2021-01-29,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+"
