@@ -322,3 +322,45 @@ WI,2021-01-29,NA,"- Different types for column `State`: character vs character
 - Different types for column `Residents.Completed`: double vs logical
 - Different types for column `Staff.Completed`: double vs logical
 "
+AZ,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+CA,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+CA,2021-01-29,no match,SF COUNTY JAIL
+FL,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+MS,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+NC,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+NJ,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+PA,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+- Different types for column `Source.Population.Feb20`: logical vs character
+"
+WI,2021-01-30,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Completed`: double vs logical
+- Different types for column `Staff.Completed`: double vs logical
+- Different types for column `Is.Different.Operator`: double vs logical
+"
