@@ -1,14 +1,14 @@
 ---
 title: "Clean Arizona - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "1/14/21"
+date: "2/3/21"
 output: html_document
 ---
 
 ```{r package setup, include=FALSE}
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
-            "devtools", "magrittr")
+            "devtools", "magrittr", "skimr")
 .packages = Packages
 ##Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
@@ -110,15 +110,15 @@ df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths,
-         Date = date,
-         Jurisdiction = Facility,
-         Facility.ID = Count.ID) %>%
+         Date = date) %>%
   select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
-df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
-df_hist_final$Residents.Population <- df_hist$Residents.Population
+df_hist_final$Residents.Population <- df_hist$Resident.Population
+all_cols <- df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 
+df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
+  select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols. doing this because we don't want all logical cols for the row_bind
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -130,9 +130,7 @@ recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE,
                                                 state = "Arizona", 
                                                 debug = TRUE) %>%
   filter(Jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) %>%
-  mutate(Zipcode = as.numeric(Zipcode),
-         County.FIPS = as.numeric(County.FIPS))
+       Date > as.Date('2020-11-04')) 
 
 ## view facility names without a match in the xwalk
 recent_dat %>%
@@ -144,8 +142,6 @@ recent_dat_cln <- recent_dat %>%
   select(-xwalk_name_clean)
 
 recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
-recent_final$Residents.Tested <- NA
-recent_final$Residents.Population <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
 
@@ -157,23 +153,18 @@ n_distinct(all_dat$Name)
 Merge in facility information (address, city, county, etc.).
 
 ```{r}
-fac_info <- behindbarstools::read_fac_info() %>%
-  filter(State == "Arizona") %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name))
+fac_info <- behindbarstools::read_fac_info() 
 final_dat <- left_join(all_dat, fac_info, 
-                  by = "Name",
-                  suffix = c(".x", ""))
-
-final_dat %<>% 
-  mutate(Latitude = behindbarstools::coalesce_with_warnings(Latitude.x, Latitude),
-         Longitude = behindbarstools::coalesce_with_warnings(Longitude.x, Longitude)) %>%
-  select(-ends_with(".x"))
+                  by = "Facility.ID",
+                  suffix = c(".x", "")) %>%
+    select(-ends_with(".x"))
 ```
 
 Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
 
 ```{r plot cases/deaths}
-test <- flag_noncumulative_cases(final_dat, Name)
+testing <- final_dat
+test <- flag_noncumulative_cases(testing, Name)
 
 # lag cases overall 
 test %>%
@@ -195,7 +186,19 @@ lag_case_plots$plot
 # for (i in 1:nrow(lag_case_plots)){
 #   facility_name <- lag_case_plots$Name[[i]]
 #   ggsave(paste0(facility_name, "_LagChangeCases.png"), lag_case_plots$plot[[i]],
-#          path = file.path(base_path, "plots", "WI"))
+#          path = file.path(base_path, "plots", "AZ", "cases"))
+# }
+
+testing <- flag_noncumulative_deaths(test, Name, Residents.Deaths)
+lag_death_plots <- plot_lags(testing, "Date", 
+                             y_var = "lag_change_deaths",
+                             grp_var = Name)
+
+## save death plots
+# for (i in 1:nrow(lag_death_plots)){
+#   facility_name <- lag_death_plots$Name[[i]]
+#   ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
+#          path = file.path(base_path, "plots", "AZ", "deaths"))
 # }
 ```
 
@@ -217,7 +220,7 @@ ggplot(data = dates,
 ```{r find infection spikes, include=FALSE }
 ## Find historical spikes over time.
 ## get 7-day percentage change in cases
-percentage_change <- final_dat %>%
+percentage_change <- testing %>%
     dplyr::arrange(Name, Date) %>%
     mutate(
         week_ago = dplyr::lag(Residents.Confirmed, n = 7),
@@ -244,7 +247,7 @@ pop_clean <- pop %>%
   behindbarstools::clean_facility_name(debug = TRUE)
 table(pop_clean$name_match) # no matches here
 
-# dat_with_pop <- final_dat %>%
+# dat_with_pop <- testing %>%
 #   left_join(pop_clean, by = c("Name" = "name_cln",
 #                             "Date" = "Date")) %>%
 #   select(-POPULATION)
@@ -255,7 +258,7 @@ table(pop_clean$name_match) # no matches here
 
 ```{r write csv}
 out <- final_dat %>%
-  reorder_historical_cols(rm_extra_cols = TRUE)
+  behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE) # dont expect anything to change here
 
 ## check nothing strange is happening!
 skim(out)
