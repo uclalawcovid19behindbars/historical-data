@@ -364,3 +364,39 @@ WI,2021-01-30,NA,"- Different types for column `State`: character vs character
 - Different types for column `Staff.Completed`: double vs logical
 - Different types for column `Is.Different.Operator`: double vs logical
 "
+AZ,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+AZ,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+CA,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+CA,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+FL,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+FL,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+MS,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+MS,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+NC,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+NC,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+NJ,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+NJ,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+"
+NJ,2021-02-01,no match,KINTOCK NEWARK
+PA,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+PA,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+- Different types for column `Source.Population.Feb20`: logical vs character
+"
+PA,2021-02-01,no match,COAL TWNP
+PA,2021-02-01,no match,LAUREL HIGH
+WI,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+WI,2021-02-03,NA,"- Different types for column `State`: character vs character
+- Different types for column `Is.Different.Operator`: double vs logical
+"
