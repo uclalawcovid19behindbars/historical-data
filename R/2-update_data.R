@@ -10,23 +10,6 @@ devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 
 update_historical_data <- function(state_in) {
   state_select <- substr(state_in, 1, 2)
-  ## columns for rbinding 
-  historical_cols <- c("Facility.ID", "Jurisdiction", "State", "Name", "Date", "source", "Residents.Confirmed",
-                       "Staff.Confirmed", "Residents.Deaths", "Staff.Deaths", "Residents.Recovered",
-                       "Staff.Recovered", "Residents.Tadmin", "Staff.Tested", "Residents.Negative",
-                       "Staff.Negative", "Residents.Pending", "Staff.Pending", "Residents.Quarantine",
-                       "Staff.Quarantine", "Residents.Active", "Residents.Tested",
-                       "Residents.Population", 
-                       "Residents.Initiated", "Residents.Completed", "Residents.Vadmin", 
-                       "Staff.Initiated", "Staff.Completed", "Staff.Vadmin", 
-                       "Address", "Zipcode", "City", "County", "County.FIPS",
-                       "Latitude", "Longitude",
-                       "Description", "Security", "Age", "Gender", 
-                       "Is.Different.Operator", "Different.Operator", 
-                       "Population.Feb20", "Source.Population.Feb20",
-                       "Capacity", "Source.Capacity", 
-                       "HIFLD.ID", "BJS.ID",
-                       "Website")
   
   ## columns that could be present but shouldn't be 
   to_rm <- c("Facility", "scrape_name_clean", "federal_bool", "xwalk_name_clean",
@@ -40,12 +23,7 @@ update_historical_data <- function(state_in) {
                                    debug = TRUE)
   latest_dat <- latest$result %>%
     filter(Jurisdiction != "federal") %>%
-    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>%
-    mutate(Zipcode = as.numeric(Zipcode),
-           County.FIPS = as.numeric(County.FIPS),
-           Latitude = as.numeric(Latitude),
-           Longitude = as.numeric(Longitude),
-           Population.Feb20 = as.numeric(Population.Feb20))
+    behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = FALSE) 
   
   no_match <- latest_dat %>%
     filter(name_match == "FALSE") %>%
@@ -54,14 +32,16 @@ update_historical_data <- function(state_in) {
            warning_type = "no match",
            warning = scrape_name_clean) %>%
     select(state, date, warning_type, warning) 
-
-  latest_dat <- latest_dat %>%
-    select(-any_of(to_rm)) %>%
-    relocate(any_of(historical_cols))
   
   ## Read data from historical data repo for x state
   hist_dat <- file.path('data', state_in) %>%
     read_csv(col_types = cols(
+      Date = "D",
+      Jurisdiction = "c",
+      State = "c",
+      Name = "c",
+      source = "c",
+      Facility.ID = "d",
       Residents.Confirmed = "d",
       Staff.Confirmed = "d",
       Residents.Deaths = "d",
@@ -86,16 +66,21 @@ update_historical_data <- function(state_in) {
       Staff.Completed = "d",
       Staff.Vadmin = "d",
       Population.Feb20 = "d",
+      Zipcode = "d",
+      Latitude = "d",
+      Longitude = "d",
+      County.FIPS = "d",
+      HIFLD.ID = "d",
+      Capacity = "d",
+      BJS.ID = "d",
       Security = "c",
-      Different.Operator = "c",
-      BJS.ID = "d"
+      Different.Operator = "c"
       )) %>%
-    select(all_of(historical_cols)) %>%
-    relocate(all_of(historical_cols)) %>%
     ## account for any changes in facility xwalks
     behindbarstools::clean_facility_name(., debug = TRUE) %>% 
     rename(Facility.ID = Facility.ID.y) %>%
-    select(-Facility.ID.x)
+    select(-Facility.ID.x) %>%
+    
   
   ## Get non-matches from historical data
   no_match_hist <- hist_dat %>%
@@ -106,18 +91,17 @@ update_historical_data <- function(state_in) {
            warning = scrape_name_clean) %>%
     select(state, date, warning_type, warning)
   
-  ## Clean up historical data columns
   hist_dat_merging <- hist_dat %>%
-    # add in any missing cols in from latest data
-    behindbarstools::reorder_cols(add_missing_cols = TRUE) %>% 
-    select(-any_of(to_rm)) %>% 
-    relocate(any_of(historical_cols))
+    behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE)
+  
+  latest_dat_merging <- latest_dat %>%
+    behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE)
   
   ## Append historical data and latest data
-  check_bindable <- all_equal(hist_dat_merging, latest_dat, ignore_col_order = FALSE)
+  check_bindable <- all_equal(hist_dat_merging, latest_dat_merging, ignore_col_order = FALSE)
   
   all_dat <- hist_dat_merging %>%
-    bind_rows(latest_dat) %>%
+    bind_rows(latest_dat_merging) %>%
     unique() # only keep unique rows 
   
   ## Write results to historical data repo 
