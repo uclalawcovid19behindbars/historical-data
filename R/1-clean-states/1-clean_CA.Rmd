@@ -1,7 +1,7 @@
 ---
 title: "Clean California - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "1/15/21"
+date: "2/3/21"
 output: html_document
 ---
 
@@ -72,20 +72,21 @@ df_out <- df_out %>%
 ```{r standardize facility names}
 df_cln <- df_out %>%
   mutate(
-    Name = str_replace(Name, "-CDCR", "CDCR"))
-      # Name = str_replace(Name, "-CDCRCCHCS WORKSITE LOCATION", ))
+    Name = str_replace(Name, "-CDCR", "CDCR"),
+    Name = str_replace(Name, "CDCRCCHCS", "CDCR CCHCS"),
+    Name = str_replace(Name, "CDCR/CCHCS", "CDCR CCHS"))
 
 df_mid <- behindbarstools::clean_facility_name(df_cln, debug = TRUE) 
 ```
 
 ```{r filter out federal facilities}
-df_mid <- df_mid %>%
+df_nonfederal <- df_mid %>%
   filter(federal_bool == FALSE)
 ```
 
 ```{r check name mismatches}
 # show instances where merge didn't identify a clean name
-df_mid %>%
+df_nonfederal %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
   unique()
@@ -94,18 +95,19 @@ df_mid %>%
 Remove observations where we didn't pick up a clean name.
 
 ```{r drop null name observations}
-df_mid <- df_mid %>%
-  filter(!is.na(scrape_name_clean),
-         name_match != FALSE)
+df_filt <- df_nonfederal %>%
+  filter(!is.na(scrape_name_clean)) %>%
+  filter((name_match == TRUE) | (str_detect(Name, "CDCR CCHS"))) %>%
+  mutate(Jurisdiction = ifelse(name_match == FALSE, "state", Jurisdiction)) # CDCR CCHS ones are "state"
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
 
 ```{r concat duplicate date/facilities}
-nrow(distinct(df_mid, date, Name))
-see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, date)))
+nrow(distinct(df_filt, date, Name))
+see_if(nrow(df_filt) == nrow(distinct(df_filt, Name, date)))
 
-df_comb <- df_mid %>% 
+df_comb <- df_filt %>% 
   behindbarstools::group_by_coalesce(., Name, date, 
                                      .ignore = c("scrape_name_clean", "Facility", "source"))
 
@@ -119,15 +121,13 @@ df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths,
-         Date = date,
-         Jurisdiction = Facility,
-         Facility.ID = Count.ID,
-         HIFLD.ID = hifld_id) %>%
+         Date = date) %>%
   select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
-df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
 ## add back in Residents.Tested (this will only be present for historical data)
 df_hist_final$Residents.Tested <- df_hist$Residents.Tested
 df_hist_final$Residents.Population <- df_hist$Residents.Population
+df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
+    select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols. doing this because we don't want all logical cols for the row_bind
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -139,9 +139,7 @@ recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE,
                                                 state = "California", 
                                                 debug = TRUE) %>%
   filter(Jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) %>%
-  mutate(Zipcode = as.numeric(Zipcode),
-         County.FIPS = as.numeric(County.FIPS))
+       Date > as.Date('2020-11-04')) 
 
 ## view facility names without a match in the xwalk
 recent_dat %>%
@@ -149,13 +147,7 @@ recent_dat %>%
   select(scrape_name_clean, Name) %>%
   unique()
 
-recent_dat_cln <- recent_dat %>%
-  filter(name_match != FALSE) %>%
-  select(-xwalk_name_clean)
-
-recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
-recent_final$Residents.Tested <- NA
-recent_final$Residents.Population <- NA
+recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
 ```
 Then, bind it to the historical cleaned data from this script. 
 
@@ -167,21 +159,20 @@ n_distinct(all_dat$Name)
 Merge in facility information (address, city, county, etc.).
 
 ```{r}
-fac_info <- behindbarstools::read_fac_info() %>%
-  filter(State == "California") %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name))
+fac_info <- behindbarstools::read_fac_info() 
 final_dat <- left_join(all_dat, fac_info, 
-                  by = "Name",
+                  by = "Facility.ID",
                   suffix = c(".x", ""))
 
-final_dat %<>% 
-  mutate(Latitude = behindbarstools::coalesce_with_warnings(Latitude.x, Latitude),
-         Longitude = behindbarstools::coalesce_with_warnings(Longitude.x, Longitude)) %>%
+final_dat <- final_dat %>% 
+  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
+         Name = behindbarstools::coalesce_with_warnings(Name.x, Name),
+         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
+         Jurisdiction = behindbarstools::coalesce_with_warnings(Jurisdiction.x, Jurisdiction)) %>%
   select(-ends_with(".x"))
 ```
 
-Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
-
+Look at the change in cases and deaths from day-to-day.
 
 ```{r plot cases/deaths}
 test <- flag_noncumulative_cases(final_dat, Name)
@@ -222,27 +213,24 @@ for (i in 1:nrow(lag_case_plots)){
 
 
 ```{r plot cleaned death data}
-final_dat <- flag_noncumulative_deaths(final_dat, Name, Residents.Deaths)
-lag_death_plots <- plot_lags(final_dat, "Date", 
+testing <- flag_noncumulative_deaths(final_dat, Name, Residents.Deaths)
+lag_death_plots <- plot_lags(testing, "Date", 
                              y_var = "lag_change_deaths",
                              grp_var = Name)
-# df_sw %>%
-#   filter(cumulative_deaths == "FALSE") %>%
-#   select(date, Name, Resident.Deaths, previous_date_value_deaths)
 
 ## save death plots
-# for (i in 1:nrow(lag_death_plots)){
-#   facility_name <- lag_death_plots$Name[[i]]
-#   ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
-#          path = file.path(base_path, "plots", "CA", "deaths"))
-# }
+for (i in 1:nrow(lag_death_plots)){
+  facility_name <- lag_death_plots$Name[[i]]
+  ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
+         path = file.path(base_path, "plots", "CA", "deaths"))
+}
 
-final_dat %>%
+testing %>%
   filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
+  ggplot(data = .,
          aes(x = Date, y = lag_change_deaths, group = Name)) +
     geom_line(alpha=0.6 , size=.5, color = "black") +
-    scale_x_date(date_labels = "%m") + 
+    scale_x_date(date_labels = "%m") +
     labs(x = "Date",
       y = "lag_change_deaths")
 ```
@@ -279,7 +267,7 @@ table(is.na(dat_with_pop$Population))
 
 ```{r write csv}
 out <- final_dat %>%
-  reorder_historical_cols(rm_extra_cols = TRUE)
+  behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE) # dont expect anything to change here
 
 ## check nothing strange is happening!
 skim(out)
