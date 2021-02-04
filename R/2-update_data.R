@@ -74,14 +74,15 @@ update_historical_data <- function(state_in) {
       Capacity = "d",
       BJS.ID = "d",
       Security = "c",
-      Different.Operator = "c"
+      Different.Operator = "c",
+      jurisdiction_scraper = "c",
+      Is.Different.Operator = "l"
       )) %>%
     ## account for any changes in facility xwalks
-    behindbarstools::clean_facility_name(., debug = TRUE) %>% 
-    rename(Facility.ID = Facility.ID.y) %>%
-    select(-Facility.ID.x) %>%
-    
-  
+    behindbarstools::clean_facility_name(., debug = TRUE) %>%
+    dplyr::rename(Facility.ID = Facility.ID.y) %>%
+    select(-Facility.ID.x)
+
   ## Get non-matches from historical data
   no_match_hist <- hist_dat %>%
     filter(name_match == FALSE) %>% 
@@ -113,7 +114,7 @@ update_historical_data <- function(state_in) {
                             warning = latest$warnings) %>%
     filter(warning != "Missing column names filled in: 'X1' [1]",
            !str_detect(warning, 'multiple values that do not match for column scrape_name_clean'),
-           !str_detect(warning, 'Input data has 17 additional columns'), # no warning on debug columns (these get rm'd later)
+           !str_detect(warning, 'Input data has 5 additional columns'), # no warning on debug columns (these get rm'd later)
            !str_detect(warning, 'unique values state, state'), # no warning on coalesce by jurisdiction if both = state
            !str_detect(warning, 'column `State`: character vs character')
            ) %>%

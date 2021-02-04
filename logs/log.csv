@@ -1,402 +1,145 @@
 state,date,warning_type,warning
-AZ,2021-01-22,NA,"- Different types for column `State`: character vs character
+AZ,NA,NA,"- Different types for column `State`: character vs character
 "
-AZ,2021-01-13,no match,ICE CCA FLORENCE CORRECTIONAL CENTER
-AZ,2021-01-13,no match,ICE ELOY FEDERAL CONTRACT FACILITY
-AZ,2021-01-13,no match,ICE FLORENCE SERVICE PROCESSING CENTER
-AZ,2021-01-13,no match,ICE LA PALMA CORRECTIONAL CENTER
-AZ,2021-01-13,no match,ICE SAN LUIS REGIONAL DETENTION CENTER
-CA,2021-01-22,NA,"- Different types for column `State`: character vs character
-"
-CA,2021-01-20,no match,ALMEDA COUNTY
-CA,2021-01-20,no match,FRESNO COUNTY
-CA,2021-01-20,no match,HUMBOLDT COUNTY
-CA,2021-01-20,no match,IMPERIAL COUNTY
-CA,2021-01-20,no match,KERN COUNTY
-CA,2021-01-20,no match,LOS ANGELES COUNTY
-CA,2021-01-20,no match,MENDOCINO COUNTY
-CA,2021-01-20,no match,MERCED COUNTY
-CA,2021-01-20,no match,MONTEREY COUNTY
-CA,2021-01-20,no match,ORANGE COUNTY
-CA,2021-01-20,no match,RIVERSIDE COUNTY
-CA,2021-01-20,no match,SACRAMENTO COUNTY
-CA,2021-01-20,no match,SAN BERNARDINO COUNTY
-CA,2021-01-20,no match,SAN DIEGO COUNTY
-CA,2021-01-20,no match,SAN FRANCISCO COUNTY
-CA,2021-01-20,no match,SAN JOAQUIN COUNTY
-CA,2021-01-20,no match,SAN LUIS OBISPO COUNTY
-CA,2021-01-20,no match,SAN MATEO COUNTY
-CA,2021-01-20,no match,SANTA BARBARA COUNTY
-CA,2021-01-20,no match,SANTA CLARA COUNTY
-CA,2021-01-20,no match,SOLANO COUNTY
-CA,2021-01-20,no match,STANISLAUS COUNTY
-CA,2021-01-20,no match,TULARE COUNTY
-CA,2021-01-20,no match,VENTURA COUNTY
-CA,2021-01-20,no match,YOLO COUNTY
-CA,2021-01-13,no match,ADELANTO ICE PROCESSING CENTER
-CA,2021-01-13,no match,ALAMEDA COUNTY
-CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION FRESNO COUNTY
-CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION IMPERIAL COUNTY
-CA,2020-12-25,no match,CDCRCCHCS WORKSITE LOCATION KERN COUNTY
-CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION MENDOCINO COUNTY
-CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION ORANGE COUNTY
-CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION SAN LUIS OBISPO COUNTY
-CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATION SANTA CLARA COUNTY
-CA,2020-11-12,no match,CDCRCCHCS WORKSITE LOCATIONKERN COUNTY
-CA,2021-01-13,no match,ICE GOLDEN STATE ANNEX FACILITY
-CA,2021-01-13,no match,ICE IMPERIAL REGIONAL DETENTION FACILITY
-CA,2021-01-13,no match,ICE MESA VERDE DETENTION FACILITY
-CA,2021-01-13,no match,ICE OTAY MESA DETENTION CENTER SAN DIEGO CDF
-FL,2021-01-22,NA,"- Different types for column `State`: character vs character
-"
-FL,2020-03-31,no match,BLACKWATER CF
-FL,2020-03-31,no match,COMMUNITY CORRECTIONS REGION 3
-FL,2020-03-31,no match,COMMUNITY CORRECTIONS REGION 4
-FL,2020-04-03,no match,COMMUNITY CORRECTIONS REGION 2
-FL,2020-04-03,no match,SANTA ROSA CI
-FL,2020-04-03,no match,SOUTH BAY CF
-FL,2020-04-07,no match,CROSS CITY CI
-FL,2020-04-09,no match,GADSDEN CF
-FL,2020-04-14,no match,LAKE CITY CF
-FL,2020-04-17,no match,BAY CF
-FL,2020-04-17,no match,COMMUNITY CORRECTIONS REGION 1
-FL,2020-04-17,no match,GRACEVILLE CF
-FL,2020-04-17,no match,MOORE HAVEN CF
-FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 1
-FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 2
-FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 3
-FL,2020-06-12,no match,COMMUNITY CORRECTIONSREGION 4
-FL,2020-11-05,no match,BAY CF THE GEO GROUP INC
-FL,2020-11-05,no match,BLACKWATER CF THE GEO GROUP INC
-FL,2020-11-05,no match,GRACEVILLE CF THE GEO GROUP INC
-FL,2020-11-05,no match,MOORE HAVEN CF THE GEO GROUP INC
-FL,2020-11-05,no match,SOUTH BAY CF THE GEO GROUP INC
-MS,2021-01-22,NA,"- Different types for column `State`: character vs character
-"
-MS,2020-08-15,no match,CENTRA MISSISSIPPI CORRECTIONAL FACILITY PEARL
-MS,2020-10-12,no match,JEFFERSON COUNTY CORRECTIONAL FACILITY
-MS,2020-08-15,no match,KEMPER-NESHOBA COUNTY CORRECTIONA FACILITY
-MS,2020-06-28,no match,PRIVATE INSTITUTIONS
-MS,2020-08-15,no match,SOUTH MISSISSIPPI CORRECTIONA INSTITUTION LEAKESVILLE
-MS,2020-04-13,no match,STATE PENITENTIARY
-MS,2020-03-31,no match,STATEWIDE
-MS,2020-04-13,no match,STATEWIDE FOR NON-SPECIFIC FACILITIES
-MS,2021-01-13,no match,ICE ADAMS COUNTY DETENTION CENTER
-MS,2021-01-13,no match,ICE HANCOCK COUNTY JAIL
-NC,2021-01-22,NA,"- Different types for column `State`: character vs character
-"
-NC,2020-04-08,no match,BALDEN CC
-NC,2020-04-28,no match,BLADEN CC
-NC,2020-04-28,no match,RALEIGH CCW
-NC,2020-03-31,no match,STATEWIDE
-NC,2020-05-12,no match,STATEWIDE FOR NON-SPECIFIC FACILITIES
-NC,2020-04-08,no match,STATEWIDE STAFF ONLY
-NC,2020-11-26,no match,CENTRAL PRISON HCF
-NC,2020-12-13,no match,DART CHERRY
-NJ,2021-01-22,NA,"- Different types for column `State`: character vs character
-"
-NJ,2020-06-26,no match,MOUNTAINVIEW YOUTH CORRECTIONAL FACILITY
-NJ,2020-04-03,no match,MOUTAINVIEW YOUTH CORRECTIONAL FACILITY
-NJ,2020-03-31,no match,STATEWIDE
-NJ,2020-04-06,no match,STU
-WI,2021-01-22,NA,"- Different types for column `State`: character vs character
-"
-WI,2020-07-15,no match,BUREAU OF CORRECTIONAL ENTERPRISES
-WI,2020-05-14,no match,COMMUNITY CORRECTIONS REGION 2 KENOSHA RACINE WALWORTH
-WI,2020-04-08,no match,COMMUNITY CORRECTIONS REGION 3 MILWAUKEE
-WI,2020-04-09,no match,RACINE CI-STURTEVANT TF
-WI,2020-08-31,no match,STATEWIDE
-WI,2020-04-17,no match,STATEWIDE FOR NON-FACILITY
-WI,2020-12-13,no match,0
-WI,2020-11-12,no match,CRIMINALJUSTICE FACILITY
-WI,2020-11-05,no match,GRAND TOTAL
-WI,2020-12-13,no match,JUVENILE JUST
-WI,2020-11-12,no match,NEW LISBON CORRECTIONAL INSTITUTIO
-WI,2021-01-06,no match,U
-AZ,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: AVENAL STATE PRISON, State: California, jurisdiction: state, Facility.ID: 83 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA CITY CORRECTIONAL FACILITY, State: California, jurisdiction: state, Facility.ID: 88 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA CORRECTIONAL CENTER, State: California, jurisdiction: state, Facility.ID: 89 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA CORRECTIONAL INSTITUTION, State: California, jurisdiction: state, Facility.ID: 90 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA HEALTH CARE FACILITY, State: California, jurisdiction: state, Facility.ID: 91 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA INSTITUTION FOR MEN, State: California, jurisdiction: state, Facility.ID: 92 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA INSTITUTION FOR WOMEN, State: California, jurisdiction: state, Facility.ID: 93 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA MEDICAL FACILITY, State: California, jurisdiction: state, Facility.ID: 94 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA MENS COLONY, State: California, jurisdiction: state, Facility.ID: 95 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA REHABILITATION CENTER, State: California, jurisdiction: state, Facility.ID: 96 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA STATE PRISON CORCORAN, State: California, jurisdiction: state, Facility.ID: 97 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA STATE PRISON LOS ANGELES, State: California, jurisdiction: state, Facility.ID: 98 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA STATE PRISON SACRAMENTO, State: California, jurisdiction: state, Facility.ID: 99 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA STATE PRISON SAN QUENTIN, State: California, jurisdiction: state, Facility.ID: 100 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIFORNIA STATE PRISON SOLANO, State: California, jurisdiction: state, Facility.ID: 101 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALIPATRIA STATE PRISON, State: California, jurisdiction: state, Facility.ID: 102 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CENTINELA STATE PRISON, State: California, jurisdiction: state, Facility.ID: 111 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CENTRAL CALIFORNIA WOMENS FACILITY, State: California, jurisdiction: state, Facility.ID: 112 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CHUCKAWALLA VALLEY STATE PRISON, State: California, jurisdiction: state, Facility.ID: 113 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: CORRECTIONAL TRAINING FACILITY, State: California, jurisdiction: state, Facility.ID: 115 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: DEUEL VOCATIONAL INSTITUTION, State: California, jurisdiction: state, Facility.ID: 116 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: FOLSOM STATE PRISON, State: California, jurisdiction: state, Facility.ID: 120 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: HIGH DESERT STATE PRISON, State: California, jurisdiction: state, Facility.ID: 128 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: IRONWOOD STATE PRISON, State: California, jurisdiction: state, Facility.ID: 129 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: KERN VALLEY STATE PRISON, State: California, jurisdiction: state, Facility.ID: 131 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: LOS ANGELES JAILS, State: California, jurisdiction: county, Facility.ID: 135 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values county, county"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: MULE CREEK STATE PRISON, State: California, jurisdiction: state, Facility.ID: 139 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: NORTH KERN STATE PRISON, State: California, jurisdiction: state, Facility.ID: 141 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: PELICAN BAY STATE PRISON, State: California, jurisdiction: state, Facility.ID: 145 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: PLEASANT VALLEY STATE PRISON, State: California, jurisdiction: state, Facility.ID: 147 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: RJ DONOVAN CORRECTIONAL FACILITY, State: California, jurisdiction: state, Facility.ID: 150 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: SALINAS VALLEY STATE PRISON, State: California, jurisdiction: state, Facility.ID: 152 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: SAN DIEGO COUNTY JAILS, State: California, jurisdiction: county, Facility.ID: 1725 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values county, county"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: SIERRA CONSERVATION CENTER, State: California, jurisdiction: state, Facility.ID: 158 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: SUBSTANCE ABUSE TREATMENT FACILITY, State: California, jurisdiction: state, Facility.ID: 161 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: VALLEY STATE PRISON, State: California, jurisdiction: state, Facility.ID: 164 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Group Date: 2021-01-25, Name: WASCO STATE PRISON, State: California, jurisdiction: state, Facility.ID: 171 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-CA,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-FL,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-MS,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: ALBEMARLE CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 952 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: ALEXANDER CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 953 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: ANSON CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 954 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: CALDWELL CORRECTIONAL CENTER, State: North Carolina, jurisdiction: state, Facility.ID: 964 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: CENTRAL PRISON, State: North Carolina, jurisdiction: state, Facility.ID: 969 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: GREENE CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 983 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: HARNETT CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 984 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: HYDE CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 986 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: LUMBERTON CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 989 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: MOUNTAIN VIEW CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 993 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: NASH CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 994 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: NEUSE CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 995 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: NORTH CAROLINA CORRECTIONAL INSTITUTION FOR WOMEN, State: North Carolina, jurisdiction: state, Facility.ID: 997 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: PENDER CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 1002 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: RUTHERFORD CORRECTIONAL CENTER, State: North Carolina, jurisdiction: state, Facility.ID: 1009 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: SCOTLAND CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 1012 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Group Date: 2021-01-25, Name: TABOR CORRECTIONAL INSTITUTION, State: North Carolina, jurisdiction: state, Facility.ID: 1017 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-NC,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-NJ,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: BLACK RIVER CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1662 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: CHIPPEWA VALLEY CORRECTIONAL TREATMENT FACILITY, State: Wisconsin, jurisdiction: state, Facility.ID: 1665 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: COLUMBIA CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1666 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: DODGE CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1672 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: DRUG ABUSE CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1673 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: FELMERS O CHANEY CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1674 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: FLAMBEAU CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1675 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: FOX LAKE CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1676 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: GORDON CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1677 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: GREEN BAY CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1678 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: JACKSON CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1680 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: JOHN C BURKE CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1681 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: KENOSHA CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1682 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: KETTLE MORAINE CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1683 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: MARSHALL E SHERRER CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1684 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: MCNAUGHTON CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1685 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: MILWAUKEE SECURE DETENTION FACILITY, State: Wisconsin, jurisdiction: state, Facility.ID: 1686 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: MILWAUKEE WOMENS CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1687 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: NEW LISBON CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1688 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: OAKHILL CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1689 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: OREGON CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1690 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: OSHKOSH CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1691 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: PRAIRIE DU CHIEN CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1693 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: RACINE CORRECTIONAL INSTITUTION STURTEVANT TRANSITIONAL FACILITY, State: Wisconsin, jurisdiction: state, Facility.ID: 1694 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: RACINE YOUTHFUL OFFENDER CORRECTIONAL FACILITY, State: Wisconsin, jurisdiction: state, Facility.ID: 1695 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: REDGRANITE CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1696 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: ROBERT E ELLSWORTH CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1697 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: SAINT CROIX CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1700 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: SANGER B POWERS CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1701 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: STANLEY CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1702 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: TAYCHEEDAH CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1705 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: THOMPSON CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1706 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: WAUPUN CORRECTIONAL INSTITUTION, State: Wisconsin, jurisdiction: state, Facility.ID: 1707 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: WINNEBAGO CORRECTIONAL CENTER, State: Wisconsin, jurisdiction: state, Facility.ID: 1708 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Group Date: 2021-01-25, Name: WISCONSIN SECURE PROGRAM FACILITY, State: Wisconsin, jurisdiction: state, Facility.ID: 1710 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values state, state"
-WI,2021-01-26,NA,"Input data has 17 additional columns: jurisdiction, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-AZ,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-AZ,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-"
-CA,2021-01-28,NA,"Group Date: 2021-01-27, Name: LOS ANGELES JAILS, State: California, jurisdiction: county, Facility.ID: 135 has multiple values that do not match for column Jurisdiction. Only using sum of observed value from the following unique values county, county"
-CA,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-CA,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-"
-FL,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-FL,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-"
-MS,2021-01-28,NA,"2 parsing failures.
-  row  col   expected    actual                                                                      file
-21454 Date date like  2020-10-  'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
-21454 NA   27 columns 1 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
-"
-MS,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-MS,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-"
-NC,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-NC,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-"
-NJ,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-NJ,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-"
-PA,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-PA,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-- Different types for column `Source.Population.Feb20`: logical vs character
-"
-PA,2020-08-23,no match,TOTAL
-WI,2021-01-28,NA,"Input data has 21 additional columns: jurisdiction, Residents.Initiated, Residents.Vadmin, Staff.Initiated, Staff.Vadmin, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match, Description, Security, Age, Gender, Is.Different.Operator, Different.Operator, Capacity, BJS.ID, Source.Population.Feb20, Source.Capacity, Website. Moving these to the end of the data set."
-WI,2021-01-28,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Initiated`: logical vs double
-- Different types for column `Residents.Vadmin`: logical vs double
-- Different types for column `Staff.Initiated`: logical vs double
-- Different types for column `Staff.Vadmin`: logical vs double
-"
-AZ,2021-01-28,NA,- different number of columns: 49 vs 47
-CA,2021-01-28,NA,- different number of columns: 49 vs 47
-FL,2021-01-28,NA,- different number of columns: 49 vs 47
-MS,2021-01-28,NA,- different number of columns: 49 vs 47
-NC,2021-01-28,NA,- different number of columns: 49 vs 47
-NJ,2021-01-28,NA,- different number of columns: 49 vs 47
-PA,2021-01-28,NA,- different number of columns: 49 vs 47
-WI,2021-01-28,NA,- different number of columns: 49 vs 47
-AZ,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-AZ,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-"
-CA,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-CA,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-"
-FL,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-FL,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-"
-MS,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-MS,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-"
-NC,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-NC,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-"
-NJ,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-NJ,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-"
-PA,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-PA,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Source.Population.Feb20`: logical vs character
-"
-WI,2021-01-29,NA,"Input data has 2 missing columns: Residents.Completed, Staff.Completed. Adding these columns in as NA rows."
-WI,2021-01-29,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-"
-AZ,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-CA,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-CA,2021-01-29,no match,SF COUNTY JAIL
-FL,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-MS,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-NC,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-NJ,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-PA,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
+AZ,NA,no match,ICE CCA FLORENCE CORRECTIONAL CENTER
+AZ,NA,no match,ICE ELOY FEDERAL CONTRACT FACILITY
+AZ,NA,no match,ICE FLORENCE SERVICE PROCESSING CENTER
+AZ,NA,no match,ICE LA PALMA CORRECTIONAL CENTER
+AZ,NA,no match,ICE SAN LUIS REGIONAL DETENTION CENTER
+CA,NA,no match,ALMEDA COUNTY
+CA,NA,no match,FRESNO COUNTY
+CA,NA,no match,HUMBOLDT COUNTY
+CA,NA,no match,IMPERIAL COUNTY
+CA,NA,no match,KERN COUNTY
+CA,NA,no match,LOS ANGELES COUNTY
+CA,NA,no match,MENDOCINO COUNTY
+CA,NA,no match,MERCED COUNTY
+CA,NA,no match,MONTEREY COUNTY
+CA,NA,no match,ORANGE COUNTY
+CA,NA,no match,RIVERSIDE COUNTY
+CA,NA,no match,SACRAMENTO COUNTY
+CA,NA,no match,SAN BERNARDINO COUNTY
+CA,NA,no match,SAN DIEGO COUNTY
+CA,NA,no match,SAN FRANCISCO COUNTY
+CA,NA,no match,SAN JOAQUIN COUNTY
+CA,NA,no match,SAN LUIS OBISPO COUNTY
+CA,NA,no match,SAN MATEO COUNTY
+CA,NA,no match,SANTA BARBARA COUNTY
+CA,NA,no match,SANTA CLARA COUNTY
+CA,NA,no match,SOLANO COUNTY
+CA,NA,no match,STANISLAUS COUNTY
+CA,NA,no match,TULARE COUNTY
+CA,NA,no match,VENTURA COUNTY
+CA,NA,no match,YOLO COUNTY
+CA,NA,no match,ADELANTO ICE PROCESSING CENTER
+CA,NA,no match,ALAMEDA COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATION FRESNO COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATION IMPERIAL COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATION KERN COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATION MENDOCINO COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATION ORANGE COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATION SAN LUIS OBISPO COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATION SANTA CLARA COUNTY
+CA,NA,no match,CDCRCCHCS WORKSITE LOCATIONKERN COUNTY
+CA,NA,no match,ICE GOLDEN STATE ANNEX FACILITY
+CA,NA,no match,ICE IMPERIAL REGIONAL DETENTION FACILITY
+CA,NA,no match,ICE MESA VERDE DETENTION FACILITY
+CA,NA,no match,ICE OTAY MESA DETENTION CENTER SAN DIEGO CDF
+FL,NA,no match,BLACKWATER CF
+FL,NA,no match,COMMUNITY CORRECTIONS REGION 3
+FL,NA,no match,COMMUNITY CORRECTIONS REGION 4
+FL,NA,no match,COMMUNITY CORRECTIONS REGION 2
+FL,NA,no match,SANTA ROSA CI
+FL,NA,no match,SOUTH BAY CF
+FL,NA,no match,CROSS CITY CI
+FL,NA,no match,GADSDEN CF
+FL,NA,no match,LAKE CITY CF
+FL,NA,no match,BAY CF
+FL,NA,no match,COMMUNITY CORRECTIONS REGION 1
+FL,NA,no match,GRACEVILLE CF
+FL,NA,no match,MOORE HAVEN CF
+FL,NA,no match,COMMUNITY CORRECTIONSREGION 1
+FL,NA,no match,COMMUNITY CORRECTIONSREGION 2
+FL,NA,no match,COMMUNITY CORRECTIONSREGION 3
+FL,NA,no match,COMMUNITY CORRECTIONSREGION 4
+FL,NA,no match,BAY CF THE GEO GROUP INC
+FL,NA,no match,BLACKWATER CF THE GEO GROUP INC
+FL,NA,no match,GRACEVILLE CF THE GEO GROUP INC
+FL,NA,no match,MOORE HAVEN CF THE GEO GROUP INC
+FL,NA,no match,SOUTH BAY CF THE GEO GROUP INC
+MS,NA,no match,CENTRA MISSISSIPPI CORRECTIONAL FACILITY PEARL
+MS,NA,no match,JEFFERSON COUNTY CORRECTIONAL FACILITY
+MS,NA,no match,KEMPER-NESHOBA COUNTY CORRECTIONA FACILITY
+MS,NA,no match,PRIVATE INSTITUTIONS
+MS,NA,no match,SOUTH MISSISSIPPI CORRECTIONA INSTITUTION LEAKESVILLE
+MS,NA,no match,STATE PENITENTIARY
+MS,NA,no match,STATEWIDE
+MS,NA,no match,STATEWIDE FOR NON-SPECIFIC FACILITIES
+MS,NA,no match,ICE ADAMS COUNTY DETENTION CENTER
+MS,NA,no match,ICE HANCOCK COUNTY JAIL
+NC,NA,no match,BALDEN CC
+NC,NA,no match,BLADEN CC
+NC,NA,no match,RALEIGH CCW
+NC,NA,no match,STATEWIDE
+NC,NA,no match,STATEWIDE FOR NON-SPECIFIC FACILITIES
+NC,NA,no match,STATEWIDE STAFF ONLY
+NC,NA,no match,CENTRAL PRISON HCF
+NC,NA,no match,DART CHERRY
+NJ,NA,no match,MOUTAINVIEW YOUTH CORRECTIONAL FACILITY
+NJ,NA,no match,STATEWIDE
+NJ,NA,no match,STU
+WI,NA,no match,BUREAU OF CORRECTIONAL ENTERPRISES
+WI,NA,no match,COMMUNITY CORRECTIONS REGION 3 MILWAUKEE
+WI,NA,no match,RACINE CI-STURTEVANT TF
+WI,NA,no match,STATEWIDE
+WI,NA,no match,STATEWIDE FOR NON-FACILITY
+WI,NA,no match,0
+WI,NA,no match,CRIMINALJUSTICE FACILITY
+WI,NA,no match,GRAND TOTAL
+WI,NA,no match,JUVENILE JUST
+WI,NA,no match,NEW LISBON CORRECTIONAL INSTITUTIO
+WI,NA,no match,U
+PA,NA,no match,TOTAL
+CA,NA,no match,SF COUNTY JAIL
+NJ,NA,no match,KINTOCK NEWARK
+PA,NA,NA,"- Different types for column `State`: character vs character
 - Different types for column `Is.Different.Operator`: double vs logical
 - Different types for column `Source.Population.Feb20`: logical vs character
 "
-WI,2021-01-30,NA,"- Different types for column `State`: character vs character
-- Different types for column `Residents.Completed`: double vs logical
-- Different types for column `Staff.Completed`: double vs logical
-- Different types for column `Is.Different.Operator`: double vs logical
+PA,NA,no match,COAL TWNP
+PA,NA,no match,LAUREL HIGH
+CA,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
-AZ,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-AZ,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
+CA,2020-08-05,no match,CDCR CCHS WORKSITE LOCATION FRESNO COUNTY
+CA,2020-08-11,no match,CDCR CCHS WORKSITE LOCATION IMPERIAL COUNTY
+CA,2020-07-03,no match,CDCR CCHS WORKSITE LOCATION KERN COUNTY
+CA,2020-06-30,no match,CDCR CCHS WORKSITE LOCATION LOS ANGELES COUNTY
+CA,2020-07-31,no match,CDCR CCHS WORKSITE LOCATION MENDOCINO COUNTY
+CA,2020-07-30,no match,CDCR CCHS WORKSITE LOCATION MONTEREY COUNTY
+CA,2020-08-11,no match,CDCR CCHS WORKSITE LOCATION ORANGE COUNTY
+CA,2020-08-04,no match,CDCR CCHS WORKSITE LOCATION RIVERSIDE COUNTY
+CA,2020-08-26,no match,CDCR CCHS WORKSITE LOCATION SACRAMENTO COUNTY
+CA,2020-08-26,no match,CDCR CCHS WORKSITE LOCATION SAN BERNARDINO COUNTY
+CA,2020-07-01,no match,CDCR CCHS WORKSITE LOCATION SAN DIEGO COUNTY
+CA,2020-07-01,no match,CDCR CCHS WORKSITE LOCATION SAN JOAQUIN COUNTY
+CA,2020-08-11,no match,CDCR CCHS WORKSITE LOCATION SAN LUIS OBISPO COUNTY
+CA,2020-07-23,no match,CDCR CCHS WORKSITE LOCATION SANTA BARBARA COUNTY
+CA,2020-08-08,no match,CDCR CCHS WORKSITE LOCATION SANTA CLARA COUNTY
+CA,2020-07-27,no match,CDCR CCHS WORKSITE LOCATION SOLANO COUNTY
+CA,2020-07-23,no match,CDCR CCHS WORKSITE LOCATION STANISLAUS COUNTY
+CA,2020-07-30,no match,CDCR CCHS WORKSITE LOCATION TULARE COUNTY
+CA,2020-07-27,no match,CDCR CCHS WORKSITE LOCATION VENTURA COUNTY
+CA,2020-07-06,no match,CDCR CCHS WORKSITE LOCATIONKERN COUNTY
+FL,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
-CA,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-CA,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
+MS,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
-FL,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-FL,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
+NC,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
-MS,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-MS,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
+NJ,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
-NC,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-NC,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-NJ,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-NJ,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
-"
-NJ,2021-02-01,no match,KINTOCK NEWARK
-PA,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-PA,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
+PA,2021-02-04,NA,"- Different types for column `State`: character vs character
 - Different types for column `Source.Population.Feb20`: logical vs character
 "
-PA,2021-02-01,no match,COAL TWNP
-PA,2021-02-01,no match,LAUREL HIGH
-WI,2021-02-03,NA,"Input data has 5 additional columns: Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
-WI,2021-02-03,NA,"- Different types for column `State`: character vs character
-- Different types for column `Is.Different.Operator`: double vs logical
+WI,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
