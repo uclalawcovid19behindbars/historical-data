@@ -1,16 +1,12 @@
-# historical-data
+# Historical Data
 
 ## Background
 
-The UCLA Law Covid-19 Behind Bars Data Project, launched in March 2020, tracks the spread and impact of Covid-19 in American carceral facilities and pushes for greater transparency and accountability around the pandemic response of the carceral system. For more information on the organization as a whole, see our website at: http://uclacovid19behindbars.org/.
-
-Since the beginning of the Covid-19 pandemic, the public’s ability to assess the extent and impact of the spread of the virus has been limited by shortcomings in data reporting in the United States. This is particularly true, and presents especially severe consequences, for data concerning Covid-19 in U.S. prisons, jails, immigration detention centers, and other carceral settings that confine over two million individuals. The overcrowding and subpar healthcare systems in carceral facilities make them hotspots for viral spread, and the people who work and are incarcerated in these facilities do not have the option to socially distance. Epidemiological data reporting in these settings are limited, often vaguely-defined, and generally not comparable between jurisdictions. To save lives, advocates and organizers need data to demonstrate the urgency of this public health crisis, and ultimately to push for the release of enough incarcerated people to limit the spread. 
-
-In an effort to make publicly accessible the limited data that correctional agencies report, the UCLA Law Covid-19 Behind Bars Data Project collects and centralizes data on Covid-19 infections and deaths for incarcerated persons and staff within U.S. carceral facilities. The project also collects and centralizes other carceral data, like incarcerated population numbers, which are critical to contextualizing Covid-19 infection numbers and which do not exist elsewhere in a unified dataset. Our methods for collecting and reporting data on prisons and jails differ from those used for data on immigration and youth facilities; these methods are explained separately below. 
+The [UCLA Law COVID-19 Behind Bars Data Project](https://uclacovidbehindbars.org/), launched in March 2020, tracks the spread and impact of COVID-19 in American carceral facilities and advocates for greater transparency and accountability around the pandemic response of the carceral system. Since March, we have been collecting and reporting facility-level data on COVID-19 in prisons, jails, and other correctional centers. 
 
 ## Prison and jail data overview
 
-We primarily collect data from federal, state, and local correctional agency websites using web scraping programs we developed to automatically collect reported data three to four times per week. Our newly scraped data, updated 3-4 times a week, is available in our [data repository](https://github.com/uclalawcovid19behindbars/data/blob/master/Adult%20Facility%20Counts/adult_facility_covid_counts_today_latest.csv). For details on the specific code we use for scraping data, please visit our [scraper repository](https://github.com/uclalawcovid19behindbars/covid19_behind_bars_scrapers).
+We primarily collect data from federal, state, and local correctional agency websites using web scraping programs we developed to automatically collect reported data three to four times per week. Our newly scraped data, updated 3-4 times a week, is available in our [data repository](https://github.com/uclalawcovid19behindbars/data). For details on the specific code we use for scraping data, please visit our [scraper repository](https://github.com/uclalawcovid19behindbars/covid19_behind_bars_scrapers).
 
 Our core data of interest include:
 
@@ -20,9 +16,25 @@ Our core data of interest include:
 
 However, correctional authorities vary in what they report publicly. For example, as of December 2020, the Pennsylvania Department of Corrections reports data for all six of these core variables, while the Mississippi Department of Corrections reports data for only one. 
 
-Further, we aim to collect and report Covid-19 facility-level data, where possible, from all federal, state, and county correctional agencies across the country. In general, the Federal Bureau of Prisons reports its Covid-19 prison data by facility. However, not all state and county jurisdictions report data disaggregated by facility for all variables. We are working on a detailed table of variable availability by jurisdiction. In the meantime, please consult the individual state pages to see where we have facility-level data. 
+Further, we aim to collect and report Covid-19 facility-level data, where possible, from all federal, state, and county correctional agencies across the country. In general, the Federal Bureau of Prisons reports its Covid-19 prison data by facility. However, not all state and county jurisdictions report data disaggregated by facility for all variables. Please visit our [website](https://uclacovidbehindbars.org/) for more info on data availability.
 
-When data are not available publicly, we make every effort to obtain missing information through original public records requests. In some cases, we also partner with other organizations who gather data directly from agencies. We compile our data into a spreadsheet we maintain on GitHub. We also maintain a historical dataset that includes all data we’ve collected since the start of the pandemic. We are currently working to clean the reporting inconsistencies in that data to enable us to display time series visualizations. 
+When data are not available publicly, we make every effort to obtain missing information through original public records requests. In some cases, we also partner with other organizations who gather data directly from agencies. Our data for several jails in California is collected by [Davis Vanguard](https://www.davisvanguard.org/), who have been generously sharing their COVID-19 data with us. Our data for state prisons in Massachusetts is reported by [the ACLU of Massachusetts](https://data.aclum.org/sjc-12926-tracker/). If you would like to contribute data on COVID-19 in a facility that we don't currently include, please see [our template](https://docs.google.com/spreadsheets/d/1cqjCvbXuUh5aIQeJ4NRKdUwVAb4adaWTK-nBPFAj0og/edit#gid=363817589). We always welcome additional contributors! 
+
+## Historical Data Availability
+
+We are in the process of cleaning historical data going back to the beginning of the pandemic. Currently, the states with [historical data available](https://github.com/uclalawcovid19behindbars/historical-data/tree/main/data) are: 
+
+- Arizona
+- California
+- Florida
+- Mississippi
+- North Carolina
+- New Jersey
+- Pennsylvania
+- Wisconsin
+
+We aim to have all states' data cleaned by late Spring 2021. We also have efforts underway to match our historical COVID data with historical population data. Stay tuned!
+
 
 ## Data dictionary
 
@@ -49,14 +61,20 @@ When data are not available publicly, we make every effort to obtain missing inf
 | `Residents.Quarantine` | Cumulative number of incarcerated individuals in quarantine from COVID-19                                                                                      |
 | `Staff.Quarantine`     | Cumulative number of staff in quarantine from COVID-19                                                                                                         |
 | `Residents.Active`     | Non-cumulative number of incarcerated individuals infected with COVID-19                                                                                       |
-| `Residents.Tested`     | Ambiguous metric of incarcerated individuals tested for COVID-19                                                                                               |
-| `Residents.Population` | Daily population of incarcerated individuals reported by DOC website                                                                                           |
 | `Population.Feb20`     | Population of the facility as close to February 1, 2020 as possible. Source listed in `Source.Population.Feb20`                                                |
-| `Capacity`             | Carceral capacity, as reported by the source listed in `Source.Capacity`.                                                                                      |
+| `Residents.Population` | Daily population of incarcerated individuals reported by DOC website                                                                                           |
+| `Residents.Tested`     | Ambiguous metric of incarcerated individuals tested for COVID-19                                                                                               |
+| `Residents.Initiated`  | Cumulative number of incarcerated individuals who have initiated COVID-19 vaccination (i.e. received any dosage of a vaccine).                                 |
+| `Residents.Completed`  | Cumulative number of incarcerated individuals who have fully completed their COVID-19 vaccination schedule                                                     |
+| `Residents.Vadmin`     | Cumulative number of COVID-19 vaccines administered to incarcerated individuals                                                                                |
+| `Staff.Initiated`      | Cumulative number of staff who have initiated COVID-19 vaccination (i.e. received any dosage of a vaccine).                                                    |
+| `Staff.Completed`      | Cumulative number of staff who have fully completed their COVID-19 vaccination schedule                                                                        |
+| `Staff.Vadmin`         | Cumulative number of COVID-19 vaccines administered to staff                                                                                                   |
 | `HIFLD.ID`             | The facility’s corresponding [Homeland Infrastructure Foundation-Level Data](https://hifld-geoplatform.opendata.arcgis.com/datasets/prison-boundaries/data) ID |
 
-
 Additional geographic fields: `Address`, `Zipcode`, `City`, `County`, `Latitude`, `Longitude`, `County.FIPS`.
+
+For more information on facility descriptors such as `Description`, `Security`, `Different.Operator`, etc, please visit our [facility data repository](https://github.com/uclalawcovid19behindbars/facility_data).
 
 ## Citations 
 
@@ -75,7 +93,6 @@ Our data is licensed under a [Creative Commons Attribution-NonCommercial-ShareAl
 ----------
 
 ## Florida Notes
-- Population data not yet present (as of posting on December 3rd 2020). Except to have this in within the next few weeks.
 - Removed two observations of "GEO" prison that had no data associated with them. 
 
 ## North Carolina Notes
@@ -91,5 +108,4 @@ The following facilities seem to be reporting active cases rather than cumulativ
 Because the facilities did not provide any specification, we're leaving the counts as-scraped. 
 
 ## Wisconsin Notes
-- Population data source was compiled by weekly reports, available here: https://doc.wi.gov/Pages/DataResearch/DataAndReports.aspx 
-- Removed youth facilities for now. Will add these back in by January 2021.
+- Historical population data source was compiled by weekly reports, available here: https://doc.wi.gov/Pages/DataResearch/DataAndReports.aspx 
