@@ -1,7 +1,7 @@
 ---
 title: "Clean Wisconsin - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "1/20/21"
+date: "2/5/21"
 output: html_document
 ---
 
@@ -73,9 +73,6 @@ df_mid <- df_mid %>%
 ```
 
 ```{r facility merge checks, include = FALSE}
-# show instances where merge didn't identify a clean name:
-## DIVISION OF JUVENILE CORRECTIONS FACILITIES is missing
-## DIVISION OF JUVENILE CORRECTIONS FIELD is missing
 df_mid %>%
   filter(name_match == "FALSE") %>% 
   select(scrape_name_clean) %>%
@@ -101,15 +98,11 @@ Filter down and re-order columns in order to row bind them to latest data.
 df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
-         Date = date,
-         Jurisdiction = Facility,
-         Facility.ID = Count.ID) %>%
+         Date = date) %>%
   select(-c(Website, date, Count.ID, Facility)) 
-df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
-## add back in Residents.Tested (this will only be present for historical data)
-## add back in Residents.Population (this will only be present for historical data)
-df_hist_final$Residents.Tested <- df_hist$Residents.Tested
-df_hist_final$Residents.Population <- df_hist$Residents.Population
+
+df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
+  select_if(~sum(!is.na(.)) > 0) 
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -121,9 +114,7 @@ recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE,
                                                 state = "Wisconsin", 
                                                 debug = TRUE) %>%
   filter(Jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) %>%
-    mutate(Zipcode = as.numeric(Zipcode),
-         County.FIPS = as.numeric(County.FIPS))
+       Date > as.Date('2020-11-04'))
 
 recent_dat %>%
   filter(name_match == "FALSE") %>% 
@@ -131,8 +122,6 @@ recent_dat %>%
   unique()
 
 recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
-recent_final$Residents.Tested <- NA
-recent_final$Residents.Population <- NA
 ```
 Then, bind it to the historical cleaned data from this script. 
 
@@ -144,19 +133,21 @@ n_distinct(all_dat$Name)
 Merge in facility information (address, city, county, etc.).
 
 ```{r}
-fac_info <- behindbarstools::read_fac_info() %>%
-  filter(State == "Wisconsin") %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name))
+fac_info <- behindbarstools::read_fac_info()
 final_dat <- left_join(all_dat, fac_info, 
-                  by = "Name",
+                  by = "Facility.ID",
                   suffix = c(".x", ""))
 
 final_dat %<>% 
-  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
-         Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
-         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
-         City = behindbarstools::coalesce_with_warnings(City.x, City),
-         County = behindbarstools::coalesce_with_warnings(County.x, County)) %>%
+  mutate(
+    Name = behindbarstools::coalesce_with_warnings(Name.x, Name),
+    Jurisdiction = behindbarstools::coalesce_with_warnings(Jurisdiction.x, Jurisdiction),
+    State = behindbarstools::coalesce_with_warnings(State.x, State),
+    State = behindbarstools::coalesce_with_warnings(State.x, State),
+    Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
+    City = behindbarstools::coalesce_with_warnings(City.x, City),
+    County = behindbarstools::coalesce_with_warnings(County.x, County)
+    ) %>%
   select(-ends_with(".x"))
 ```
 
@@ -243,9 +234,10 @@ table(is.na(dat_with_pop$Population))
 
 
 ```{r write csv}
-out <- dat_with_pop %>%
-  rename(Historical.Population = Population) %>%
-  reorder_historical_cols(rm_extra_cols = TRUE)
+out <- final_dat %>%
+  behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE) # dont expect anything to change here
+
+# out$Historical.Population <- dat_with_pop$Population
 
 ## check nothing strange is happening!
 skim(out)
