@@ -49,7 +49,7 @@ load_data <- function(data_path,
 flag_noncumulative_cases <- function(dat, grp_var) {
   dat <- dat %>% 
     group_by({{grp_var}}) %>%
-    mutate(previous_date_value_cases = lag(Residents.Confirmed, order_by = Date)) %>%
+    mutate(previous_date_value_cases = dplyr::lag(Residents.Confirmed, order_by = Date)) %>%
     mutate(lag_change_cases = Residents.Confirmed - previous_date_value_cases,
            cumulative_cases = ifelse(lag_change_cases >= 0, TRUE, FALSE)) %>%
     ungroup() 
@@ -59,7 +59,7 @@ flag_noncumulative_cases <- function(dat, grp_var) {
 flag_noncumulative_deaths <- function(dat, grp_var, death_var) {
   dat <- dat %>% 
     group_by({{grp_var}}) %>%
-    mutate(previous_date_value_deaths = lag({{death_var}}, order_by = Date)) %>%
+    mutate(previous_date_value_deaths = dplyr::lag({{death_var}}, order_by = Date)) %>%
     mutate(lag_change_deaths = {{death_var}} - previous_date_value_deaths,
            cumulative_deaths = ifelse(lag_change_deaths >= 0, TRUE, FALSE)) %>%
     ungroup() 

@@ -1,7 +1,7 @@
 ---
 title: "Clean North Carolina - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "1/14/21"
+date: "2/4/21"
 output: html_document
 ---
 
@@ -85,12 +85,11 @@ df_mid %>%
   unique()
 ```
 
-Remove observations where we didn't pick up a clean name.
+Remove observations where the name was NA.
 
 ```{r drop null name observations}
 df_mid <- df_mid %>%
-  filter(!is.na(scrape_name_clean),
-         name_match != FALSE)
+  filter(!is.na(scrape_name_clean))
 ```
 
 Remove observation where we clearly mis-scraped the data.
@@ -122,15 +121,12 @@ df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths,
-         Date = date,
-         Jurisdiction = Facility,
-         Facility.ID = Count.ID) %>%
+         Date = date) %>%
   select(-c(Website, Resident.Deaths, Resident.Death, date, Count.ID, Facility)) 
-df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE)
-## add back in Residents.Tested (this will only be present for historical data)
-## add back in Residents.Population (this will only be present for historical data)
-df_hist_final$Residents.Tested <- df_hist$Residents.Tested
-df_hist_final$Residents.Population <- df_hist$Residents.Population
+
+df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
+  select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols. doing this because we don't want all logical cols for the row_
+
 ```
 
 Add in more recently scraped data (from November until present). 
@@ -142,9 +138,7 @@ recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE,
                                                 state = "North Carolina", 
                                                 debug = TRUE) %>%
   filter(Jurisdiction != "federal",
-       Date > as.Date('2020-11-04')) %>%
-  mutate(Zipcode = as.numeric(Zipcode),
-         County.FIPS = as.numeric(County.FIPS))
+       Date > as.Date('2020-11-04'))
 
 ## view facility names without a match in the xwalk
 recent_dat %>%
@@ -152,13 +146,7 @@ recent_dat %>%
   select(scrape_name_clean) %>%
   unique()
 
-recent_dat_cln <- recent_dat %>%
-  filter(name_match != FALSE) %>%
-  select(-xwalk_name_clean)
-
-recent_final <- behindbarstools::reorder_cols(recent_dat_cln, rm_extra_cols = TRUE)
-recent_final$Residents.Tested <- NA
-recent_final$Residents.Population <- NA
+recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
 ```
 
 Then, bind it to the historical cleaned data from this script. 
@@ -171,16 +159,15 @@ n_distinct(all_dat$Name)
 Merge in facility information (address, city, county, etc.).
 
 ```{r}
-fac_info <- behindbarstools::read_fac_info() %>%
-  filter(State == "North Carolina") %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name))
+fac_info <- behindbarstools::read_fac_info() 
 final_dat <- left_join(all_dat, fac_info, 
-                  by = "Name",
-                  suffix = c(".x", ""))
+                  by = "Facility.ID",
+                  suffix = c(".x", "")) 
 
 final_dat %<>% 
   mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
          Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
+         Name = behindbarstools::coalesce_with_warnings(Name.x, Name),
          Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
          City = behindbarstools::coalesce_with_warnings(City.x, City),
          County = behindbarstools::coalesce_with_warnings(County.x, County)) %>%
