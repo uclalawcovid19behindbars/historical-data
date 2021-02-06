@@ -143,3 +143,14 @@ PA,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
 WI,2021-02-04,NA,"- Different types for column `State`: character vs character
 "
+NC,2021-02-06,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Initiated`: logical vs double
+- Different types for column `Residents.Completed`: logical vs double
+- Different types for column `Residents.Vadmin`: logical vs double
+- Different types for column `Staff.Initiated`: logical vs double
+- Different types for column `Staff.Completed`: logical vs double
+- Different types for column `Staff.Vadmin`: logical vs double
+"
+NC,2020-08-08,no match,CALDWELL CORRECTIONAL CENTER
+PA,2021-02-06,NA,"- Different types for column `State`: character vs character
+"
