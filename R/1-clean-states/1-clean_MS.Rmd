@@ -82,14 +82,6 @@ df_mid %>%
   unique()
 ```
 
-Remove observations where we didn't pick up a clean name.
-
-```{r drop null name observations}
-df_mid <- df_mid %>%
-  filter(!is.na(scrape_name_clean),
-         name_match != FALSE)
-```
-
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
 
 ```{r concat duplicate date/facilities}
@@ -97,8 +89,10 @@ nrow(distinct(df_mid, date, Name))
 see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, date)))
 
 df_comb <- df_mid %>% 
-  behindbarstools::group_by_coalesce(., Name, date, 
-                                     .ignore = c("scrape_name_clean", "Facility", "source"),
+  behindbarstools::group_by_coalesce(., Name, Facility.ID, date, 
+                                     .ignore = c("scrape_name_clean", 
+                                                 "Facility", 
+                                                 "source"),
                                      .method = "sum")
 
 assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, date)))
@@ -113,7 +107,9 @@ df_hist_final <- df_hist %>%
          Date = date) %>%
   select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
-    select_if(~sum(!is.na(.)) > 0) # rm all NA
+  select_if(~sum(!is.na(.)) > 0) %>% # rm all NA
+  mutate(Zipcode = as.character(Zipcode),
+         County.FIPS = as.character(County.FIPS))
 
 ```
 
@@ -148,8 +144,17 @@ Merge in facility information (address, city, county, etc.).
 fac_info <- behindbarstools::read_fac_info() 
 final_dat <- left_join(all_dat, fac_info, 
                   by = "Facility.ID",
-                  suffix = c(".x", "")) %>%
+                  suffix = c(".x", "")) 
+
+final_dat %<>% 
+  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
+         Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
+         Name = behindbarstools::coalesce_with_warnings(Name.x, Name),
+         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
+         City = behindbarstools::coalesce_with_warnings(City.x, City),
+         County = behindbarstools::coalesce_with_warnings(County.x, County)) %>%
   select(-ends_with(".x"))
+
 ```
 
 
