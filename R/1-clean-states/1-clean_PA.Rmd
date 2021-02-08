@@ -100,7 +100,7 @@ see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, date)))
 
 # if there are two values, sum them 
 df_comb <- df_mid %>% 
-  behindbarstools::group_by_coalesce(., Name, date, 
+  behindbarstools::group_by_coalesce(., Name, date, Facility.ID,
                                      .ignore = "scrape_name_clean",
                                      .method = "sum")
 
@@ -115,7 +115,9 @@ df_hist_final <- df_hist %>%
   select(-c(Website, date, Count.ID, Facility)) 
 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
-  select_if(~sum(!is.na(.)) > 0) # get rid of all-NA columns for easier row-binding
+  select_if(~sum(!is.na(.)) > 0) %>% # get rid of all-NA columns for easier row-binding
+  mutate(Zipcode = as.character(Zipcode),
+         County.FIPS = as.character(County.FIPS))
 
 ```
 
