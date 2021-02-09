@@ -214,8 +214,56 @@ all_cases <- testing_file %>%
 
 ggplotly(all_cases)
 
+negative_cases <- testing_file %>% 
+  filter(Date == as.Date("2020-08-26") & lag_change_cases < 0) %>%
+  pull(Name)
+
+final_dat %>%
+  filter(Date == as.Date("2020-08-26") & (Name %in% negative_cases)) %>%
+  select(Name, Date, Residents.Confirmed) %>%
+  head()
+
+# make suspect scraping day NA for a few facilities
+final_dat <- final_dat %>%
+  mutate(Residents.Confirmed = ifelse(((Name %in% negative_cases) & (Date == as.Date("2020-08-26"))), 
+                                      NA,
+                                      Residents.Confirmed))
+
+```
+
+Remove obvious data entry issue. 
+
+```{r}
+case_check <- testing_file %>% 
+  filter(Date == as.Date("2020-08-26") | Date == as.Date("2020-08-27")) %>%
+  group_by(Name) %>% 
+  mutate(two_day_deaths = behindbarstools::sum_na_rm(lag_change_cases)) %>% 
+  filter((two_day_deaths == 0) & (first(abs(lag_change_cases)) > 1)) %>%
+  ungroup()
+
+case_check %>%
+  filter(Name != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = Date, y = lag_change_cases, group = Name)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m/%y", 
+                      date_breaks = "1 month") + 
+    labs(x = "Date",
+      y = "lag_change_cases")
+
+bad_facs <- case_check %>% 
+  select(Name) %>%
+  unique() %>%
+  pull(Name)
+
+# remove cases from date that was obviously a data entry error
+final_dat <- final_dat %>%
+  filter(!((Name %in% bad_facs) & between(Date, as.Date("2020-08-26"), as.Date("2020-08-27"))))
+```
+
+```{r}
 # lag deaths overall
-all_deaths <- testing_file %>%
+resident_deaths <- testing_file %>%
   filter(Name != "STATEWIDE") %>%
   ggplot(data = ., 
          aes(x = Date, y = lag_change_deaths, group = Name)) +
@@ -223,7 +271,18 @@ all_deaths <- testing_file %>%
     scale_x_date(date_labels = "%m") + 
     labs(x = "Date",
       y = "lag_change_deaths")
-ggplotly(all_deaths)
+ggplotly(resident_deaths)
+
+testing_file <- flag_noncumulative_deaths(testing_file, Name, Staff.Deaths)
+staff_deaths <- testing_file %>%
+  filter(Name != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = Date, y = lag_change_deaths, group = Name)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_deaths")
+ggplotly(staff_deaths)
 
 ```
 
@@ -242,22 +301,22 @@ lag_case_plots <- plot_lags(testing_file, "Date",
                             grp_var = Name)
 lag_case_plots$plot
 
-# save lag case plots
-# for (i in 1:nrow(lag_case_plots)){
-#   facility_name <- lag_case_plots$Name[[i]]
-#   ggsave(paste0(facility_name, "_LagChangeCases.png"), lag_case_plots$plot[[i]],
-#          path = file.path(base_path, "plots", state_abbrev, "cases"))
-# }
+## save lag case plots
+for (i in 1:nrow(lag_case_plots)){
+  facility_name <- lag_case_plots$Name[[i]]
+  ggsave(paste0(facility_name, "_LagChangeCases.png"), lag_case_plots$plot[[i]],
+         path = file.path(base_path, "plots", state_abbrev, "cases"))
+}
 
 lag_death_plots <- plot_lags(testing_file, "Date", 
                             y_var = "lag_change_deaths",
                             grp_var = Name)
-# save lag death plots
-# for (i in 1:nrow(lag_death_plots)){
-#   facility_name <- lag_death_plots$Name[[i]]
-#   ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
-#          path = file.path(base_path, "plots", state_abbrev, "deaths"))
-# }
+## save lag death plots
+for (i in 1:nrow(lag_death_plots)){
+  facility_name <- lag_death_plots$Name[[i]]
+  ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
+         path = file.path(base_path, "plots", state_abbrev, "deaths"))
+}
 ```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
