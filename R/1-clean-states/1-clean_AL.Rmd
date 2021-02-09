@@ -76,7 +76,7 @@ df_out %>%
 
 ```{r}
 df_out %<>% 
-  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
+  mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
          Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
 ```
 
@@ -213,6 +213,22 @@ all_cases <- testing_file %>%
       y = "lag_change_cases")
 
 ggplotly(all_cases)
+
+negative_cases <- testing_file %>% 
+  filter(Date == as.Date("2020-08-26") & lag_change_cases < 0) %>%
+  pull(Name)
+
+final_dat %>%
+  filter(Date == as.Date("2020-08-26") & (Name %in% negative_cases)) %>%
+  select(Name, Date, Residents.Confirmed) %>%
+  head()
+
+# make suspect scraping day NA for a few facilities
+final_dat <- final_dat %>%
+  mutate(Residents.Confirmed = ifelse(((Name %in% negative_cases) & (Date == as.Date("2020-08-26"))), 
+                                      NA,
+                                      Residents.Confirmed))
+
 ```
 
 Remove obvious data entry issue. 
@@ -243,12 +259,11 @@ bad_facs <- case_check %>%
 # remove cases from date that was obviously a data entry error
 final_dat <- final_dat %>%
   filter(!((Name %in% bad_facs) & between(Date, as.Date("2020-08-26"), as.Date("2020-08-27"))))
-
 ```
 
 ```{r}
 # lag deaths overall
-all_deaths <- testing_file %>%
+resident_deaths <- testing_file %>%
   filter(Name != "STATEWIDE") %>%
   ggplot(data = ., 
          aes(x = Date, y = lag_change_deaths, group = Name)) +
@@ -256,7 +271,18 @@ all_deaths <- testing_file %>%
     scale_x_date(date_labels = "%m") + 
     labs(x = "Date",
       y = "lag_change_deaths")
-ggplotly(all_deaths)
+ggplotly(resident_deaths)
+
+testing_file <- flag_noncumulative_deaths(testing_file, Name, Staff.Deaths)
+staff_deaths <- testing_file %>%
+  filter(Name != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = Date, y = lag_change_deaths, group = Name)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_deaths")
+ggplotly(staff_deaths)
 
 ```
 

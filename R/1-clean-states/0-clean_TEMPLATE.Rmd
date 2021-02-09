@@ -76,7 +76,7 @@ df_out %>%
 
 ```{r}
 df_out %<>% 
-  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
+  mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
          Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
 ```
 
