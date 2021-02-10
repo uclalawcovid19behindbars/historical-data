@@ -1,7 +1,7 @@
 ---
 title: "Clean STATENAME - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "2/4/21"
+date: "2/10/21"
 output: html_document
 ---
 
@@ -35,7 +35,7 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
