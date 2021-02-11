@@ -190,3 +190,13 @@ KY,2020-08-08,no match,KENTUCKY CORRECTIONA INSTITUTION FOR WOMEN
 KY,2020-10-28,no match,SOUTHEAST CORRECTIONAL COMPLEX
 KY,2020-04-15,no match,STATEWIDE FOR NON-SPECIFIC FACILITIES
 KY,2020-08-28,no match,TOTA
+AL,2021-02-11,NA,"- Different types for column `State`: character vs character
+"
+AR,2021-02-11,NA,"- Different types for column `State`: character vs character
+- Different types for column `Age`: logical vs character
+- Different types for column `Gender`: logical vs character
+"
+KY,2021-02-11,NA,"- Different types for column `State`: character vs character
+"
+KY,2021-02-10,no match,KENTUCKY STATE PENIFENTIARY
+KY,2021-02-10,no match,WESTERN KENFUCKY CORRECTIONAL COMPLEX
