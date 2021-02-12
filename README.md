@@ -24,9 +24,12 @@ When data are not available publicly, we make every effort to obtain missing inf
 
 We are in the process of cleaning historical data going back to the beginning of the pandemic. Currently, the states with [historical data available](https://github.com/uclalawcovid19behindbars/historical-data/tree/main/data) are: 
 
+- Alabama
+- Arkansas
 - Arizona
 - California
 - Florida
+- Kentucky 
 - Mississippi
 - North Carolina
 - New Jersey
