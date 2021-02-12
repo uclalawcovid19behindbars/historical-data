@@ -200,3 +200,38 @@ KY,2021-02-11,NA,"- Different types for column `State`: character vs character
 "
 KY,2021-02-10,no match,KENTUCKY STATE PENIFENTIARY
 KY,2021-02-10,no match,WESTERN KENFUCKY CORRECTIONAL COMPLEX
+AL,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+AR,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `Age`: logical vs character
+- Different types for column `Gender`: logical vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+AZ,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+CA,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+FL,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+KY,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+MS,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+NC,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+NJ,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+PA,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
+WI,2021-02-12,NA,"- Different types for column `State`: character vs character
+- Different types for column `ICE.Field.Office`: logical vs character
+"
