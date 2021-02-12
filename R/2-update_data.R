@@ -76,7 +76,11 @@ update_historical_data <- function(state_in) {
       Security = "c",
       Different.Operator = "c",
       jurisdiction_scraper = "c",
-      Is.Different.Operator = "l"
+      Is.Different.Operator = "l",
+      ICE.Field.Office = "c",
+      Age = "c",
+      Gender = "c",
+      Description = "c"
       )) %>%
     ## account for any changes in facility xwalks
     behindbarstools::clean_facility_name(., debug = TRUE) %>%
