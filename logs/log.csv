@@ -258,3 +258,5 @@ NC,2021-02-16,NA,"1 parsing failure.
    row col   expected    actual                                                                      file
 108693  -- 29 columns 2 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+AR,2021-02-17,NA,"- Different types for column `State`: character vs character
+"
