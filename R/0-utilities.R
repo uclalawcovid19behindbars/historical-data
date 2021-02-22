@@ -177,4 +177,39 @@ get_fac_n <- function(dat, var) {
   return(fac_n)
 }
 
+sync_remote_files <- function(file_name){
+  system(str_c(
+    "rsync --perms --chmod=u+rwx -rtvu --progress data/pre-nov/",
+    file_name, 
+    " ucla:/srv/shiny-server/scraper_data/extracted_data/"))
+}
 
+clean_hist_df <- function(df) {
+  valid_columns <- c(
+    "Name", "Date", "Jurisdiction", "State",
+    "Staff.Confirmed", "Residents.Confirmed",
+    "Staff.Deaths", "Residents.Deaths",
+    "Staff.Recovered", "Residents.Recovered",
+    "Staff.Tested", "Residents.Tested", "Residents.Tadmin",
+    "Staff.Negative", "Residents.Negative",
+    "Staff.Pending", "Residents.Pending",
+    "Staff.Quarantine", "Residents.Quarantine",
+    "Residents.Population", "Residents.Active",
+    "Staff.Vadmin", "Residents.Vadmin",
+    "Staff.Initiated", "Residents.Initiated",
+    "Staff.Completed", "Residents.Completed"
+  )
+  
+  for(i in names(df)){
+    if(!(i %in% valid_columns)){
+      warning(str_c("removing ", i, "\n"))
+      df <- df %>%
+        select(-!!i)
+    }
+  }
+  
+  df <- df %>%
+    mutate(State = behindbarstools::translate_state(State, reverse = TRUE))
+  return(df)
+  
+}

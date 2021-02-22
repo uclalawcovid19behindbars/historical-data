@@ -32,7 +32,7 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
@@ -59,6 +59,14 @@ df_out <- df_typed %>%
   select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
 names(df_out) 
 
+df_out %>%
+  select(contains("Staff")) %>% 
+  names()
+
+df_out %>%
+  select(contains("Resident")) %>% 
+  names()
+
 df_out %<>% 
   mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death),
          Staff.Quarantine = behindbarstools::coalesce_with_warnings(Staff.Quarantine, Staff.Quarantined)) 
@@ -66,7 +74,7 @@ df_out %<>%
 
 ```{r create date var}
 df_out <- df_out %>%
-  mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
+  mutate(Date = as_date(sheet_name, format = "%Om.%d.%y"))
 ```
 
 ```{r standardize facility names}
@@ -74,8 +82,12 @@ df_cln <- df_out %>%
   mutate(
     Name = str_replace(Name, "-CDCR", "CDCR"),
     Name = str_replace(Name, "CDCRCCHCS", "CDCR CCHCS"),
-    Name = str_replace(Name, "CDCR/CCHCS", "CDCR CCHS"))
+    Name = str_replace(Name, "CDCR/CCHCS", "CDCR CCHCS"))
+```
 
+Standardize facility names and add facility IDs from alternate name spelling crosswalk. 
+
+```{r}
 df_mid <- behindbarstools::clean_facility_name(df_cln, debug = TRUE) 
 ```
 
@@ -86,10 +98,12 @@ df_nonfederal <- df_mid %>%
 
 ```{r check name mismatches}
 # show instances where merge didn't identify a clean name
-df_nonfederal %>%
+nonmatches <- df_nonfederal %>%
   filter(name_match == FALSE) %>% 
-  select(scrape_name_clean) %>%
+  select(Name) %>%
   unique()
+
+# View(nonmatches)
 ```
 
 Remove observations where we didn't pick up a clean name.
@@ -97,21 +111,22 @@ Remove observations where we didn't pick up a clean name.
 ```{r drop null name observations}
 df_filt <- df_nonfederal %>%
   filter(!is.na(scrape_name_clean)) %>%
-  filter((name_match == TRUE) | (str_detect(Name, "CDCR CCHS"))) %>%
-  mutate(Jurisdiction = ifelse(name_match == FALSE, "state", Jurisdiction)) # CDCR CCHS ones are "state"
+  filter(name_match == TRUE)
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
 
 ```{r concat duplicate date/facilities}
-nrow(distinct(df_filt, date, Name))
-see_if(nrow(df_filt) == nrow(distinct(df_filt, Name, date)))
+nrow(distinct(df_filt, Date, Name))
+see_if(nrow(df_filt) == nrow(distinct(df_filt, Name, Date)))
 
+# if there are two values, sum them 
 df_comb <- df_filt %>% 
-  behindbarstools::group_by_coalesce(., Name, date, 
-                                     .ignore = c("scrape_name_clean", "Facility", "source"))
+  behindbarstools::group_by_coalesce(., Name, Facility.ID, Date, 
+                                     .ignore = "scrape_name_clean",
+                                     .method = "sum") 
 
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, date)))
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date)))
 ```
 
 Filter down and re-order columns in order to row bind them to latest data.
@@ -120,12 +135,19 @@ Filter down and re-order columns in order to row bind them to latest data.
 df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
-         Residents.Deaths = Resident.Deaths,
-         Date = date) %>%
-  select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
+         Residents.Deaths = Resident.Deaths) %>%
+  select(-c(Website, Resident.Deaths, Resident.Death, Count.ID, Facility)) 
 
+# this is ready for merging with post-nov scraped data
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
-    select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols. doing this because we don't want all logical cols for the row_bind
+  select_if(~sum(!is.na(.)) > 0) 
+
+# paring this down for read_scrape_data format
+df_hist_towrite <- clean_hist_df(df_hist_final)
+srvr_outfile_name <- '1-pre-november-CA.csv'
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+sync_remote_files(srvr_outfile_name)
+
 ```
 
 Add in more recently scraped data (from November until present). 

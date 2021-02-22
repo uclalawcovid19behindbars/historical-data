@@ -130,6 +130,17 @@ df_hist_final <- df_hist %>%
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
   select_if(~sum(!is.na(.)) > 0) # rm all NA
 
+df_hist_towrite <- clean_hist_df(df_hist_final)
+skim(df_hist_towrite)
+srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+```
+
+Merge the data with
+
+```{r}
+
+
 ```
 
 Add in more recently scraped data (from November until present). 
