@@ -339,3 +339,6 @@ CA,2021-02-19,NA,"Group Date: 2021-02-10, Name: CENTRAL CALIFORNIA WOMENS FACILI
 CA,2021-02-19,NA,"Group Date: 2021-02-10, Name: FOLSOM STATE PRISON, State: California, jurisdiction_scraper: state, Facility.ID: 120 has multiple values that do not match for column Residents.Population. Only using sum of observed value from the following unique values 1988, 63"
 CA,2021-02-20,NA,"Group Date: 2021-02-17, Name: CENTRAL CALIFORNIA WOMENS FACILITY, State: California, jurisdiction_scraper: state, Facility.ID: 112 has multiple values that do not match for column Residents.Population. Only using sum of observed value from the following unique values 4, 2013"
 CA,2021-02-20,NA,"Group Date: 2021-02-17, Name: FOLSOM STATE PRISON, State: California, jurisdiction_scraper: state, Facility.ID: 120 has multiple values that do not match for column Residents.Population. Only using sum of observed value from the following unique values 1979, 63"
+AR,2021-02-23,NA,"- Different types for column `State`: character vs character
+- Different types for column `Residents.Population`: double vs logical
+"
