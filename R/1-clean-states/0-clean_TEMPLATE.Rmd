@@ -1,7 +1,7 @@
 ---
 title: "Clean STATENAME - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "2/10/21"
+date: "2/24/21"
 output: html_document
 ---
 
@@ -129,19 +129,19 @@ df_hist_final <- df_hist %>%
 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
   select_if(~sum(!is.na(.)) > 0) # rm all NA
-
-df_hist_towrite <- clean_hist_df(df_hist_final)
-skim(df_hist_towrite)
-srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
-write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
 ```
 
-Merge the data with
+Write pre-November data to the server. 
 
 ```{r}
+df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+skim(df_hist_towrite)
 
-
+srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+sync_remote_files(srvr_outfile_name)
 ```
+
 
 Add in more recently scraped data (from November until present). 
 

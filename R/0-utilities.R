@@ -184,9 +184,13 @@ sync_remote_files <- function(file_name){
     " ucla:/srv/shiny-server/scraper_data/extracted_data/"))
 }
 
-clean_hist_df <- function(df) {
+prep_server_data <- function(df, state_abbrev) {
+  df <- df %>%
+    mutate(jurisdiction = Jurisdiction,
+           id = glue('pre-nov_{tolower(state_abbrev)}_covid')) %>%
+    select(-Jurisdiction)
   valid_columns <- c(
-    "Name", "Date", "Jurisdiction", "State",
+    "Date","Name", "State", "id", "jurisdiction", 
     "Staff.Confirmed", "Residents.Confirmed",
     "Staff.Deaths", "Residents.Deaths",
     "Staff.Recovered", "Residents.Recovered",
