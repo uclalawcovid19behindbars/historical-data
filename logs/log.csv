@@ -984,3 +984,4 @@ CA,2021-02-25,NA,"Group Date: 2020-10-30, Name: VALLEY STATE PRISON, State: Cali
 CA,2021-02-25,NA,"Group Date: 2020-10-30, Name: WASCO STATE PRISON, State: California, jurisdiction_scraper: state, Facility.ID: 171 has multiple values that do not match for column Residents.Confirmed. Only using sum of observed value from the following unique values 293, 293"
 CA,2021-02-25,NA,"Group Date: 2020-10-30, Name: WASCO STATE PRISON, State: California, jurisdiction_scraper: state, Facility.ID: 171 has multiple values that do not match for column Residents.Deaths. Only using sum of observed value from the following unique values 0, 0"
 CA,2021-02-25,NA,"Group Date: 2020-10-30, Name: WASCO STATE PRISON, State: California, jurisdiction_scraper: state, Facility.ID: 171 has multiple values that do not match for column Residents.Recovered. Only using sum of observed value from the following unique values 250, 250"
+CA,2021-02-26,no match,SANTA BARBARA JAILS
