@@ -212,8 +212,17 @@ prep_server_data <- function(df, state_abbrev) {
     }
   }
   
-  df <- df %>%
-    mutate(State = behindbarstools::translate_state(State, reverse = TRUE))
-  return(df)
+  rowAny <- function(x) rowSums(x) > 0
   
+  out_df <- df %>%
+    # drop rows missing COVID data (e.g. only with state name and a note)
+    filter(rowAny(across(ends_with(c(
+      ".Confirmed", ".Deaths", ".Recovered", ".Tadmin", ".Tested", ".Active",
+      ".Negative", ".Pending", ".Quarantine", ".Initiated", ".Completed", ".Vadmin")),
+      ~ !is.na(.x))))
+  
+  out_df <- out_df %>%
+    mutate(State = toupper(state_abbrev))
+
+  return(out_df)
 }
