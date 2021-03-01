@@ -16,6 +16,7 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ##Load packages into session 
 lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
+library(behindbarstools)
 help(package=behindbarstools)
 
 ##Define state
@@ -35,7 +36,7 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
@@ -118,6 +119,21 @@ df_comb <- df_mid %>%
 assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date)))
 ```
 
+Assertions / sanity checks ! 
+```{r}
+# make sure there's only 1 clean name per facility ID! 
+df_comb %>% 
+  group_by(Facility.ID) %>% 
+  summarise(n_name = n_distinct(Name)) %>% 
+  filter(n_name > 1)
+
+# make sure there's only 1 facility ID per clean name!
+df_comb %>% 
+    group_by(Name) %>% 
+    summarise(n_fac_ID = n_distinct(Facility.ID)) %>% 
+    filter(n_fac_ID > 1)
+```
+
 Filter down and re-order columns in order to row bind them to latest data.
 
 ```{r}
@@ -129,200 +145,12 @@ df_hist_final <- df_hist %>%
 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
   select_if(~sum(!is.na(.)) > 0) # rm all NA
-
-```
-
-Add in more recently scraped data (from November until present). 
-
-First, read it in and clean it. 
-
-```{r add in recently scraped data}
-recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
-                                                state = state_toclean, 
-                                                debug = TRUE) %>%
-  filter(Jurisdiction != "federal",
-       Date > as.Date('2020-11-04'))
-```
-
-Look at facilities that aren't in facility name crosswalk and/or facility data sheet.
-
-```{r}
-## view facility names without a match in the xwalk
-recent_dat %>%
-  filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean) %>%
-  unique()
-
-recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
-```
-
-Then, bind it to the historical cleaned data from this script. 
-
-```{r bind historical and recent}
-all_equal(df_hist_final, recent_final, ignore_col_order = FALSE)
-all_dat <- bind_rows(df_hist_final, recent_final)
-n_distinct(all_dat$Name)
-
-# make sure there's only 1 clean name per facility ID! 
-all_dat %>% 
-  group_by(Facility.ID) %>% 
-  summarise(n_name = n_distinct(Name)) %>% 
-  filter(n_name > 1)
-
-# make sure there's only 1 facility ID per clean name!
-all_dat %>% 
-    group_by(Name) %>% 
-    summarise(n_fac_ID = n_distinct(Facility.ID)) %>% 
-    filter(n_fac_ID > 1)
-```
-Merge in facility information (address, city, county, etc.).
-
-```{r}
-fac_info <- behindbarstools::read_fac_info() 
-final_dat <- left_join(all_dat, fac_info, 
-                  by = "Facility.ID",
-                  suffix = c(".x", "")) 
-
-# coalesce important columns, prioritizing facility_data info for rows that have both
-final_dat %<>% 
-  mutate(State = behindbarstools::coalesce_with_warnings(State, State.x),
-         Address = behindbarstools::coalesce_with_warnings(Address, Address.x),
-         Name = behindbarstools::coalesce_with_warnings(Name, Name.x),
-         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode, Zipcode.x),
-         City = behindbarstools::coalesce_with_warnings(City, City.x),
-         County = behindbarstools::coalesce_with_warnings(County, County.x)) %>%
-  select(-ends_with(".x"))
-```
-
-Make plots for the data, and take a look at any weirdness. 
-
-```{r plot cases/deaths}
-# create a testing file 
-testing_file <- flag_noncumulative_cases(final_dat, Name)
-testing_file <- flag_noncumulative_deaths(testing_file, Name, Residents.Deaths)
-
-# lag cases overall 
-all_cases <- testing_file %>%
-  filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
-         aes(x = Date, y = lag_change_cases, group = Name)) +
-    geom_line(alpha=0.6 , size=.5, color = "black") +
-         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m/%y", 
-                      date_breaks = "1 month") + 
-    labs(x = "Date",
-      y = "lag_change_cases")
-
-ggplotly(all_cases)
-
-negative_cases <- testing_file %>% 
-  filter(Date == as.Date("2020-08-26") & lag_change_cases < 0) %>%
-  pull(Name)
-
-final_dat %>%
-  filter(Date == as.Date("2020-08-26") & (Name %in% negative_cases)) %>%
-  select(Name, Date, Residents.Confirmed) %>%
-  head()
-
-# make suspect scraping day NA for a few facilities
-final_dat <- final_dat %>%
-  mutate(Residents.Confirmed = ifelse(((Name %in% negative_cases) & (Date == as.Date("2020-08-26"))), 
-                                      NA,
-                                      Residents.Confirmed))
-
-```
-
-Remove obvious data entry issue. 
-
-```{r}
-case_check <- testing_file %>% 
-  filter(Date == as.Date("2020-08-26") | Date == as.Date("2020-08-27")) %>%
-  group_by(Name) %>% 
-  mutate(two_day_deaths = behindbarstools::sum_na_rm(lag_change_cases)) %>% 
-  filter((two_day_deaths == 0) & (first(abs(lag_change_cases)) > 1)) %>%
-  ungroup()
-
-case_check %>%
-  filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
-         aes(x = Date, y = lag_change_cases, group = Name)) +
-    geom_line(alpha=0.6 , size=.5, color = "black") +
-         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m/%y", 
-                      date_breaks = "1 month") + 
-    labs(x = "Date",
-      y = "lag_change_cases")
-
-bad_facs <- case_check %>% 
-  select(Name) %>%
-  unique() %>%
-  pull(Name)
-
-# remove cases from date that was obviously a data entry error
-final_dat <- final_dat %>%
-  filter(!((Name %in% bad_facs) & between(Date, as.Date("2020-08-26"), as.Date("2020-08-27"))))
-```
-
-```{r}
-# lag deaths overall
-resident_deaths <- testing_file %>%
-  filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
-         aes(x = Date, y = lag_change_deaths, group = Name)) +
-    geom_line(alpha=0.6 , size=.5, color = "black") +
-    scale_x_date(date_labels = "%m") + 
-    labs(x = "Date",
-      y = "lag_change_deaths")
-ggplotly(resident_deaths)
-
-testing_file <- flag_noncumulative_deaths(testing_file, Name, Staff.Deaths)
-staff_deaths <- testing_file %>%
-  filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
-         aes(x = Date, y = lag_change_deaths, group = Name)) +
-    geom_line(alpha=0.6 , size=.5, color = "black") +
-    scale_x_date(date_labels = "%m") + 
-    labs(x = "Date",
-      y = "lag_change_deaths")
-ggplotly(staff_deaths)
-
-```
-
-Make facility-specific plots, and take a look at any weirdness.
-
-```{r}
-# will throw a warning if path already exists
-plot_path <- file.path(base_path, "plots", state_abbrev)
-dir.create(file.path(plot_path))
-dir.create(file.path(plot_path, "cases"))
-dir.create(file.path(plot_path, "deaths"))
-
-# plot lag counts by facility
-lag_case_plots <- plot_lags(testing_file, "Date", 
-                            y_var = "lag_change_cases",
-                            grp_var = Name)
-lag_case_plots$plot
-
-## save lag case plots
-for (i in 1:nrow(lag_case_plots)){
-  facility_name <- lag_case_plots$Name[[i]]
-  ggsave(paste0(facility_name, "_LagChangeCases.png"), lag_case_plots$plot[[i]],
-         path = file.path(base_path, "plots", state_abbrev, "cases"))
-}
-
-lag_death_plots <- plot_lags(testing_file, "Date", 
-                            y_var = "lag_change_deaths",
-                            grp_var = Name)
-## save lag death plots
-for (i in 1:nrow(lag_death_plots)){
-  facility_name <- lag_death_plots$Name[[i]]
-  ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
-         path = file.path(base_path, "plots", state_abbrev, "deaths"))
-}
 ```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
 ```{r}
-dates <- final_dat %>%
+dates <- df_hist_final %>%
   arrange(Date) %>%
   count(Date)
 dates
@@ -334,13 +162,19 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
-```{r write csv}
-out <- final_dat %>%
-  reorder_historical_cols(rm_extra_cols = TRUE)
+Prep pre-November data.
 
-## check nothing strange is happening!
-skim(out)
+```{r}
+df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
 
-outfile_name <- glue('{state_abbrev}-historical-data.csv')
-write_csv(out, file.path(base_path, "data", outfile_name))
+skim(df_hist_towrite) # double-check everything in the data 
+```
+
+Write pre-November data to the server. 
+
+```{r}
+srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+
+sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```

@@ -239,14 +239,19 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
-Write pre-November data to the server. 
+Prep pre-November data for writing to the server. 
 
 ```{r}
 df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
+```
 
+Write pre-November data to the server. 
+
+```{r}
 srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
+
 write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
 
 sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!

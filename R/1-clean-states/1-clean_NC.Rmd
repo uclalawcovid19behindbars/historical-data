@@ -123,159 +123,19 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
          County.FIPS = as.character(County.FIPS))
 ```
 
-Add in more recently scraped data (from November until present). 
+Prep pre-November data for writing to the server. 
+```{r}
+df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
 
-First, read it in and clean it. 
-
-```{r add in recently scraped data}
-recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
-                                                state = "North Carolina", 
-                                                debug = TRUE) %>%
-  filter(Jurisdiction != "federal",
-       Date > as.Date('2020-11-04'))
-
-## view facility names without a match in the xwalk
-recent_dat %>%
-  filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean) %>%
-  unique()
-
-recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
+skim(df_hist_towrite) # double-check everything in the data 
 ```
 
-Then, bind it to the historical cleaned data from this script. 
-
-```{r bind historical and recent}
-all_equal(df_hist_final, recent_final, ignore_col_order = FALSE)
-all_dat <- bind_rows(df_hist_final, recent_final)
-n_distinct(all_dat$Name)
-
-# make sure there's only 1 clean name per facility ID! 
-all_dat %>% 
-  group_by(Facility.ID) %>% 
-  summarise(n_name = n_distinct(Name)) %>% 
-  filter(n_name > 1)
-
-# make sure there's only 1 facility ID per clean name!
-all_dat %>% 
-    group_by(Name) %>% 
-    summarise(n_fac_ID = n_distinct(Facility.ID)) %>% 
-    filter(n_fac_ID > 1)
-```
-Merge in facility information (address, city, county, etc.).
+Write pre-November data to the server. 
 
 ```{r}
-fac_info <- behindbarstools::read_fac_info() 
-final_dat <- left_join(all_dat, fac_info, 
-                  by = "Facility.ID",
-                  suffix = c(".x", "")) 
+srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
 
-final_dat %<>% 
-  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
-         Address = behindbarstools::coalesce_with_warnings(Address.x, Address),
-         Name = behindbarstools::coalesce_with_warnings(Name.x, Name),
-         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
-         City = behindbarstools::coalesce_with_warnings(City.x, City),
-         County = behindbarstools::coalesce_with_warnings(County.x, County)) %>%
-  select(-ends_with(".x"))
-```
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
 
-Find non-cumulative counts, separate those into "active" and "confirmed". Confirmed = active + recovered + deaths.
-
-```{r plot cases/deaths}
-test_nc <- flag_noncumulative_cases(final_dat, Name)
-test_nc <- flag_noncumulative_deaths(test_nc, Name, Residents.Deaths)
-
-# lag cases overall 
-test_nc %>%
-  filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
-         aes(x = Date, y = lag_change_cases, group = Name)) +
-    geom_line(alpha=0.6 , size=.5, color = "black") +
-         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m/%y", 
-                      date_breaks = "1 month") + 
-    labs(x = "Date",
-      y = "lag_change_cases")
-
-# lag deaths overall
-test_nc %>%
-  filter(Name != "STATEWIDE") %>%
-  ggplot(data = ., 
-         aes(x = Date, y = lag_change_deaths, group = Name)) +
-    geom_line(alpha=0.6 , size=.5, color = "black") +
-    scale_x_date(date_labels = "%m") + 
-    labs(x = "Date",
-      y = "lag_change_deaths")
-
-# plot lag counts by facility
-lag_case_plots <- plot_lags(test_nc, "Date", 
-                            y_var = "lag_change_cases",
-                            grp_var = Name)
-lag_case_plots$plot
-
-# save lag case plots
-# for (i in 1:nrow(lag_case_plots)){
-#   facility_name <- lag_case_plots$Name[[i]]
-#   ggsave(paste0(facility_name, "_LagChangeCases.png"), lag_case_plots$plot[[i]],
-#          path = file.path(base_path, "plots", "NC", "cases"))
-# }
-
-## confirmed Wilkes CC via way back machine
-## confirmed Marion CI via way back machine
-## confirmed Foothills CI via way back machine
-## confirmed Central Prison via way back machine
-## confirmed Alexander CI via way back machine
-
-lag_death_plots <- plot_lags(test_nc, "Date", 
-                            y_var = "lag_change_deaths",
-                            grp_var = Name)
-# save lag death plots
-# for (i in 1:nrow(lag_death_plots)){
-#   facility_name <- lag_death_plots$Name[[i]]
-#   ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
-#          path = file.path(base_path, "plots", "NC", "deaths"))
-# }
-```
-
-Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
-
-```{r}
-dates <- final_dat %>%
-  arrange(Date) %>%
-  count(Date)
-dates
-
-ggplot(data = dates, 
-       aes(x = Date, y = n)) +
-  geom_bar(stat="identity") +
-  labs(x = "Date",
-    y = "n instances")
-```
-
-```{r find infection spikes, include=FALSE }
-## Find historical spikes over time.
-## get 7-day percentage change in cases
-percentage_change <- final_dat %>%
-    dplyr::arrange(Name, Date) %>%
-    mutate(
-        week_ago = dplyr::lag(Residents.Confirmed, n = 7),
-        seven_day_change = (Residents.Confirmed - week_ago) / (week_ago + 0.00001) ,
-        n_increase = Residents.Confirmed - week_ago,
-        denom_zero = ifelse(week_ago == 0, TRUE, FALSE)
-    ) %>%
-    select(State, Name, Date, Residents.Confirmed, 
-           week_ago, seven_day_change, denom_zero, n_increase) %>%
-    ungroup()
-
-# View(percentage_change)
-```
-
-```{r write csv}
-out <- final_dat %>%
-  reorder_historical_cols(rm_extra_cols = TRUE)
-
-## check nothing strange is happening!
-skim(out)
-
-write_csv(out, file.path(base_path, "data", "NC-historical-data.csv"))
+sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```

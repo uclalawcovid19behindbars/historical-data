@@ -1,6 +1,7 @@
 # Files in `data` directory
 data/inputs/*
 data/outputs/*
+Data/pre-nov/*
 outfiles/*
 Plots/*
 *.Rproj

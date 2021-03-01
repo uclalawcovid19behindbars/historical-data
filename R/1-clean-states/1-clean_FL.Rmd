@@ -363,73 +363,19 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
   select_if(~sum(!is.na(.)) > 0) # rm 10
 ```
 
-Add in more recently scraped data (from November until present). 
+Prep pre-November data for writing to the server. 
+```{r}
+df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
 
-First, read it in and clean it. 
-
-```{r add in recently scraped data}
-recent_dat <- behindbarstools::read_scrape_data(all_dates = TRUE, 
-                                                state = "Florida", 
-                                                debug = TRUE) %>%
-  filter(Jurisdiction != "federal",
-       Date > as.Date('2020-11-04'))
-
-## view facility names without a match in the xwalk
-recent_dat %>%
-  filter(name_match == "FALSE") %>% 
-  select(scrape_name_clean) %>%
-  unique()
-
-# recent_dat_cln <- recent_dat %>%
-#   filter(name_match != FALSE) %>%
-#   select(-xwalk_name_clean)
-
-recent_final <- behindbarstools::reorder_cols(recent_dat, rm_extra_cols = TRUE)
+skim(df_hist_towrite) # double-check everything in the data 
 ```
-Then, bind it to the historical cleaned data from this script. 
 
-```{r bind historical and recent}
-all_equal(df_hist_final, recent_final, ignore_col_order = FALSE)
-all_dat <- bind_rows(df_hist_final, recent_final)
-n_distinct(all_dat$Name)
-```
-Merge in facility information (address, city, county, etc.).
+Write pre-November data to the server. 
 
 ```{r}
-fac_info <- behindbarstools::read_fac_info() 
-final_dat <- left_join(all_dat, fac_info, 
-                  by = "Facility.ID",
-                  suffix = c(".x", ""))
+srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
 
-final_dat <- final_dat %>% 
-  mutate(State = behindbarstools::coalesce_with_warnings(State.x, State),
-         Name = behindbarstools::coalesce_with_warnings(Name.x, Name),
-         Zipcode = behindbarstools::coalesce_with_warnings(Zipcode.x, Zipcode),
-         Jurisdiction = behindbarstools::coalesce_with_warnings(Jurisdiction.x, Jurisdiction)) %>%
-  select(-ends_with(".x"))
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+
+sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```
-
-Finally, merge in population data. This isn't working right now because of naming issues!
-
-````{r merge-population}
-pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/initial/Merg_Pop.csv') %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name,to_upper = TRUE))
-
-dat_with_pop <- all_dat %>%
-  left_join(pop, by = "Name")
-
-table(is.na(dat_with_pop$Population))
-```
-
-Write out data with the correct columns.
-
-```{r write csv}
-out <- final_dat %>%
-  behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE) # dont expect anything to change here
-
-## check nothing strange is happening!
-skim(out)
-
-write_csv(out, file.path(base_path, "data", "FL-historical-data.csv"))
-```
-
