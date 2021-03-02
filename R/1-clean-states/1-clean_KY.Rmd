@@ -6,6 +6,8 @@ output: html_document
 ---
 
 ```{r package setup, include=FALSE}
+rm(list=ls())
+
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
             "devtools", "magrittr", "skimr", "plotly")
@@ -35,7 +37,7 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
@@ -122,7 +124,22 @@ df_comb <- df_mid %>%
                                      .ignore = "scrape_name_clean",
                                      .method = "sum") 
 
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date)))
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Facility.ID, Date)))
+```
+
+Assertions / sanity checks ! 
+```{r}
+# make sure there's only 1 clean name per facility ID! 
+df_comb %>% 
+  group_by(Facility.ID) %>% 
+  summarise(n_name = n_distinct(Name)) %>% 
+  filter(n_name > 1)
+
+# make sure there's only 1 facility ID per clean name!
+df_comb %>% 
+    group_by(Name) %>% 
+    summarise(n_fac_ID = n_distinct(Facility.ID)) %>% 
+    filter(n_fac_ID > 1)
 ```
 
 Filter down and re-order columns in order to row bind them to latest data.

@@ -6,6 +6,8 @@ output: html_document
 ---
 
 ```{r package setup, include=FALSE}
+rm(list=ls())
+
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
             "devtools", "magrittr", "skimr")
@@ -17,6 +19,10 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 help(package=behindbarstools)
+
+##Define state
+state_toclean <- "Pennsylvania"
+state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
 ## Intro & Credits
@@ -34,7 +40,7 @@ Input files:
 * Facility name look-up table 
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
@@ -124,7 +130,7 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
 Prep pre-November data for writing to the server. 
 ```{r}
 df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
-
+options(skimr_strip_metadata = FALSE)
 skim(df_hist_towrite) # double-check everything in the data 
 ```
 

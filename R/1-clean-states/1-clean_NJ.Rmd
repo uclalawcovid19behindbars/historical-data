@@ -6,6 +6,8 @@ output: html_document
 ---
 
 ```{r package setup, include=FALSE}
+rm(list=ls())
+
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
             "devtools", "magrittr", "skimr")
@@ -17,6 +19,10 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 help(package=behindbarstools)
+
+##Define state
+state_toclean <- "New Jersey"
+state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
 ## Intro & Credits
@@ -34,7 +40,7 @@ Input files:
 * Facility name look-up table 
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code",  "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
@@ -86,6 +92,12 @@ df_mid %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
   unique()
+```
+
+Designate Kintock Newark as "federal" for name cleaning purposes down the line. 
+```{r}
+df_mid <- df_mid %>%
+  mutate(Jurisdiction = ifelse(Name == "KINTOCK NEWARK", "federal", Jurisdiction))
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.

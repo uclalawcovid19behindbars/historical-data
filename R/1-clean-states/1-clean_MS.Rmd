@@ -6,6 +6,8 @@ output: html_document
 ---
 
 ```{r package setup, include=FALSE}
+rm(list=ls())
+
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
             "devtools", "magrittr", "skimr")
@@ -17,6 +19,10 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 help(package=behindbarstools)
+
+##Define state
+state_toclean <- "Mississippi"
+state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
 ## Intro & Credits
@@ -32,7 +38,7 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
@@ -43,7 +49,7 @@ source(util_path, local = knitr::knit_global())
 ```{r load data, message=FALSE}
 df <- load_data(data_path, 
                 "11420",
-                filter_state = "Mississippi") 
+                filter_state = state_toclean) 
 df_typed <- type_convert(df)
 ```
 

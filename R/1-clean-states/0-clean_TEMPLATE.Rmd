@@ -6,6 +6,7 @@ output: html_document
 ---
 
 ```{r package setup, include=FALSE}
+rm(list=ls())
 ##Define package list
 Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
             "devtools", "magrittr", "skimr", "plotly")
@@ -15,6 +16,7 @@ Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ##Load packages into session 
 lapply(.packages, require, character.only=TRUE)
+options(skimr_strip_metadata = FALSE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 library(behindbarstools)
 help(package=behindbarstools)
