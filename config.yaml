@@ -1,6 +1,6 @@
 cleaning-settings:
   all:
-    states: [AR, AZ, CA, FL, KY, MS, NC, NJ, PA, WI]
+    states: [AL, AR, AZ, CA, FL, KY, MS, NC, NJ, PA, WI]
     run: TRUE
   partial:
     states: []
