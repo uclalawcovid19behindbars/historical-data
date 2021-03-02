@@ -8,18 +8,19 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 
+## update one state's historical data by reading data from the server,
+## logging any mis-matches, and any other warnings along the way
 update_historical_data <- function(state_in) {
-  state_select <- substr(state_in, 1, 2)
-  
   ## columns that could be present but shouldn't be 
   to_rm <- c("Facility", "scrape_name_clean", "federal_bool", "xwalk_name_clean",
              "name_match", "Count.ID", "Population", "Residents.Released", "jurisdiction")
   
-  state_full <- behindbarstools::translate_state(state_select)
+  state_full <- behindbarstools::translate_state(state_in)
   
   ## Read latest data from “data” repo
   quiet_read_scrape_data <- quietly(behindbarstools::read_scrape_data)
   latest <- quiet_read_scrape_data(state = state_full,
+                                   all_dates = TRUE,
                                    debug = TRUE)
   latest_dat <- latest$result %>%
     filter(Jurisdiction != "federal") %>%
@@ -27,93 +28,22 @@ update_historical_data <- function(state_in) {
   
   no_match <- latest_dat %>%
     filter(name_match == "FALSE") %>%
-    mutate(state = state_select,
+    mutate(state = state_in,
            date = Date,
            warning_type = "no match",
            warning = scrape_name_clean) %>%
     select(state, date, warning_type, warning) 
-  
-  ## Read data from historical data repo for x state
-  hist_dat <- file.path('data', state_in) %>%
-    read_csv(col_types = cols(
-      Date = "D",
-      Jurisdiction = "c",
-      State = "c",
-      Name = "c",
-      source = "c",
-      Facility.ID = "d",
-      Residents.Confirmed = "d",
-      Staff.Confirmed = "d",
-      Residents.Deaths = "d",
-      Staff.Deaths = "d",
-      Residents.Recovered = "d",
-      Staff.Recovered = "d",
-      Residents.Tadmin = "d",
-      Staff.Tested = "d",
-      Residents.Negative = "d",
-      Staff.Negative = "d",
-      Residents.Pending = "d",
-      Staff.Pending = "d",
-      Residents.Quarantine = "d",
-      Staff.Quarantine = "d",
-      Residents.Active = "d",
-      Residents.Tested = "d",
-      Residents.Population = "d",
-      Residents.Initiated = "d",
-      Residents.Completed = "d",
-      Residents.Vadmin = "d",
-      Staff.Initiated = "d",
-      Staff.Completed = "d",
-      Staff.Vadmin = "d",
-      Population.Feb20 = "d",
-      Zipcode = "c",
-      Latitude = "d",
-      Longitude = "d",
-      County.FIPS = "c",
-      HIFLD.ID = "c",
-      Capacity = "d",
-      BJS.ID = "c",
-      Security = "c",
-      Different.Operator = "c",
-      jurisdiction_scraper = "c",
-      Is.Different.Operator = "l",
-      ICE.Field.Office = "c",
-      Age = "c",
-      Gender = "c",
-      Description = "c"
-      )) %>%
-    ## account for any changes in facility xwalks
-    behindbarstools::clean_facility_name(., debug = TRUE) %>%
-    dplyr::rename(Facility.ID = Facility.ID.y) %>%
-    select(-Facility.ID.x)
 
-  ## Get non-matches from historical data
-  no_match_hist <- hist_dat %>%
-    filter(name_match == FALSE) %>% 
-    mutate(state = state_select,
-           date = Date,
-           warning_type = "no match",
-           warning = scrape_name_clean) %>%
-    select(state, date, warning_type, warning)
-  
-  hist_dat_merging <- hist_dat %>%
-    behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE)
-  
-  latest_dat_merging <- latest_dat %>%
-    behindbarstools::reorder_cols(add_missing_cols = TRUE, rm_extra_cols = TRUE)
-  
-  ## Append historical data and latest data
-  check_bindable <- all_equal(hist_dat_merging, latest_dat_merging, ignore_col_order = FALSE)
-  
-  all_dat <- hist_dat_merging %>%
-    bind_rows(latest_dat_merging) %>%
-    unique() # only keep unique rows 
+  ## rm cols from debug setting
+  out <- latest_dat %>%
+    behindbarstools::reorder_cols(add_missing_cols = TRUE, 
+                                  rm_extra_cols = TRUE)
   
   ## Write results to historical data repo 
-  write_csv(all_dat, glue('data/{state_in}'))
+  write_csv(out, glue('data/{state_in}-historical-data.csv'))
   
   ## Write warnings to log
-  latest_warnings <- tibble(state = state_select,
+  latest_warnings <- tibble(state = state_in,
                             date = Sys.Date(),
                             warning = latest$warnings) %>%
     filter(warning != "Missing column names filled in: 'X1' [1]",
@@ -122,13 +52,9 @@ update_historical_data <- function(state_in) {
            !str_detect(warning, 'unique values state, state'), # no warning on coalesce by jurisdiction if both = state
            !str_detect(warning, 'column `State`: character vs character')
            ) %>%
-    add_row(state = state_select,
-            date = Sys.Date(),
-            warning = check_bindable) %>%
-    bind_rows(no_match) %>%
-    bind_rows(no_match_hist) 
+    bind_rows(no_match) 
   
-  if(state_select != "federal"){
+  if(state_in != "federal"){
     latest_warnings <- latest_warnings %>%
       filter(!str_detect(warning, 'State: Federal'),
              !str_detect(warning, 'Jurisdiction: federal'))
@@ -143,5 +69,26 @@ update_historical_data <- function(state_in) {
   write_csv(warnings_out, 'logs/log.csv')
 }
 
-file.list <- dir(path = 'data', pattern = "*-historical-data.csv")
-lapply(file.list, update_historical_data)
+## run update_historical_data on some or all states, depending 
+## on settings in config.yaml
+run_main <- function(settings) {
+  settings <- plyr::compact(lapply(settings, function(x)
+  { if(x$run) {return(x)}}))
+  
+  states_to_clean <- settings %>% 
+    .[[1]] %>% 
+    purrr::pluck("states")  
+  
+  if (names(settings) == "all") {
+    lapply(states_to_clean, update_historical_data)
+  } 
+  else {
+    cat("Updating + cleaning a subset of states: ", states_to_clean)
+    lapply(states_to_clean, update_historical_data)
+  }
+}
+
+## read config file and either clean all states, or a subset of them 
+config <- yaml::read_yaml("./config.yaml")
+cleaning_settings <- config$`cleaning-settings`
+run_main(cleaning_settings)
