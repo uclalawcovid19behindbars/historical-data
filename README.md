@@ -65,17 +65,19 @@ beginning of the pandemic. Currently, the states with [historical data
 available](https://github.com/uclalawcovid19behindbars/historical-data/tree/main/data)
 are:
 
-    #> 01) Alabama
-    #> 02) Arkansas
-    #> 03) Arizona
-    #> 04) California
-    #> 05) Florida
-    #> 06) Kentucky
-    #> 07) Mississippi
-    #> 08) North Carolina
-    #> 09) New Jersey
-    #> 10) Pennsylvania
-    #> 11) Wisconsin
+    > 01) Alabama
+    > 02) Arkansas
+    > 03) Arizona
+    > 04) California
+    > 05) Colorado
+    > 06) Florida
+    > 07) Georgia
+    > 08) Kentucky
+    > 09) Mississippi
+    > 10) North Carolina
+    > 11) New Jersey
+    > 12) Pennsylvania
+    > 13) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 

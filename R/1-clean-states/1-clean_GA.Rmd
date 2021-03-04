@@ -1,7 +1,7 @@
 ---
-title: "Clean STATENAME - COVID-19 Behind Bars Historical Data Cleaning"
+title: "Clean Georgia - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "2/24/21"
+date: "3/3/21"
 output: html_document
 ---
 
@@ -22,7 +22,7 @@ library(behindbarstools)
 help(package=behindbarstools)
 
 ##Define state
-state_toclean <- 
+state_toclean <- "Georgia"
 state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
@@ -189,6 +189,9 @@ all_deaths <- testing_deaths %>%
     scale_x_date(date_labels = "%m") + 
     labs(x = "Date",
       y = "lag_change_deaths")
+## Missed death data from 9/23 - 10/12
+## Later, should come back and re-scrape this is possible
+## src: http://www.dcor.state.ga.us/content/CVD_Dashboard 
 ggplotly(all_deaths)
 
 ```

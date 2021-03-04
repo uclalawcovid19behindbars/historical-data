@@ -1,7 +1,7 @@
 ---
-title: "Clean STATENAME - COVID-19 Behind Bars Historical Data Cleaning"
+title: "Clean Colorado - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "2/24/21"
+date: "3/2/21"
 output: html_document
 ---
 
@@ -22,7 +22,7 @@ library(behindbarstools)
 help(package=behindbarstools)
 
 ##Define state
-state_toclean <- 
+state_toclean <- "Colorado"
 state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
@@ -79,8 +79,7 @@ df_out %>%
 
 ```{r}
 df_out %<>% 
-  mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
-         Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
+  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
 ```
 
 ```{r create date var}
@@ -97,11 +96,7 @@ df_mid <- df_mid %>%
   filter(federal_bool == FALSE)
 ```
 
-Show instances where the  didn't identify a clean name. 
-
-- Stop and add these to facility spellings and/or facility data, here: https://docs.google.com/spreadsheets/d/1tAhD-brnuqw0s55QXM-xYLPsyD-rNrqHbAVIbxSOMwI/edit#gid=0
-
-- Reference the current working versions of both sheets, available here: https://github.com/uclalawcovid19behindbars/facility_data/tree/master/data 
+Show instances where the  didn't identify a clean name. This never happened! Yay
 
 ```{r facility name cleaning checks}
 # check if it's in fac_data
@@ -109,12 +104,6 @@ df_mid %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
   unique()
-```
-
-Remove rows when we didn't get a name at all.
-```{r}
-df_mid <- df_mid %>%
-  filter(!is.na(Name))
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
@@ -134,13 +123,13 @@ assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date)))
 
 Assertions / sanity checks ! 
 ```{r}
-# make sure there's only 1 clean name per facility ID! 
+# make sure there's only 1 clean name per facility ID
 df_comb %>% 
   group_by(Facility.ID) %>% 
   summarise(n_name = n_distinct(Name)) %>% 
   filter(n_name > 1)
 
-# make sure there's only 1 facility ID per clean name!
+# make sure there's only 1 facility ID per clean name
 df_comb %>% 
     group_by(Name) %>% 
     summarise(n_fac_ID = n_distinct(Facility.ID)) %>% 
