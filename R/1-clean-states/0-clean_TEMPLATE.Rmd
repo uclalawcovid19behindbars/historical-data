@@ -163,6 +163,31 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
 Make plots for the data, and take a look at any weirdness. 
 
 ```{r plot cases/deaths}
+res_conf_stacked <- df_hist_final %>% 
+  mutate(Facility.ID = as.character(Facility.ID)) %>%
+  arrange(Facility.ID) %>%
+  ggplot(data = ., 
+         aes(x = Date, 
+             y = Residents.Confirmed, 
+             group = Facility.ID)) +
+  theme(legend.position = "none") + 
+  geom_line(aes(colour = Name), position = "stack", alpha = 0.4, size = 0.5) + 
+  scale_x_date(date_breaks = "2 months", date_labels = "%m/%y") 
+ggplotly(res_conf_stacked)
+
+res_death_stacked <- df_hist_final %>% 
+  mutate(Facility.ID = as.character(Facility.ID)) %>%
+  arrange(Facility.ID) %>%
+  ggplot(data = ., 
+         aes(x = Date, 
+             y = Residents.Deaths, 
+             group = Facility.ID)) +
+  theme(legend.position = "none") + 
+  geom_line(aes(colour = Name), position = "stack", alpha = 0.4, size = 0.5) + 
+  scale_x_date(date_breaks = "2 months", date_labels = "%m/%y") 
+ggplotly(res_death_stacked)
+
+
 # create a testing file 
 testing_cases <- flag_noncumulative_cases(df_hist_final, Name)
 testing_deaths <- flag_noncumulative_deaths(df_hist_final, Name, Residents.Deaths)
@@ -240,6 +265,32 @@ ggplot(data = dates,
   labs(x = "Date",
     y = "n instances")
 ```
+
+Marshall Project / AP data comparison.
+
+```{r}
+mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+  filter(State == state_toclean)
+
+ourdat_tocompare <- df_hist_final %>% 
+  filter(Jurisdiction == "state") %>%
+  group_by(Date) %>%
+  summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
+            Residents.Deaths = sum_na_rm(Residents.Deaths),
+            Residents.Recovered = sum_na_rm(Residents.Recovered),
+            Staff.Recovered = sum_na_rm(Staff.Recovered))
+  
+comparison <- ourdat_tocompare %>%
+  full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
+  arrange(Date) %>%
+  select(-State) %>% 
+  select(Date, 
+         starts_with("Residents.Confirmed"), 
+         starts_with("Residents.Deaths"),
+         starts_with("Residents.Recovered"),
+         starts_with("Staff.Recovered"))
+```
+
 
 Prep pre-November data for writing to the server. 
 
