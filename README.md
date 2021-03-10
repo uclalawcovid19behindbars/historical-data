@@ -72,12 +72,14 @@ are:
     > 05) Colorado
     > 06) Florida
     > 07) Georgia
-    > 08) Kentucky
-    > 09) Mississippi
-    > 10) North Carolina
-    > 11) New Jersey
-    > 12) Pennsylvania
-    > 13) Wisconsin
+    > 08) Illinois
+    > 09) Indiana
+    > 10) Kentucky
+    > 11) Mississippi
+    > 12) North Carolina
+    > 13) New Jersey
+    > 14) Pennsylvania
+    > 15) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 

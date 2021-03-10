@@ -226,3 +226,53 @@ prep_server_data <- function(df, state_abbrev) {
 
   return(out_df)
 }
+
+
+string_to_clean_numeric <- function(column) {
+  
+  if (all(is.na(column)) | is.numeric(column)) { return(column) }
+  
+  if (is.factor(column)) { column <- as.character(column) }
+  # check if there are any nonnumeric characters we didn't expect
+  expected.nonnumeric.values <- 
+    c("-", "N/A", "na", "n/a", "NA", "", " +",
+      NA, "T", "[", "]", "o", "O",
+      "PENDING DOH RESULTS", "PENDING DOH RESULT$", "S", "", "PENDING")
+  
+  unexpected.nonnumeric.values <- column[
+    !(grepl(column, pattern = "[0-9]+") | 
+        column == "" | 
+        column %in% expected.nonnumeric.values)
+  ] %>% unique()
+  
+  if(length(unexpected.nonnumeric.values) != 0) {
+    bad_str <- str_c(unexpected.nonnumeric.values, collapse = ", ")
+    warning(str_c(
+      "Unexpected nonnumeric values were scraped that we haven't",
+      " seen before. They are... ", bad_str))
+  }
+  
+  # clean
+  
+  # this sets up the unicode stripping later
+  Encoding(column) <- "latin1" 
+  
+  column_clean <- column %>% 
+    str_replace_all(., "o", "0") %>%
+    str_replace_all(., "O", "0") %>%
+    str_replace_all(., "^S$", "5") %>%
+    str_replace_all(., "^s$", "5") %>%
+    # a single "]" "[" and "T" are commonly scraped as 1
+    str_replace(., "^\\]$", "1") %>%
+    str_replace(., "^\\[$", "1") %>%
+    str_replace(., "^T$", "1") %>%
+    # remove any decimal points and numbers that follow
+    str_remove_all(., "\\.[0-9]+") %>%
+    # remove any nonnumeric chars
+    str_remove_all( ., "[^0-9]") %>%
+    # remove unicode
+    iconv(., from = "latin1", "ASCII", sub="") %>%
+    as.numeric()
+  
+  return(column_clean)
+}
