@@ -1,0 +1,332 @@
+---
+title: "Clean STATENAME - COVID-19 Behind Bars Historical Data Cleaning"
+author: "Hope Johnson"
+date: "3/8/21"
+output: html_document
+---
+
+```{r package setup, include=FALSE}
+rm(list=ls())
+##Define package list
+Packages<-c("tidyverse", "glue", "assertthat", "stringr", "lubridate",
+            "devtools", "magrittr", "skimr", "plotly")
+.packages = Packages
+##Install CRAN packages (if not already installed)
+.inst <- .packages %in% installed.packages()
+if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
+##Load packages into session 
+lapply(.packages, require, character.only=TRUE)
+options(skimr_strip_metadata = FALSE)
+devtools::install_github("uclalawcovid19behindbars/behindbarstools")
+library(behindbarstools)
+help(package=behindbarstools)
+
+##Define state
+state_toclean <- "Illinois"
+state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
+```
+
+## Intro & Credits
+
+This script is used to clean one state in the historical data concerning COVID-19 in state and federal prisons. Contributors to the historical data cleaning efforts include Hope Johnson, Michael Everett, Neal Marquez, Erika Tyagi, Chase Hommeyer, Grace DiLaura,  and Kalind Parish. Contributors to larger project include Sharon Dolovich, Aaron Littman, Danielle Flores, Poornima Rajeshwar, Victoria Rossi, and many others. 
+
+## Load inputs
+
+Input files: 
+
+* Utilities script
+* Historical data
+
+```{r load inputs, echo=FALSE}
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
+##Load utilities function
+util_path <- file.path(base_path, "R", "0-utilities.R")
+source(util_path, local = knitr::knit_global())
+```
+
+Load in all the historical data for this state!
+
+```{r load data, message=FALSE}
+df <- load_data(data_path, 
+                "11420",
+                filter_state = state_toclean) 
+df_typed <- type_convert(df)
+```
+
+Fill in missing values of `Staff.Deaths` with non-missing values of `Staff.Death`, when those exist. Do the same with `Resident.Death`/`Resident.Deaths`. 
+
+```{r initial cleaning}
+df_out <- df_typed %>%
+  select(!starts_with("...")) %>%
+  select(!starts_with("lots")) %>%
+  select(!starts_with("Bad")) %>%
+  select(!c("V2", "V4", "V5", "V7", "V8", "V10")) %>%
+  select(!c("Facility.", "Coder", "Housing.Type")) %>%
+  select_if(~sum(!is.na(.)) > 0) %>% # rm 100% missing cols 
+  mutate(Zipcode = as.character(Zipcode),
+         County.FIPS = as.character(County.FIPS))
+
+# if there are any other similarly-named columns in the results below, pay attention!
+df_out %>%
+  select(contains("Staff")) %>% 
+  names()
+
+df_out %>%
+  select(contains("Resident")) %>% 
+  names()
+```
+
+```{r}
+df_out %<>% 
+  mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
+         Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
+```
+
+```{r create date var}
+df_out <- df_out %>%
+  mutate(Date = as_date(sheet_name, format = "%Om.%d.%y")) 
+
+```
+
+Do a little facility name cleaning before the Name Cleaning
+
+```{r}
+df_scrubbed <- df_out %>%
+  mutate(Name = str_replace_all(Name, "(?i)[ÄÃ]", ""))
+```
+
+
+```{r standardize facility names}
+df_mid <- behindbarstools::clean_facility_name(df_scrubbed, debug = TRUE) 
+```
+
+```{r filter out federal facilities}
+df_mid <- df_mid %>%
+  filter(federal_bool == FALSE)
+```
+
+Show instances where the  didn't identify a clean name. 
+
+- Stop and add these to facility spellings and/or facility data, here: https://docs.google.com/spreadsheets/d/1tAhD-brnuqw0s55QXM-xYLPsyD-rNrqHbAVIbxSOMwI/edit#gid=0
+
+- Reference the current working versions of both sheets, available here: https://github.com/uclalawcovid19behindbars/facility_data/tree/master/data 
+
+```{r facility name cleaning checks}
+# check if it's in fac_data
+df_mid %>%
+  filter(name_match == FALSE) %>% 
+  select(scrape_name_clean) %>%
+  unique()
+```
+
+Remove rows when we didn't get a name at all. Filter out "total". 
+```{r}
+df_mid <- df_mid %>%
+  filter(!is.na(Name),
+         !str_detect(Name, "(?i)total"),
+         name_match != FALSE) # confirmed that all of these are federal
+ 
+```
+
+Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
+
+```{r concat duplicate date/facilities}
+nrow(distinct(df_mid, Date, Name))
+see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, Date)))
+
+# if there are two values, sum them 
+df_comb <- df_mid %>% 
+  behindbarstools::group_by_coalesce(., Name, Facility.ID, Date, 
+                                     .ignore = "scrape_name_clean",
+                                     .method = "sum") 
+
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date)))
+```
+
+Assertions / sanity checks ! 
+```{r}
+# make sure there's only 1 clean name per facility ID! 
+df_comb %>% 
+  group_by(Facility.ID) %>% 
+  summarise(n_name = n_distinct(Name)) %>% 
+  filter(n_name > 1)
+
+# make sure there's only 1 facility ID per clean name!
+df_comb %>% 
+    group_by(Name) %>% 
+    summarise(n_fac_ID = n_distinct(Facility.ID)) %>% 
+    filter(n_fac_ID > 1)
+```
+
+Filter down and re-order columns in order to row bind them to latest data.
+
+```{r}
+df_hist <- behindbarstools::reorder_cols(df_comb)
+df_hist_final <- df_hist %>%
+  mutate(source = Website,
+         Residents.Deaths = Resident.Deaths) %>%
+  select(-c(Website, Resident.Deaths, Resident.Death, Count.ID, Facility)) 
+
+df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
+  select_if(~sum(!is.na(.)) > 0) # rm all NA
+```
+
+Remove data that was clearly mis-scraped. 
+
+```{r}
+df_hist_final <- df_hist_final %>%
+  filter(Facility.ID != 454) %>% # filter out cook county jail until we re-scrape
+  mutate(Residents.Deaths = ifelse(Date == as.Date("2020-09-23"), NA, Residents.Deaths), ## rm deaths on days we seem to have mis-scraped
+         Residents.Deaths = ifelse(Date > as.Date("2020-10-01"), NA, Residents.Deaths))
+
+```
+
+Make plots for the data, and take a look at any weirdness. 
+
+```{r plot cases/deaths}
+res_conf_stacked <- df_hist_final %>% 
+  mutate(Facility.ID = as.character(Facility.ID)) %>%
+  arrange(Facility.ID) %>%
+  ggplot(data = ., 
+         aes(x = Date, 
+             y = Residents.Confirmed, 
+             group = Facility.ID)) +
+  theme(legend.position = "none") + 
+  geom_line(aes(colour = Name), position = "stack", alpha = 0.4, size = 0.5) + 
+  scale_x_date(date_breaks = "2 months", date_labels = "%m/%y") 
+ggplotly(res_conf_stacked)
+
+res_death_stacked <- df_hist_final %>% 
+  mutate(Facility.ID = as.character(Facility.ID)) %>%
+  arrange(Facility.ID) %>%
+  ggplot(data = ., 
+         aes(x = Date, 
+             y = Residents.Deaths, 
+             group = Facility.ID)) +
+  theme(legend.position = "none") + 
+  geom_line(aes(colour = Name), position = "stack", alpha = 0.4, size = 0.5) + 
+  scale_x_date(date_breaks = "2 months", date_labels = "%m/%y") 
+ggplotly(res_death_stacked)
+
+# create a testing file 
+testing_cases <- flag_noncumulative_cases(df_hist_final, Name)
+testing_deaths <- flag_noncumulative_deaths(df_hist_final, Name, Residents.Deaths)
+
+# lag cases overall 
+all_cases <- testing_cases %>%
+  filter(Name != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = Date, y = lag_change_cases, group = Name)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+         scale_x_date(date_minor_breaks = "1 month", date_labels = "%m/%y", 
+                      date_breaks = "1 month") + 
+    labs(x = "Date",
+      y = "lag_change_cases")
+
+ggplotly(all_cases)
+
+# lag deaths overall
+all_deaths <- testing_deaths %>%
+  filter(Name != "STATEWIDE") %>%
+  ggplot(data = ., 
+         aes(x = Date, y = lag_change_deaths, group = Name)) +
+    geom_line(alpha=0.6 , size=.5, color = "black") +
+    scale_x_date(date_labels = "%m") + 
+    labs(x = "Date",
+      y = "lag_change_deaths")
+ggplotly(all_deaths)
+```
+
+Make facility-specific plots, and take a look at any weirdness.
+
+```{r}
+# will throw a warning if path already exists
+plot_path <- file.path(base_path, "plots", state_abbrev)
+dir.create(file.path(plot_path))
+dir.create(file.path(plot_path, "cases"))
+dir.create(file.path(plot_path, "deaths"))
+
+# plot lag counts by facility
+lag_case_plots <- plot_lags(testing_cases, "Date", 
+                            y_var = "lag_change_cases",
+                            grp_var = Name)
+# lag_case_plots$plot # view them by un-commenting this
+
+## save lag case plots
+for (i in 1:nrow(lag_case_plots)){
+  facility_name <- lag_case_plots$Name[[i]]
+  ggsave(paste0(facility_name, "_LagChangeCases.png"), lag_case_plots$plot[[i]],
+         path = file.path(base_path, "plots", state_abbrev, "cases"))
+}
+
+lag_death_plots <- plot_lags(testing_deaths, "Date", 
+                            y_var = "lag_change_deaths",
+                            grp_var = Name)
+# save lag death plots
+for (i in 1:nrow(lag_death_plots)){
+  facility_name <- lag_death_plots$Name[[i]]
+  ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
+         path = file.path(base_path, "plots", state_abbrev, "deaths"))
+}
+```
+
+Marshall Project / AP data comparison.
+
+```{r}
+mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+  filter(State == state_toclean)
+
+ourdat_tocompare <- df_hist_final %>% 
+  filter(Jurisdiction == "state") %>%
+  group_by(Date) %>%
+  summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
+            Residents.Deaths = sum_na_rm(Residents.Deaths),
+            Residents.Recovered = sum_na_rm(Residents.Recovered),
+            Staff.Recovered = sum_na_rm(Staff.Recovered))
+  
+comparison <- ourdat_tocompare %>%
+  full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
+  arrange(Date) %>%
+  select(-State) %>% 
+  select(Date, 
+         starts_with("Residents.Confirmed"), 
+         starts_with("Residents.Deaths"),
+         starts_with("Residents.Recovered"),
+         starts_with("Staff.Recovered"))
+```
+
+Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
+
+```{r}
+dates <- df_hist_final %>%
+  arrange(Date) %>%
+  count(Date)
+dates
+
+ggplot(data = dates, 
+       aes(x = Date, y = n)) +
+  geom_bar(stat="identity") +
+  labs(x = "Date",
+    y = "n instances")
+```
+
+
+
+Prep pre-November data for writing to the server. 
+
+```{r}
+df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+
+skim(df_hist_towrite) # double-check everything in the data 
+```
+
+Write pre-November data to the server. 
+
+```{r}
+srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
+
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+
+sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
+```
