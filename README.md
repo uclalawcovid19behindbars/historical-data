@@ -70,16 +70,18 @@ are:
     > 03) Arizona
     > 04) California
     > 05) Colorado
-    > 06) Florida
-    > 07) Georgia
-    > 08) Illinois
-    > 09) Indiana
-    > 10) Kentucky
-    > 11) Mississippi
-    > 12) North Carolina
-    > 13) New Jersey
-    > 14) Pennsylvania
-    > 15) Wisconsin
+    > 06) Connecticut
+    > 07) Florida
+    > 08) Georgia
+    > 09) Illinois
+    > 10) Indiana
+    > 11) Kansas
+    > 12) Kentucky
+    > 13) Mississippi
+    > 14) North Carolina
+    > 15) New Jersey
+    > 16) Pennsylvania
+    > 17) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
