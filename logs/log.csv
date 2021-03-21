@@ -12453,3 +12453,8 @@ KS,2021-03-20,NA,"Group Date: 2020-10-28, Name: TOPEKA CORRECTIONAL FACILITY, St
 KS,2021-03-20,NA,"Group Date: 2020-10-28, Name: WICHITA WORK RELEASE, State: Kansas, jurisdiction_scraper: state, Facility.ID: 550 has multiple values that do not match for column Staff.Confirmed. Only using first of observed value from the following unique values 10, 9"
 KS,2021-03-20,NA,"Group Date: 2020-10-28, Name: WINFIELD CORRECTIONAL FACILITY, State: Kansas, jurisdiction_scraper: state, Facility.ID: 551 has multiple values that do not match for column Residents.Confirmed. Only using first of observed value from the following unique values 88, 70"
 KS,2020-11-14,no match,OUT OF STATE
+KS,2021-03-21,NA,"2 parsing failures.
+  row                col   expected     actual                                                                      file
+90261 Residents.Negative a double   N          'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+90261 NA                 29 columns 11 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
