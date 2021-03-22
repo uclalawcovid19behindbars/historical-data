@@ -1,7 +1,7 @@
 ---
-title: "Clean STATENAME - COVID-19 Behind Bars Historical Data Cleaning"
+title: "Clean Washington - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "4/01/21"
+date: "3/22/21"
 output: html_document
 ---
 
@@ -22,7 +22,7 @@ library(behindbarstools)
 help(package=behindbarstools)
 
 ##Define state
-state_toclean <- 
+state_toclean <- "Washington"
 state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
@@ -108,7 +108,8 @@ Show instances where the  didn't identify a clean name.
 df_mid %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
-  unique()
+  unique() %>%
+  arrange(scrape_name_clean)
 ```
 
 Remove rows when we didn't get a name at all.
@@ -251,6 +252,16 @@ for (i in 1:nrow(lag_death_plots)){
 }
 ```
 
+Spot-fix one facility where we scraped residents.population but called it residents.confirmed. 
+
+```{r}
+df_hist_final <- df_hist_final %>%
+  mutate(Residents.Confirmed = ifelse(Name == "AIRWAY HEIGHTS CORRECTIONS CENTER",
+                                      NA,
+                                      Residents.Confirmed))
+
+```
+
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
 ```{r}
@@ -276,9 +287,7 @@ ourdat_tocompare <- df_hist_final %>%
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
-            Residents.Deaths = sum_na_rm(Residents.Deaths),
-            Residents.Recovered = sum_na_rm(Residents.Recovered),
-            Staff.Recovered = sum_na_rm(Staff.Recovered))
+            Residents.Deaths = sum_na_rm(Residents.Deaths))
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
@@ -286,9 +295,7 @@ comparison <- ourdat_tocompare %>%
   select(-State) %>% 
   select(Date, 
          starts_with("Residents.Confirmed"), 
-         starts_with("Residents.Deaths"),
-         starts_with("Residents.Recovered"),
-         starts_with("Staff.Recovered"))
+         starts_with("Residents.Deaths"))
 ```
 
 

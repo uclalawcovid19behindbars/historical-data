@@ -82,7 +82,8 @@ are:
     > 15) New Jersey
     > 16) Oregon
     > 17) Pennsylvania
-    > 18) Wisconsin
+    > 18) Washington
+    > 19) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
