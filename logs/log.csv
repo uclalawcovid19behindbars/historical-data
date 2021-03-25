@@ -12619,3 +12619,12 @@ WA,2021-03-23,NA,"Group Date: 2021-03-01, Name: AIRWAY HEIGHTS CORRECTIONS CENTE
 WA,2021-03-23,NA,"Group Date: 2021-03-01, Name: WASHINGTON CORRECTIONS CENTER FOR WOMEN, State: Washington, jurisdiction_scraper: state, Facility.ID: 1620 has multiple values that do not match for column Residents.Confirmed. Only using first of observed value from the following unique values 15, 0"
 WA,2021-03-23,NA,"Group Date: 2021-03-03, Name: AIRWAY HEIGHTS CORRECTIONS CENTER, State: Washington, jurisdiction_scraper: state, Facility.ID: 1585 has multiple values that do not match for column Residents.Deaths. Only using first of observed value from the following unique values 0, 5"
 WA,2021-03-23,NA,"Group Date: 2021-03-03, Name: WASHINGTON CORRECTIONS CENTER FOR WOMEN, State: Washington, jurisdiction_scraper: state, Facility.ID: 1620 has multiple values that do not match for column Residents.Confirmed. Only using first of observed value from the following unique values 16, 0"
+GA,2021-03-24,no match,CSH - MILLEDGEVILLE
+GA,2021-03-24,no match,ECRH - AUGUSTA
+GA,2021-03-24,no match,GRH - ATLANTA
+GA,2021-03-24,no match,GRH - SAVANNAH
+GA,2021-03-24,no match,WCGRH - COLUMBUS
+WA,2021-03-25,NA,"1 parsing failure.
+   row col   expected     actual                                                                      file
+119942  -- 29 columns 22 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
