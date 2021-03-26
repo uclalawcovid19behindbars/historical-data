@@ -12628,3 +12628,12 @@ WA,2021-03-25,NA,"1 parsing failure.
    row col   expected     actual                                                                      file
 119942  -- 29 columns 22 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+AZ,2021-03-26,NA,"1 parsing failure.
+  row col   expected    actual                                                                      file
+23079  -- 29 columns 2 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
+OR,2021-03-26,NA,"2 parsing failures.
+   row                  col   expected     actual                                                                      file
+167820 Residents.Quarantine a double   N          'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+167820 NA                   29 columns 14 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
