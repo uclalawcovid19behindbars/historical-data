@@ -12637,3 +12637,7 @@ OR,2021-03-26,NA,"2 parsing failures.
 167820 Residents.Quarantine a double   N          'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 167820 NA                   29 columns 14 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+NJ,2021-03-29,NA,"1 parsing failure.
+   row col   expected     actual                                                                      file
+230561  -- 29 columns 15 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
