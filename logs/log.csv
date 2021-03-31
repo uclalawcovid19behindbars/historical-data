@@ -12641,3 +12641,8 @@ NJ,2021-03-29,NA,"1 parsing failure.
    row col   expected     actual                                                                      file
 230561  -- 29 columns 15 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+OR,2021-03-31,NA,"2 parsing failures.
+   row                 col   expected    actual                                                                      file
+282671 Residents.Confirmed a double   N         'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+282671 NA                  29 columns 8 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
