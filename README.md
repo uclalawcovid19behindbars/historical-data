@@ -80,10 +80,11 @@ are:
     > 13) Mississippi
     > 14) North Carolina
     > 15) New Jersey
-    > 16) Oregon
-    > 17) Pennsylvania
-    > 18) Washington
-    > 19) Wisconsin
+    > 16) Nevada
+    > 17) Oregon
+    > 18) Pennsylvania
+    > 19) Washington
+    > 20) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
