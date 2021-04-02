@@ -12646,3 +12646,7 @@ OR,2021-03-31,NA,"2 parsing failures.
 282671 Residents.Confirmed a double   N         'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 282671 NA                  29 columns 8 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+CA,2021-04-02,NA,"1 parsing failure.
+  row col   expected    actual                                                                      file
+39523  -- 29 columns 4 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
