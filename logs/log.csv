@@ -12650,3 +12650,69 @@ CA,2021-04-02,NA,"1 parsing failure.
   row col   expected    actual                                                                      file
 39523  -- 29 columns 4 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+AL,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+AR,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+AZ,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+CA,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+CA,2021-04-02,no match,ASP
+CA,2021-04-02,no match,CAC
+CA,2021-04-02,no match,CAL
+CA,2021-04-02,no match,CCC
+CA,2021-04-02,no match,CCI
+CA,2021-04-02,no match,CCWF
+CA,2021-04-02,no match,CEN
+CA,2021-04-02,no match,CHCF
+CA,2021-04-02,no match,CIM
+CA,2021-04-02,no match,CIW
+CA,2021-04-02,no match,CMC
+CA,2021-04-02,no match,CMF
+CA,2021-04-02,no match,COR
+CA,2021-04-02,no match,CRC
+CA,2021-04-02,no match,CTF
+CA,2021-04-02,no match,CVSP
+CA,2021-04-02,no match,DJJ
+CA,2021-04-02,no match,DVI
+CA,2021-04-02,no match,FSP
+CA,2021-04-02,no match,HDSP
+CA,2021-04-02,no match,ISP
+CA,2021-04-02,no match,KVSP
+CA,2021-04-02,no match,LAC
+CA,2021-04-02,no match,MCSP
+CA,2021-04-02,no match,NKSP
+CA,2021-04-02,no match,OTHER CCHCS
+CA,2021-04-02,no match,OTHER CDCR
+CA,2021-04-02,no match,PAROLE
+CA,2021-04-02,no match,PBSP
+CA,2021-04-02,no match,PVSP
+CA,2021-04-02,no match,RJD
+CA,2021-04-02,no match,SAC
+CA,2021-04-02,no match,SATF
+CA,2021-04-02,no match,SCC
+CA,2021-04-02,no match,SOL
+CA,2021-04-02,no match,SQ
+CA,2021-04-02,no match,SVSP
+CA,2021-04-02,no match,VSP
+CA,2021-04-02,no match,WSP
+CO,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+CT,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+FL,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+GA,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+IL,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+IN,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+KS,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+KY,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+MS,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+NC,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+NJ,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+NV,2021-04-03,NA,"Group Date: 2020-10-20, Name: ELY STATE PRISON, State: Nevada, jurisdiction_scraper: state, Facility.ID: 811 has multiple values that do not match for column Staff.Confirmed. Only using first of observed value from the following unique values 10, 11"
+NV,2021-04-03,NA,"Group Date: 2020-10-20, Name: LOVELOCK CORRECTIONAL CENTER, State: Nevada, jurisdiction_scraper: state, Facility.ID: 816 has multiple values that do not match for column Residents.Confirmed. Only using first of observed value from the following unique values 2, 4"
+NV,2021-04-03,NA,"Group Date: 2020-10-20, Name: NORTHERN NEVADA CORRECTIONAL CENTER, State: Nevada, jurisdiction_scraper: state, Facility.ID: 817 has multiple values that do not match for column Staff.Confirmed. Only using first of observed value from the following unique values 20, 21"
+NV,2021-04-03,NA,"Group Date: 2020-10-26, Name: CASA GRANDE PRISON, State: Nevada, jurisdiction_scraper: state, Facility.ID: 809 has multiple values that do not match for column Staff.Confirmed. Only using first of observed value from the following unique values 9, 8"
+NV,2021-04-03,NA,"Group Date: 2020-10-26, Name: FLORENCE MCCLURE WOMENS CORRECTIONAL CENTER, State: Nevada, jurisdiction_scraper: state, Facility.ID: 812 has multiple values that do not match for column Staff.Confirmed. Only using first of observed value from the following unique values 15, 14"
+NV,2021-04-03,NA,"Group Date: 2020-10-26, Name: SOUTHERN DESERT CORRECTIONAL CENTER, State: Nevada, jurisdiction_scraper: state, Facility.ID: 819 has multiple values that do not match for column Staff.Confirmed. Only using first of observed value from the following unique values 10, 9"
+NV,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+NV,2021-02-26,no match,NDOC-STEWART TRAINING FACILITY
+OR,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+PA,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+WA,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
+WI,2021-04-03,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
