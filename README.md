@@ -73,18 +73,19 @@ are:
     > 06) Connecticut
     > 07) Florida
     > 08) Georgia
-    > 09) Illinois
-    > 10) Indiana
-    > 11) Kansas
-    > 12) Kentucky
-    > 13) Mississippi
-    > 14) North Carolina
-    > 15) New Jersey
-    > 16) Nevada
-    > 17) Oregon
-    > 18) Pennsylvania
-    > 19) Washington
-    > 20) Wisconsin
+    > 09) Hawaii
+    > 10) Illinois
+    > 11) Indiana
+    > 12) Kansas
+    > 13) Kentucky
+    > 14) Mississippi
+    > 15) North Carolina
+    > 16) New Jersey
+    > 17) Nevada
+    > 18) Oregon
+    > 19) Pennsylvania
+    > 20) Washington
+    > 21) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
