@@ -45,7 +45,7 @@ Input files:
 # source(util_path, local = knitr::knit_global())
 
 ##Load utilities function
-source("0-utilities.R", local = knitr::knit_global())
+source("~/Desktop/historical-data/R/0-utilities.R", local = knitr::knit_global())
 ```
 
 Load in all the historical data for this state!
@@ -230,8 +230,13 @@ Make facility-specific plots, and take a look at any weirdness.
 
 ```{r}
 # will throw a warning if path already exists
-base_path <- "~/Desktop/Behind Bars/Massachusetts"
-plot_path <- file.path("~/Desktop/Behind Bars/Massachusetts", "plots", state_abbrev)
+
+# plot_path <- file.path(base_path, "plots", state_abbrev)
+# dir.create(file.path(plot_path))
+# dir.create(file.path(plot_path, "cases"))
+# dir.create(file.path(plot_path, "deaths"))
+base_path <- "~/Desktop/historical-data"
+plot_path <- file.path("~/Desktop/historical-data", "plots", state_abbrev)
 dir.create(file.path(plot_path))
 dir.create(file.path(plot_path, "cases"))
 dir.create(file.path(plot_path, "deaths"))
@@ -286,8 +291,9 @@ ourdat_tocompare <- df_hist_final %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
-            Residents.Recovered = sum_na_rm(Residents.Recovered),
-            Staff.Recovered = sum_na_rm(Staff.Recovered))
+#            Residents.Recovered = sum_na_rm(Residents.Recovered),
+ #           Staff.Recovered = sum_na_rm(Staff.Recovered)
+)
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
@@ -296,8 +302,9 @@ comparison <- ourdat_tocompare %>%
   select(Date, 
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
-         starts_with("Residents.Recovered"),
-         starts_with("Staff.Recovered"))
+#         starts_with("Residents.Recovered"),
+ #        starts_with("Staff.Recovered")
+)
 ```
 
 
@@ -319,7 +326,8 @@ write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_
 sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```
 
-saving my workspace:
+
+Saving my workspace:
 
 ```{r}
 # df historical
