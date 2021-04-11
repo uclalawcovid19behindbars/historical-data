@@ -12757,3 +12757,7 @@ GA,2021-04-10,NA,"1 parsing failure.
    row col   expected     actual                                                                      file
 247609  -- 30 columns 19 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+WA,2021-04-11,NA,"1 parsing failure.
+   row col   expected    actual                                                                      file
+126928  -- 30 columns 2 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
