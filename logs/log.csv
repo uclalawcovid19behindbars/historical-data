@@ -12761,3 +12761,8 @@ WA,2021-04-11,NA,"1 parsing failure.
    row col   expected    actual                                                                      file
 126928  -- 30 columns 2 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+AZ,2021-04-14,NA,"2 parsing failures.
+   row  col   expected    actual                                                                      file
+250735 Date date like  2021-02   'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+250735 NA   30 columns 1 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
