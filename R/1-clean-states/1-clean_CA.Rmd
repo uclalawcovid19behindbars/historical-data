@@ -1,7 +1,7 @@
 ---
 title: "Clean California - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "2/3/21"
+date: "4/14/21"
 output: html_document
 ---
 
@@ -145,6 +145,11 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
 # paring this down for read_scrape_data format
 df_hist_towrite <- prep_server_data(df_hist_final, "CA")
 skim(df_hist_towrite)
+```
+Get rid of Residents.Tested variable because it only exists for 2 facilities and might not actually be reflecting the number of tests.
+```{r}
+df_hist_towrite <- df_hist_towrite %>%
+  select(-Residents.Tested)
 ```
 
 Write pre-November data to the server!

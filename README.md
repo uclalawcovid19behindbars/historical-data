@@ -78,14 +78,16 @@ are:
     > 11) Indiana
     > 12) Kansas
     > 13) Kentucky
-    > 14) Mississippi
-    > 15) North Carolina
-    > 16) New Jersey
-    > 17) Nevada
-    > 18) Oregon
-    > 19) Pennsylvania
-    > 20) Washington
-    > 21) Wisconsin
+    > 14) Massachusetts
+    > 15) Minnesota
+    > 16) Mississippi
+    > 17) North Carolina
+    > 18) New Jersey
+    > 19) Nevada
+    > 20) Oregon
+    > 21) Pennsylvania
+    > 22) Washington
+    > 23) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 

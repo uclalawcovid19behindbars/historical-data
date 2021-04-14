@@ -39,24 +39,24 @@ Input files:
 
 ```{r load inputs, echo=FALSE}
 #
-# base_path <- file.path("~", "UCLA", "code", "historical-data")
-# data_path <- file.path(base_path, "data", "inputs")
-# util_path <- file.path(base_path, "R", "0-utilities.R")
-# source(util_path, local = knitr::knit_global())
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
+util_path <- file.path(base_path, "R", "0-utilities.R")
+source(util_path, local = knitr::knit_global())
 
 ##Load utilities function
-source("~/Desktop/historical-data/R/0-utilities.R", local = knitr::knit_global())
+#source("~/Desktop/historical-data/R/0-utilities.R", local = knitr::knit_global())
 ```
 
 Load in all the historical data for this state!
 
 ```{r load data, message=FALSE}
-#df <- load_data(data_path, 
-#                "11420",
-#                filter_state = state_toclean) 
+df <- load_data(data_path,
+               "11420",
+               filter_state = state_toclean)
 
-df <- load_data("~/Desktop/Behind Bars/Massachusetts", "11420",
-                filter_state = state_toclean) 
+# df <- load_data("~/Desktop/Behind Bars/Massachusetts", "11420",
+#                 filter_state = state_toclean) 
 df_typed <- type_convert(df)
 ```
 
@@ -225,18 +225,30 @@ all_deaths <- testing_deaths %>%
 ggplotly(all_deaths)
 
 ```
+Deal with "statewide" data between 4/11/20 and 4/15/20. For these five dates collected, the number of confirmed cases and deaths among incarcerated people were all mistakenly reported as zero. 
+```{r}
+df_hist_final <- df_hist_final %>%
+  mutate(Residents.Deaths = ifelse(Date > as.Date("2020-04-07") & Name == "STATEWIDE",
+                                   NA,
+                                   Residents.Deaths),
+         Residents.Confirmed = ifelse(Date > as.Date("2020-04-07") & Name == "STATEWIDE",
+                                   NA,
+                                   Residents.Confirmed))
+
+```
+
 
 Make facility-specific plots, and take a look at any weirdness.
 
 ```{r}
 # will throw a warning if path already exists
 
-# plot_path <- file.path(base_path, "plots", state_abbrev)
+plot_path <- file.path(base_path, "plots", state_abbrev)
 # dir.create(file.path(plot_path))
 # dir.create(file.path(plot_path, "cases"))
 # dir.create(file.path(plot_path, "deaths"))
-base_path <- "~/Desktop/historical-data"
-plot_path <- file.path("~/Desktop/historical-data", "plots", state_abbrev)
+# base_path <- "~/Desktop/historical-data"
+# plot_path <- file.path("~/Desktop/historical-data", "plots", state_abbrev)
 dir.create(file.path(plot_path))
 dir.create(file.path(plot_path, "cases"))
 dir.create(file.path(plot_path, "deaths"))
@@ -325,19 +337,3 @@ write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_
 
 sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```
-
-
-Saving my workspace:
-
-```{r}
-# df historical
-out_name_1 <- glue('{state_abbrev}-historical-data.csv')
-write_csv(df_hist, file.path(base_path, "data", out_name_1))
-
-#df historical final
-out_name_2 <- glue('{state_abbrev}-historical-data-final.csv')
-write_csv(df_hist_final, file.path(base_path, "data", out_name_2))
-
-
-```
-
