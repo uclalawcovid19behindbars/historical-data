@@ -12847,3 +12847,11 @@ MN,2021-04-15,NA,"Group Date: 2020-10-30, Name: WILLOW RIVER CORRECTIONAL FACILI
 MN,2021-04-15,NA,"Group Date: 2020-12-06, Name: MOOSE LAKE CORRECTIONAL FACILITY, State: Minnesota, jurisdiction_scraper: state, Facility.ID: 700 has multiple values that do not match for column Residents.Population. Only using first of observed value from the following unique values 418, 960"
 MN,2021-04-15,NA,"Input data has 6 additional columns: Staff.Population, Facility, scrape_name_clean, federal_bool, xwalk_name_clean, name_match. Moving these to the end of the data set."
 MN,2021-03-24,no match,NON-DOC
+AL,2021-04-16,NA,"1 parsing failure.
+   row col   expected     actual                                                                      file
+183926  -- 30 columns 19 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
+WI,2021-04-16,NA,"1 parsing failure.
+   row col   expected     actual                                                                      file
+278000  -- 30 columns 28 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
+"
