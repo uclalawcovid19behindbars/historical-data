@@ -12855,3 +12855,30 @@ WI,2021-04-16,NA,"1 parsing failure.
    row col   expected     actual                                                                      file
 278000  -- 30 columns 28 columns 'http://104.131.72.50:3838/scraper_data/summary_data/aggregated_data.csv'
 "
+FL,2021-04-16,no match,GADSDEN REENTRY
+PA,2021-04-16,no match,ALB
+PA,2021-04-16,no match,BEN
+PA,2021-04-16,no match,CAM
+PA,2021-04-16,no match,CBS
+PA,2021-04-16,no match,CEN
+PA,2021-04-16,no match,CHS
+PA,2021-04-16,no match,COA
+PA,2021-04-16,no match,DAL
+PA,2021-04-16,no match,FRA
+PA,2021-04-16,no match,FRS
+PA,2021-04-16,no match,FYT
+PA,2021-04-16,no match,GRN
+PA,2021-04-16,no match,HOU
+PA,2021-04-16,no match,HUN
+PA,2021-04-16,no match,LAU
+PA,2021-04-16,no match,MAH
+PA,2021-04-16,no match,MER
+PA,2021-04-16,no match,MUN
+PA,2021-04-16,no match,PHX
+PA,2021-04-16,no match,PNG
+PA,2021-04-16,no match,QUE
+PA,2021-04-16,no match,RET
+PA,2021-04-16,no match,ROC
+PA,2021-04-16,no match,SMI
+PA,2021-04-16,no match,SMR
+PA,2021-04-16,no match,WAM
