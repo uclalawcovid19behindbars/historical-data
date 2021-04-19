@@ -1,7 +1,7 @@
 ---
 title: "Clean Louisiana - COVID-19 Behind Bars Historical Data Cleaning"
-author: "Hope Johnson"
-date: "4/01/21"
+author: "Dara Tan and Hope Johnson"
+date: "4/19/21"
 output: html_document
 ---
 
@@ -38,10 +38,10 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "Desktop", "CBB")
-data_path <- file.path(base_path)
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
-util_path <- file.path(base_path, "historical-data", "R", "0-utilities.R")
+util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ```
 
@@ -76,6 +76,7 @@ df_out %>%
   select(contains("Resident")) %>% 
   names()
 ```
+
 
 ```{r COMMENTS BY DARA}
   # unusual residents released variable
@@ -254,10 +255,10 @@ Make facility-specific plots, and take a look at any weirdness.
 
 ```{r}
 # will throw a warning if path already exists
-# plot_path <- file.path(base_path, "plots", state_abbrev)
-# dir.create(file.path(plot_path))
-# dir.create(file.path(plot_path, "cases"))
-# dir.create(file.path(plot_path, "deaths"))
+plot_path <- file.path(base_path, "plots", state_abbrev)
+dir.create(file.path(plot_path))
+dir.create(file.path(plot_path, "cases"))
+dir.create(file.path(plot_path, "deaths"))
 # CREATE PATH MANUALLY
 
 # plot lag counts by facility
@@ -407,8 +408,8 @@ Write pre-November data to the server.
 ```{r}
 srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
 
-# write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
-write_csv(df_hist_towrite, srvr_outfile_name)
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+# write_csv(df_hist_towrite, srvr_outfile_name)
 
 sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```

@@ -66,28 +66,30 @@ available](https://github.com/uclalawcovid19behindbars/historical-data/tree/main
 are:
 
     > 01) Alabama
-    > 02) Arkansas
+    > 02) Alaska
     > 03) Arizona
-    > 04) California
-    > 05) Colorado
-    > 06) Connecticut
-    > 07) Florida
-    > 08) Georgia
-    > 09) Hawaii
-    > 10) Illinois
-    > 11) Indiana
-    > 12) Kansas
-    > 13) Kentucky
-    > 14) Massachusetts
-    > 15) Minnesota
-    > 16) Mississippi
-    > 17) North Carolina
-    > 18) New Jersey
+    > 04) Arkansas
+    > 05) California
+    > 06) Colorado
+    > 07) Connecticut
+    > 08) Florida
+    > 09) Georgia
+    > 10) Hawaii
+    > 11) Illinois
+    > 12) Indiana
+    > 13) Kansas
+    > 14) Kentucky
+    > 15) Louisiana
+    > 16) Massachusetts
+    > 17) Minnesota
+    > 18) Mississippi
     > 19) Nevada
-    > 20) Oregon
-    > 21) Pennsylvania
-    > 22) Washington
-    > 23) Wisconsin
+    > 20) New Jersey
+    > 21) North Carolina
+    > 22) Oregon
+    > 23) Pennsylvania
+    > 24) Washington
+    > 25) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
