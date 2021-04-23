@@ -1,8 +1,8 @@
 ---
-title: "Data cleaning ucla law"
+title: "data cleaning alaska"
 author: "Kevin Zhao"
-date: "4/7/2021"
-output: html_document
+date: "4/15/2021"
+output: pdf_document
 ---
 
 ```{r package setup, include=FALSE}
@@ -21,7 +21,7 @@ devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 library(behindbarstools)
 help(package=behindbarstools)
 ##Define state
-state_toclean <- "Minnesota"
+state_toclean <- "Oklahoma"
 state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
@@ -74,11 +74,6 @@ df_out %>%
   names()
 ```
 
-```{r}
-df_out %<>% 
-  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
-```
-
 ```{r create date var}
 df_out <- df_out %>%
   mutate(Date = as_date(sheet_name, format = "%Om.%d.%y"))
@@ -105,14 +100,23 @@ df_mid %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
   unique()
+
+#renaming observations in original df_out
+df_out$Name <- str_replace(df_out$Name, "Correctiona ", "Correctional ")
+
+df_mid <- behindbarstools::clean_facility_name(df_out, debug = TRUE) 
+
+#checking again
+df_mid %>%
+  filter(name_match == FALSE) %>% 
+  select(scrape_name_clean) %>%
+  unique()
 ```
 
 Remove rows when we didn't get a name at all.
 ```{r}
-##removing house of correction, jail, and youth detention
-df_mid <- df_mid %>% filter(Name != "HOUSE OF CORRECTION") %>% 
-  filter(Name != "JAIL") %>% filter(Name != "YOUTH DETENTION")
-df_mid <- df_mid %>%
+##Getting rid of facilities named "-" and the vague "North Fork Correctional Center- Unit since I can't tell whether its the I unit or J unit or some other unit
+df_mid <- df_mid %>% filter(Name != "-") %>% filter(Name != "NORTH FORK CORRECTIONAL CENTER- UNIT") %>%
   filter(!is.na(Name))
 ```
 
@@ -150,7 +154,7 @@ df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths) %>%
-  select(-c(Website, Resident.Deaths, Resident.Death, Count.ID, Facility)) 
+  select(-c(Website, Resident.Deaths, Count.ID, Facility)) 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
   select_if(~sum(!is.na(.)) > 0) # rm all NA
 ```
@@ -236,7 +240,6 @@ for (i in 1:nrow(lag_death_plots)){
 }
 ```
 
-**MOOSE LAKE, LINO LAKES, WILLOW RIVER, seem to have major discrepancies in cases**
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
@@ -276,7 +279,6 @@ comparison <- ourdat_tocompare %>%
          starts_with("Staff.Recovered"))
 ```
 
-**AP is slightly different on specific days, just ask Hope about this during the meeting**
 
 Prep pre-November data for writing to the server. 
 
