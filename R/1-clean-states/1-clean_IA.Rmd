@@ -38,8 +38,8 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("C:/Users/kayla/Documents/Github/historical-data")
-data_path <- file.path(base_path, "data")
+base_path <- file.path("~", "UCLA", "code","historical-data")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
@@ -250,11 +250,17 @@ for (i in 1:nrow(lag_death_plots)){
          path = file.path(base_path, "plots", state_abbrev, "deaths"))
 }
 # Residents Confirmed = Inmates Positive + Inmates Recovered, while Residents Recovered = only Inmates Recovered
+
 # Polk County Jail: plot often goes positive to negative; not sure if they are recording cumulative COVID-19 cases per day or total cumulative cases OR inmates who tested positive are being transferred/released from jail
+
 # Clarinda Correctional Facility: negative lag cases 10/23-10/24 but not problematic
+
 # Fort Dodge Correctional Facility: negative lag cases on 7/18-7/29 & 7/21-7/25, but always followed by significant increase in cases on 7/20 and 7/26 respectively.
+
 # Iowa Medical and Classification Center: negative lag cases 7/24-7/25 but not problematic
+
 # DOC: Resident deaths reported starting 7/31 (explains why deaths were not plotted beforehand)
+
 # Polk County Jail: No resident deaths reported at all
 ```
 
