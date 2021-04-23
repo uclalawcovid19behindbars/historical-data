@@ -77,19 +77,21 @@ are:
     > 10) Hawaii
     > 11) Illinois
     > 12) Indiana
-    > 13) Kansas
-    > 14) Kentucky
-    > 15) Louisiana
-    > 16) Massachusetts
-    > 17) Minnesota
-    > 18) Mississippi
-    > 19) Nevada
-    > 20) New Jersey
-    > 21) North Carolina
-    > 22) Oregon
-    > 23) Pennsylvania
-    > 24) Washington
-    > 25) Wisconsin
+    > 13) Iowa
+    > 14) Kansas
+    > 15) Kentucky
+    > 16) Louisiana
+    > 17) Massachusetts
+    > 18) Minnesota
+    > 19) Mississippi
+    > 20) Nevada
+    > 21) New Jersey
+    > 22) North Carolina
+    > 23) Oregon
+    > 24) Pennsylvania
+    > 25) Virginia
+    > 26) Washington
+    > 27) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
