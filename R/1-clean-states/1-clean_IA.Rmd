@@ -249,7 +249,7 @@ for (i in 1:nrow(lag_death_plots)){
   ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
          path = file.path(base_path, "plots", state_abbrev, "deaths"))
 }
-# Residents Confirmed = Inmates Recovered + Inmates Recovered, while Residents Recovered = only Inmates Recovered
+# Residents Confirmed = Inmates Positive + Inmates Recovered, while Residents Recovered = only Inmates Recovered
 # Polk County Jail: plot often goes positive to negative; not sure if they are recording cumulative COVID-19 cases per day or total cumulative cases OR inmates who tested positive are being transferred/released from jail
 # Clarinda Correctional Facility: negative lag cases 10/23-10/24 but not problematic
 # Fort Dodge Correctional Facility: negative lag cases on 7/18-7/29 & 7/21-7/25, but always followed by significant increase in cases on 7/20 and 7/26 respectively.
