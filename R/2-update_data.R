@@ -1,5 +1,5 @@
 ## Define package list
-Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "plyr")
+Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "plyr", "data.table")
 .packages = Packages
 ## Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
