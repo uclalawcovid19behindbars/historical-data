@@ -6,7 +6,7 @@ Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "plyr", "data.tab
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ## Load packages into session 
 lapply(.packages, require, character.only=TRUE)
-devtools::install_github("uclalawcovid19behindbars/behindbarstools")
+devtools::install_github("uclalawcovid19behindbars/behindbarstools", dependencies = c("Depends", "Imports"))
 
 ## update one state's historical data by reading data from the server,
 ## logging any mis-matches, and any other warnings along the way
