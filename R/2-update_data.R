@@ -1,6 +1,6 @@
 ## Define package list
 # Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "plyr", "data.table")
-Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "data.table")
+Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "data.table", "stringr")
 
 .packages = Packages
 ## Install CRAN packages (if not already installed)
@@ -10,6 +10,8 @@ if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 # lapply(.packages, require, character.only=TRUE)
 devtools::install_github("uclalawcovid19behindbars/behindbarstools")
 library(behindbarstools)
+library(purrr)
+library(stringr)
 
 ## update one state's historical data by reading data from the server,
 ## logging any mis-matches, and any other warnings along the way
@@ -43,7 +45,7 @@ update_historical_data <- function(state_in) {
                                   rm_extra_cols = TRUE)
   
   ## Write results to historical data repo 
-  write_csv(out, glue::glue('data/{state_in}-historical-data.csv'))
+  readr::write_csv(out, glue::glue('data/{state_in}-historical-data.csv'))
   
   ## Write warnings to log
   latest_warnings <- tibble(state = state_in,
@@ -63,13 +65,13 @@ update_historical_data <- function(state_in) {
              !str_detect(warning, 'Jurisdiction: federal'))
   }
   
-  warnings <- read_csv('logs/log.csv', col_types = "cDcc") 
+  warnings <- readr::read_csv('logs/log.csv', col_types = "cDcc") 
   warnings_out <- warnings %>%
     bind_rows(latest_warnings) %>%
     distinct(state, warning, .keep_all = TRUE) # only keep new warnings
   
   # copy the log to a text file
-  write_csv(warnings_out, 'logs/log.csv')
+  readr::write_csv(warnings_out, 'logs/log.csv')
 }
 
 ## run update_historical_data on some or all states, depending 
