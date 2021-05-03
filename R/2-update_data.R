@@ -1,12 +1,15 @@
 ## Define package list
-Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "plyr", "data.table")
+# Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "plyr", "data.table")
+Packages<-c("tidyverse", "devtools", "purrr", "glue", "readr", "data.table")
+
 .packages = Packages
 ## Install CRAN packages (if not already installed)
 .inst <- .packages %in% installed.packages()
 if(length(.packages[!.inst]) > 0) install.packages(.packages[!.inst])
 ## Load packages into session 
-lapply(.packages, require, character.only=TRUE)
-devtools::install_github("uclalawcovid19behindbars/behindbarstools", dependencies = c("Depends", "Imports"))
+# lapply(.packages, require, character.only=TRUE)
+devtools::install_github("uclalawcovid19behindbars/behindbarstools")
+library(behindbarstools)
 
 ## update one state's historical data by reading data from the server,
 ## logging any mis-matches, and any other warnings along the way
@@ -40,7 +43,7 @@ update_historical_data <- function(state_in) {
                                   rm_extra_cols = TRUE)
   
   ## Write results to historical data repo 
-  write_csv(out, glue('data/{state_in}-historical-data.csv'))
+  write_csv(out, glue::glue('data/{state_in}-historical-data.csv'))
   
   ## Write warnings to log
   latest_warnings <- tibble(state = state_in,
