@@ -99,14 +99,13 @@ Show instances where the  didn't identify a clean name.
 df_mid %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
-  unique()3
+  unique()
 ```
 
 Remove rows when we didn't get a name at all.
 ```{r}
-##Getting rid of facilities named "-" and the vague "North Fork Correctional Center- Unit since I can't tell whether its the I unit or J unit or some other unit
-df_mid <- df_mid %>% filter(Name != "-") %>% filter(Name != "NORTH FORK CORRECTIONAL CENTER- UNIT") %>%
-  filter(!is.na(Name))
+##Getting rid of facilities named "NON_PRISON STAFF", "NON_FACILITY", and vague correctional facilities that could not be directly identified
+df_mid <- df_mid %>% filter(Name != "NON-PRISON STAFF") %>% filter(Name != "NON-FACILITY") %>% filter(Name != "CO") %>% filter(Name != "FTC") %>% filter(Name != "PP OFFICES")   %>% filter(!is.na(Name))
 ```
 
 Figure out duplicate date/facilities, concatenate those instances from multiple rows into one. This most often occurs because we scraped death data and infections data from separate tables.
