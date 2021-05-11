@@ -38,26 +38,26 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-#base_path <- file.path("~", "UCLA", "code", "historical-data")
-#data_path <- file.path(base_path, "data", "inputs")
-##Load utilities function
-#util_path <- file.path(base_path, "R", "0-utilities.R")
-#source(util_path, local = knitr::knit_global())
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
+#Load utilities function
+util_path <- file.path(base_path, "R", "0-utilities.R")
+source(util_path, local = knitr::knit_global())
 
-source("~/Desktop/historical-data/R/0-utilities.R", local = knitr::knit_global())
+#source("~/Desktop/historical-data/R/0-utilities.R", local = knitr::knit_global())
 ```
 
 Load in all the historical data for this state!
 
 ```{r load data, message=FALSE}
-#df <- load_data(data_path, 
-#                "11420",
-#                filter_state = state_toclean) 
-#df_typed <- type_convert(df)
-
-df <- load_data("~/Desktop/historical-data", "11420",
-                filter_state = state_toclean) 
+df <- load_data(data_path,
+               "11420",
+               filter_state = state_toclean)
 df_typed <- type_convert(df)
+
+# df <- load_data("~/Desktop/historical-data", "11420",
+#                 filter_state = state_toclean) 
+# df_typed <- type_convert(df)
 ```
 
 Fill in missing values of `Staff.Deaths` with non-missing values of `Staff.Death`, when those exist. Do the same with `Resident.Death`/`Resident.Deaths`. 
@@ -232,16 +232,16 @@ Make facility-specific plots, and take a look at any weirdness.
 
 ```{r}
 # will throw a warning if path already exists
-#plot_path <- file.path(base_path, "plots", state_abbrev)
-#dir.create(file.path(plot_path))
-#dir.create(file.path(plot_path, "cases"))
-#dir.create(file.path(plot_path, "deaths"))
-
-base_path <- "~/Desktop/historical-data"
-plot_path <- file.path("~/Desktop/historical-data", "plots", state_abbrev)
+plot_path <- file.path(base_path, "plots", state_abbrev)
 dir.create(file.path(plot_path))
 dir.create(file.path(plot_path, "cases"))
 dir.create(file.path(plot_path, "deaths"))
+
+# base_path <- "~/Desktop/historical-data"
+# plot_path <- file.path("~/Desktop/historical-data", "plots", state_abbrev)
+# dir.create(file.path(plot_path))
+# dir.create(file.path(plot_path, "cases"))
+# dir.create(file.path(plot_path, "deaths"))
 
 # plot lag counts by facility
 lag_case_plots <- plot_lags(testing_cases, "Date", 
