@@ -244,9 +244,6 @@ dir.create(file.path(plot_path, "deaths"))
 # CREATE PATH MANUALLY
 
 # plot lag counts by facility
-## re-run "testing cases" after runningn chunk on line 275
-testing_cases <- flag_noncumulative_cases(df_hist_final_corrected, Name)
-
 lag_case_plots <- plot_lags(testing_cases, "Date", 
                             y_var = "lag_change_cases",
                             grp_var = Name)
@@ -429,7 +426,7 @@ testing_cases %>%
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
 ```{r}
-dates <- df_hist_final %>%
+dates <- df_hist_final_corrected %>%
   arrange(Date) %>%
   count(Date)
 dates
@@ -442,7 +439,7 @@ ggplot(data = dates,
 ```
 
 ```{r COMMENTS BY DARA}
-df_hist_final %>%
+df_hist_final_corrected %>%
   filter(Date > "2020-08-31") %>%
   count(Name)
 # 2 peaks after August are due to 'STATEWIDE'
@@ -454,7 +451,7 @@ Marshall Project / AP data comparison.
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_corrected %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
@@ -488,7 +485,7 @@ comparison <- ourdat_tocompare %>%
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_corrected, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
