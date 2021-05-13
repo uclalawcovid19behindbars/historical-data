@@ -81,17 +81,19 @@ are:
     > 14) Kansas
     > 15) Kentucky
     > 16) Louisiana
-    > 17) Massachusetts
-    > 18) Minnesota
-    > 19) Mississippi
-    > 20) Nevada
-    > 21) New Jersey
-    > 22) North Carolina
-    > 23) Oregon
-    > 24) Pennsylvania
-    > 25) Virginia
-    > 26) Washington
-    > 27) Wisconsin
+    > 17) Maryland
+    > 18) Massachusetts
+    > 19) Minnesota
+    > 20) Mississippi
+    > 21) Nevada
+    > 22) New Jersey
+    > 23) North Carolina
+    > 24) Oregon
+    > 25) Pennsylvania
+    > 26) Tennessee
+    > 27) Virginia
+    > 28) Washington
+    > 29) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
@@ -157,22 +159,3 @@ that you must give appropriate credit, provide a link to the license,
 and indicate if changes were made. You may not use our work for
 commercial purposes, which means anything primarily intended for or
 directed toward commercial advantage or monetary compensation.
-
-------------------------------------------------------------------------
-
-## Florida Notes
-
--   Removed two observations of “GEO” prison that had no data associated
-    with them.
-
-## North Carolina Notes
-
--   Population data not yet present (as of posting in December 2020).
-    Not sure yet when this will become available.
-
-The following facilities seem to be reporting active cases rather than
-cumulative cases in the column `Residents.Confirmed`: \* Wilkes CC \*
-Marion CI \* Foothills CI \* Central Prison \* Alexander CI
-
-Because the facilities did not provide any specification, we’re leaving
-the counts as-scraped.
