@@ -1,7 +1,7 @@
 ---
-title: "Clean AK - COVID-19 Behind Bars Historical Data Cleaning"
-author: "Meichen Chen"
-date: "4/16/21"
+title: "Clean Rhode Island - COVID-19 Behind Bars Historical Data Cleaning"
+author: "Hope Johnson"
+date: "4/26/21"
 output: html_document
 ---
 
@@ -22,7 +22,7 @@ library(behindbarstools)
 help(package=behindbarstools)
 
 ##Define state
-state_toclean <- "Alaska"
+state_toclean <- "Rhode Island"
 state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
@@ -38,26 +38,19 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-#
 base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
+##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
-
-##Load utilities function
-# source("~/Desktop/historical-data/R/0-utilities.R", local = knitr::knit_global())
 ```
 
 Load in all the historical data for this state!
 
 ```{r load data, message=FALSE}
-df <- load_data(data_path,
-               "11420",
-               filter_state = state_toclean)
-
-# keep all data in a folder called Massachusetts
-# df <- load_data("~/Desktop/Behind Bars/Massachusetts", "11420",
-#                 filter_state = state_toclean) 
+df <- load_data(data_path, 
+                "11420",
+                filter_state = state_toclean) 
 df_typed <- type_convert(df)
 ```
 
@@ -85,7 +78,6 @@ df_out %>%
 ```
 
 ```{r}
-
 df_out %<>% 
   mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
          Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
@@ -107,7 +99,7 @@ df_mid <- df_mid %>%
 
 Show instances where the  didn't identify a clean name. 
 
-- Stop and add these to facility spellings and/or facility data, here: https://docs.google.com/spreadsheets/d/1tAhD-brnuqw0s55QXM-xYLPsyD-rNrqHbAVIbxSOMwI/edit#gid=0
+- Stop and add these to facility spellings and/or facility data, here: 
 
 - Reference the current working versions of both sheets, available here: https://github.com/uclalawcovid19behindbars/facility_data/tree/master/data 
 
@@ -129,7 +121,7 @@ Figure out duplicate date/facilities, concatenate those instances from multiple 
 
 ```{r concat duplicate date/facilities}
 nrow(distinct(df_mid, Date, Name))
-see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, Date)))
+see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, Date))) ## ok if this is false
 
 # if there are two values, sum them 
 df_comb <- df_mid %>% 
@@ -137,7 +129,7 @@ df_comb <- df_mid %>%
                                      .ignore = "scrape_name_clean",
                                      .method = "sum") 
 
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date)))
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date))) ## this must be true
 ```
 
 Assertions / sanity checks ! 
@@ -230,16 +222,10 @@ Make facility-specific plots, and take a look at any weirdness.
 
 ```{r}
 # will throw a warning if path already exists
-
 plot_path <- file.path(base_path, "plots", state_abbrev)
 dir.create(file.path(plot_path))
 dir.create(file.path(plot_path, "cases"))
 dir.create(file.path(plot_path, "deaths"))
-# base_path <- "~/Desktop/historical-data"
-# plot_path <- file.path("~/Desktop/historical-data", "plots", state_abbrev)
-# dir.create(file.path(plot_path))
-# dir.create(file.path(plot_path, "cases"))
-# dir.create(file.path(plot_path, "deaths"))
 
 # plot lag counts by facility
 lag_case_plots <- plot_lags(testing_cases, "Date", 
@@ -264,25 +250,6 @@ for (i in 1:nrow(lag_death_plots)){
          path = file.path(base_path, "plots", state_abbrev, "deaths"))
 }
 ```
-Change anomalous state-wide cumulative infection counts that were not confirmed in the WayBack Machine. 
-
-```{r}
-df_hist_final <- df_hist_final %>%
-  mutate(Residents.Confirmed = ifelse((Name == "STATEWIDE" & Date == as.Date("2020-10-01")),
-                                      NA,
-                                      Residents.Confirmed),
-         Residents.Confirmed = ifelse((Name == "STATEWIDE" & Date == as.Date("2020-09-04")),
-                                      NA,
-                                      Residents.Confirmed),
-        Residents.Tested = ifelse((Name == "STATEWIDE" & Date == as.Date("2020-09-04")),
-                            NA,
-                            Residents.Tested),
-        Residents.Tested = ifelse(Date == as.Date("2020-09-04") | Date == as.Date("2020-10-01"),
-                    NA,
-                    Residents.Tested)
-         )
-```
-
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
@@ -301,6 +268,10 @@ ggplot(data = dates,
 
 Marshall Project / AP data comparison.
 
+Starting on May 14th, UCLA collected both statewide and facility-specific counts. 
+
+Might want to remove Residents.Confirmed for state-wide from that point onwards. 
+
 ```{r}
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
@@ -310,9 +281,8 @@ ourdat_tocompare <- df_hist_final %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
-          # Residents.Recovered = sum_na_rm(Residents.Recovered),
-           #Staff.Recovered = sum_na_rm(Staff.Recovered)
-)
+            Residents.Recovered = sum_na_rm(Residents.Recovered),
+            Staff.Recovered = sum_na_rm(Staff.Recovered))
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
@@ -321,9 +291,10 @@ comparison <- ourdat_tocompare %>%
   select(Date, 
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
-      #   starts_with("Residents.Recovered"),
-       # starts_with("Staff.Recovered")
-)
+         starts_with("Residents.Recovered"),
+         starts_with("Staff.Recovered"))
+
+View(comparison)
 ```
 
 
@@ -344,16 +315,3 @@ write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_
 
 sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```
-
-Saving my workspace:
-
-```{r}
-# df historical
-# out_name_1 <- glue('{state_abbrev}-historical-data.csv')
-# write_csv(df_hist, file.path(base_path, "data", out_name_1))
-# 
-# #df historical final
-# out_name_2 <- glue('{state_abbrev}-historical-data-final.csv')
-# write_csv(df_hist_final, file.path(base_path, "data", out_name_2))
-```
-

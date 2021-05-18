@@ -179,7 +179,8 @@ get_fac_n <- function(dat, var) {
 
 sync_remote_files <- function(file_name){
   system(str_c(
-    "rsync --perms --chmod=u+rwx -rtvu --progress ~UCLA/code/historical-data/data/pre-nov/",
+    # "rsync --perms --chmod=u+rwx -rtvu --progress ~UCLA/code/historical-data/data/pre-nov/",
+    "rsync --perms --chmod=u+rwx -rtvu --progress data/pre-nov/",
     file_name, 
     " ucla:/srv/shiny-server/scraper_data/extracted_data/"))
 }

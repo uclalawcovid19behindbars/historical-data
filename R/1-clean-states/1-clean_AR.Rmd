@@ -132,6 +132,22 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
 
 ```
 
+Change anomalous state-wide cumulative infection counts to NA.
+
+```{r}
+df_hist_final <- df_hist_final %>%
+  mutate(Residents.Deaths = ifelse((Name == "CUMMINS UNIT PRISON" & Date == as.Date("2020-09-18")),
+                                      NA,
+                                      Residents.Deaths),
+          Residents.Deaths = ifelse((Name == "CUMMINS UNIT PRISON" & Date == as.Date("2020-09-23")),
+                                      NA,
+                                      Residents.Deaths),
+         Staff.Confirmed = ifelse((Name == "STATEWIDE" & Date > as.Date("2020-10-05")),
+                            NA,
+                            Staff.Confirmed),
+         )
+```
+
 Prep pre-November data for writing to the server. 
 ```{r}
 df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)

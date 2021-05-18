@@ -244,6 +244,11 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
+```{r}
+df_hist_final <- df_hist_final %>%
+  filter(Date != as.Date("2020-08-23"))
+```
+
 Prep pre-November data for writing to the server. 
 
 ```{r}

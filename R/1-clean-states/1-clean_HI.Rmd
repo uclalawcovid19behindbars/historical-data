@@ -289,6 +289,16 @@ comparison <- ourdat_tocompare %>%
          starts_with("Residents.Recovered"))
 ```
 
+Change anomalous state-wide cumulative infection counts to NA.
+
+```{r}
+df_hist_final <- df_hist_final %>%
+  ## scraper data is better for these days
+  filter(Date != as.Date("2020-10-01"),
+         Date != as.Date("2020-10-14"),
+         Date != as.Date("2020-10-20")) %>% 
+  mutate(Residents.Tested <- NA)
+```
 
 Prep pre-November data for writing to the server. 
 

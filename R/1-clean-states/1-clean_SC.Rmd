@@ -38,8 +38,8 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("C:/Users/kayla/Documents/Github/historical-data")
-data_path <- file.path(base_path, "data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
@@ -256,6 +256,9 @@ for (i in 1:nrow(lag_death_plots)){
   ggsave(paste0(facility_name, "_LagChangeDeaths.png"), lag_death_plots$plot[[i]],
          path = file.path(base_path, "plots", state_abbrev, "deaths"))
 }
+```
+
+```{r}
 ```
 
 ```{r Cases Concerns}
