@@ -87,14 +87,15 @@ are:
     > 20) Mississippi
     > 21) Nevada
     > 22) New Jersey
-    > 23) North Carolina
-    > 24) Oregon
-    > 25) Pennsylvania
-    > 26) South Carolina
-    > 27) Tennessee
-    > 28) Virginia
-    > 29) Washington
-    > 30) Wisconsin
+    > 23) New Mexico
+    > 24) North Carolina
+    > 25) Oregon
+    > 26) Pennsylvania
+    > 27) South Carolina
+    > 28) Tennessee
+    > 29) Virginia
+    > 30) Washington
+    > 31) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
