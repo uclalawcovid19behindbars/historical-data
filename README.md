@@ -90,10 +90,11 @@ are:
     > 23) North Carolina
     > 24) Oregon
     > 25) Pennsylvania
-    > 26) Tennessee
-    > 27) Virginia
-    > 28) Washington
-    > 29) Wisconsin
+    > 26) South Carolina
+    > 27) Tennessee
+    > 28) Virginia
+    > 29) Washington
+    > 30) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
