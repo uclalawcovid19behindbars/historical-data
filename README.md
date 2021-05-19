@@ -85,17 +85,18 @@ are:
     > 18) Massachusetts
     > 19) Minnesota
     > 20) Mississippi
-    > 21) Nevada
-    > 22) New Jersey
-    > 23) New Mexico
-    > 24) North Carolina
-    > 25) Oregon
-    > 26) Pennsylvania
-    > 27) South Carolina
-    > 28) Tennessee
-    > 29) Virginia
-    > 30) Washington
-    > 31) Wisconsin
+    > 21) Missouri
+    > 22) Nevada
+    > 23) New Jersey
+    > 24) New Mexico
+    > 25) North Carolina
+    > 26) Oregon
+    > 27) Pennsylvania
+    > 28) South Carolina
+    > 29) Tennessee
+    > 30) Virginia
+    > 31) Washington
+    > 32) Wisconsin
 
 We aim to have all states’ data cleaned by late Spring 2021.
 
