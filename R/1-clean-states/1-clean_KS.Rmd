@@ -265,6 +265,8 @@ for (i in 1:nrow(cumulative_case_plots)){
 
 ```
 
+Scraper issues in this date range! Delete and fill in using way back machine. 
+
 ```{r}
 facs_with_october_drops <- c("EL DORADO CORRECTIONAL FACILITY",
                  "HUTCHINSON CORRECTIONAL FACILITY",
@@ -276,12 +278,9 @@ facs_with_october_drops <- c("EL DORADO CORRECTIONAL FACILITY",
                  "WINFIELD CORRECTIONAL FACILITY")
 
 df_hist_final <- df_hist_final %>%
-  mutate(Residents.Confirmed = ifelse((Name %in% facs_with_october_drops) & 
-                                      (Date >= as.Date("2020-10-07") & Date <= as.Date("2020-10-18")),
-                                      NA, 
-                                      Residents.Confirmed))
-
-
+  filter(!(Date >= as.Date("2020-10-07") & 
+                 Date <= as.Date("2020-10-18"))
+         )
 ```
 
 

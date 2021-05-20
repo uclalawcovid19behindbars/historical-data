@@ -38,10 +38,10 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "Desktop", "CBB")
-data_path <- file.path(base_path)
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
-util_path <- file.path(base_path, "historical-data", "R", "0-utilities.R")
+util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ```
 
@@ -251,10 +251,10 @@ Make facility-specific plots, and take a look at any weirdness.
 
 ```{r}
 # will throw a warning if path already exists
-# plot_path <- file.path(base_path, "plots", state_abbrev)
-# dir.create(file.path(plot_path))
-# dir.create(file.path(plot_path, "cases"))
-# dir.create(file.path(plot_path, "deaths"))
+plot_path <- file.path(base_path, "plots", state_abbrev)
+dir.create(file.path(plot_path))
+dir.create(file.path(plot_path, "cases"))
+dir.create(file.path(plot_path, "deaths"))
 # CREATE PATH MANUALLY
 
 # plot lag counts by facility
@@ -310,6 +310,26 @@ Most facilities are not problematic (at most one/two dips below zero of size -1/
 - OHIO STATE PENITENTIARY (one dip below of size -7 on 2020-04-21), WBM not available
 
 * Note, the date and size of the dips below zero in the death plots for these two facilities coincide with the dips in the case plots, i.e. the dips in the case plots are due to the dips in the death counts recorded.
+
+```{r}
+## DECISION: 
+# - data is too messy to display. request this directly from the state if possible
+
+# large_dips <- c("BELMONT CORRECTIONAL INSTITUTION",
+#   "SOUTHEASTERN CORRECTIONAL INSTITUTION" ,
+#   "LAKE ERIE CORRECTIONAL INSTITUTION",
+#   "PICKAWAY CORRECTIONAL INSTITUTION",
+#   "NORTH CENTRAL CORRECTIONAL CENTER",
+#   "TRUMBULL CORRECTIONAL INSTITUTION",
+#   "LEBANON CORRECTIONAL INSTITUTION",
+#   "LONDON CORRECTIONAL INSTITUTION",
+#   "LORAIN CORRECTIONAL INSTITUTION",
+#   "MADISON CORRECTIONAL INSTITUTION",
+#   "MARION CORRECTIONAL INSTITUTION",
+#   "NORTHEAST REINTEGRATION CENTER" ,
+#   "CORRECTIONAL RECEPTION CENTER",
+#   "FRANKLIN MEDICAL CENTER")
+```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 

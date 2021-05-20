@@ -319,6 +319,12 @@ comparison <- ourdat_tocompare %>%
 )
 ```
 
+`Residents.Tested` should be `Residents.Tadmin` in the historical data file.
+
+```{r}
+df_hist_edited <- df_hist_final %>%
+  rename(Residents.Tadmin = Residents.Tested)
+```
 
 Prep pre-November data for writing to the server. 
 
