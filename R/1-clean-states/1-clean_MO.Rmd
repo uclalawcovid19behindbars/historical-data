@@ -240,10 +240,13 @@ First, there seem to be a significant number of facilities that have lag count c
 
 Second, the AP comparison showed some irregularities. There was a specific data point near the beginning that showed a ~5000 increase in resident cases, which immediately dips within the next couple of days. This is almost definitely a scraping error, but I just wanted to let you know. Date is 2020-04-06.
 
+Staff.Confirmed fell a lot on 11/12/20 and in the following (few) scrapes we collected. Deleting these instances
+
 ```{r}
 df_hist_final_edit <- df_hist_final %>%
   ## big dips in almost every facility
-  filter(Date != as.Date("2020-11-04"))
+  filter(Date != as.Date("2020-11-04")) %>%
+  mutate(Staff.Confirmed = ifelse(Date > "2020-11-05", NA, Staff.Confirmed))
 ```
 
 

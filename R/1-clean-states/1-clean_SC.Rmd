@@ -274,12 +274,13 @@ dip_list <- c("ALLENDALE CORRECTIONAL INSTITUTION",
               "TURBEVILLE CORRECTIONAL INSTITUTION",
               "TYGER RIVER CORRECTIONAL INSTITUTION")
 
+## NB: decided to just remove these dates for state-aggregated counts looking more normal
 df_hist_final_edit <- df_hist_final %>%
-  filter(!(Name %in% dip_list & Date > as.Date("2020-09-07") & Date < as.Date("2020-09-13")))
-
-
-
+  # filter(!(Name %in% dip_list & Date > as.Date("2020-09-07") & Date < as.Date("2020-09-13")))
+  filter(!(Date > as.Date("2020-09-07") & Date < as.Date("2020-09-13"))) %>%
+  filter(!(Name == "OTHER LOCATIONS" & Date > as.Date("2020-09-17") & Date < as.Date("2020-10-08")))
 ```
+
 ```{r Cases Concerns}
 ## Hope: FILTERED THESE OUT
 # From 9/8 - 9/12, almost all the facilities had negative lag cases at the exact same time period. I am assuming there have been some scraping issues for Resident Confirmed cases since the official source still reported the accurate numbers for Residents Confirmed cases. Either, there were significantly less cases that were scraped from the official source, or there were cases being reported when the official source reported that the facility had 0 Residents Confirmed cases. See ALLENDALE CORRECTIONAL INSTITUTION and CAMILLE GRAHAM CORRECTIONAL INSTITUTION for examples of the two major problems that were occurring between 9/8 - 9/12. I was not able to find the origin of the scraped numbers from the original source. If otherwise stated, every facility has this scraping problem from 9/8 - 9/12.
@@ -334,7 +335,7 @@ Marshall Project / AP data comparison.
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
