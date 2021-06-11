@@ -261,7 +261,7 @@ for (i in 1:nrow(lag_death_plots)){
 # From 2020-05-26 to 2020-11-04, Resident Confirmed in Excel reports NA values even though original data source reports positive COVID-19 cases (CRANSTON ADULT WOMENS, INTAKE SERVICE CENTER, MEDIUM SECURITY FACILITY, MINIMUM SECURITY FACILITY).
 # From 2020-05-30 to 2020-11-04, Staff Confirmed in Excel reports NA values even though original data source reports positive COVID-19 cases (CRANSTON ADULT WOMENS, INTAKE SERVICE CENTER, MEDIUM SECURITY FACILITY, MINIMUM SECURITY FACILITY).
 # Original data source stops reporting data from 2020-07-30 to 2020-09-28.
-# STATWIDE: Do not know where Residents Recovered and Staff Recovered numbers come from because original data source does not report them.
+# STATEWIDE: Do not know where Residents Recovered and Staff Recovered numbers come from because original data source does not report them.
 ```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
