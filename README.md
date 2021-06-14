@@ -61,9 +61,8 @@ We always welcome additional contributors!
 ## Historical Data Availability
 
 We are in the process of cleaning historical data going back to the
-beginning of the pandemic. Currently, the states with [historical data
-available](https://github.com/uclalawcovid19behindbars/historical-data/tree/main/data)
-are:
+beginning of the pandemic. Currently, the states with historical data
+available are:
 
     > 01) Alabama
     > 02) Alaska
@@ -98,7 +97,13 @@ are:
     > 31) Washington
     > 32) Wisconsin
 
-We aim to have all states’ data cleaned by late Spring 2021.
+We aim to have all states’ data cleaned by early summer 2021.
+
+## Access
+
+Instructions for accessing our historical time-series data are provided
+in our [main data
+repository](https://github.com/uclalawcovid19behindbars/data#accessing-time-series-data).
 
 ## Data dictionary
 
