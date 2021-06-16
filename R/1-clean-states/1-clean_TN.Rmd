@@ -313,7 +313,6 @@ staff_compare %>%
   group_by(Date) %>%
   summarise(count = sum_na_rm(Staff.Confirmed),
             n = n())
-
 ## seems like for 10/01, lots of facilities had counts that were not recorded before or after
 ```
 
