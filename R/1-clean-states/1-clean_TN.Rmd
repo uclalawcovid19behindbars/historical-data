@@ -241,6 +241,8 @@ plot_path <- file.path(base_path, "plots", state_abbrev)
 dir.create(file.path(plot_path))
 dir.create(file.path(plot_path, "cases"))
 dir.create(file.path(plot_path, "deaths"))
+dir.create(file.path(plot_path, "staff confirmed"))
+
 # CREATE PATH MANUALLY
 
 # plot lag counts by facility
@@ -267,6 +269,8 @@ for (i in 1:nrow(lag_death_plots)){
 }
 ```
 
+Investigating issues with the number of staff cumulative cases:
+
 Remove any huge dips/jumps >10 cases: 
 
 ```{r}
@@ -276,8 +280,41 @@ df_hist_final_corrected <- df_hist_final %>%
                                        Residents.Confirmed),
          Residents.Confirmed  = ifelse((Name == "MARK LUTTRELL TRANSITION CENTER") & (Date == "2020-05-18"),
                                        NA,
-                                       Residents.Confirmed)
+                                       Residents.Confirmed),
+        Staff.Confirmed = ifelse((Name == "SOUTH CENTRAL CORRECTIONAL FACILITY") & (Date == "2020-09-23"),
+                             NA,
+                             Staff.Confirmed),
+       Staff.Confirmed = ifelse((Date == "2020-10-01"),
+                             NA,
+                             Staff.Confirmed),
+        Staff.Confirmed = ifelse((Name %in% c("MORGAN COUNTY CORRECTIONAL COMPLEX",
+                                              "LOIS M DERRY SPECIAL NEEDS FACILITY",
+                                              "TURNEY CENTER INDUSTRIAL COMPLEX",
+                                              "DEBRA K JOHNSON REHABILITATION CENTER"
+                                              )) & 
+                                   (Date == "2020-10-03"),
+                             NA,
+                             Staff.Confirmed),
          )
+```
+
+```{r}
+
+staff_compare <- df_hist_final_corrected %>% 
+  filter(Date >= as.Date("2020-09-29") & Date <= as.Date("2020-10-03")) %>% 
+  group_by(Name) %>% 
+  mutate(prev_conf = dplyr::lag(Staff.Confirmed, order_by = Date),
+         change_conf = Staff.Confirmed - prev_conf) %>%
+  ungroup() %>%
+  select(Date, Name, Staff.Confirmed, change_conf) 
+View(staff_compare)
+
+staff_compare %>%
+  group_by(Date) %>%
+  summarise(count = sum_na_rm(Staff.Confirmed),
+            n = n())
+
+## seems like for 10/01, lots of facilities had counts that were not recorded before or after
 ```
 
 
@@ -457,6 +494,7 @@ ourdat_tocompare <- df_hist_final_corrected %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
             Residents.Recovered = sum_na_rm(Residents.Recovered),
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed),
             Staff.Recovered = sum_na_rm(Staff.Recovered))
 
 comparison <- ourdat_tocompare %>%
@@ -464,6 +502,7 @@ comparison <- ourdat_tocompare %>%
   arrange(Date) %>%
   select(-State) %>% 
   select(Date, 
+         starts_with("Staff.Confirmed"),
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
          starts_with("Residents.Recovered"),
@@ -481,6 +520,7 @@ comparison <- ourdat_tocompare %>%
 - 2020-06-30 Staff Recovered: CBB = 122; MPAP = 93
 
 - For every date starting 2020-06-30 that MPAP has data for Staff Recovered, CBB and MPAP differ by at least 20 and the difference gets larger over time.
+
 
 Prep pre-November data for writing to the server. 
 
