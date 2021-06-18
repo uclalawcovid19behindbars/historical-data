@@ -89,18 +89,19 @@ available are:
     > 23) Missouri
     > 24) Nebraska
     > 25) Nevada
-    > 26) New Jersey
-    > 27) New Mexico
-    > 28) North Carolina
-    > 29) Oregon
-    > 30) Pennsylvania
-    > 31) South Carolina
-    > 32) Tennessee
-    > 33) Vermont
-    > 34) Virginia
-    > 35) Washington
-    > 36) West Virginia
-    > 37) Wisconsin
+    > 26) New Hampshire
+    > 27) New Jersey
+    > 28) New Mexico
+    > 29) North Carolina
+    > 30) Oregon
+    > 31) Pennsylvania
+    > 32) South Carolina
+    > 33) Tennessee
+    > 34) Vermont
+    > 35) Virginia
+    > 36) Washington
+    > 37) West Virginia
+    > 38) Wisconsin
 
 We aim to have all states’ data cleaned by early summer 2021.
 
