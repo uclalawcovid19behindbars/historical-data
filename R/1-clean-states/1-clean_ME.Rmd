@@ -200,7 +200,7 @@ for (i in 1:nrow(lag_case_plots)){
 # Cases ONLY
 # Cannot verify historical counts because missing raw data source.
 # Only found raw data source for 2020-10-16, but data for 2020-10-16 was not scraped into Excel sheet. The Excel sheet only reports data from 2020-10-14 and then skips to 2020-10-18. No Residents Confirmed reported for the individual facilities in raw data source.
-# For STATEWIDE ADULT, there are supposed to be 4 Residents Confirmed on 2020-10-16, but Excel sheet reports NA on 2020-10-18 which is not accurate. STATWIDE ADULT in Excel sheet only reports 0 or NA for Residents Confirmed.
+# For STATEWIDE ADULT, there are supposed to be 4 Residents Confirmed on 2020-10-16, but Excel sheet reports NA on 2020-10-18 which is not accurate. STATEWIDE ADULT in Excel sheet only reports 0 or NA for Residents Confirmed.
 # The Excel sheet data for 2020-10-18 is identical to the data from the raw data source for 2020-10-16 except Residents Confirmed (not reported in original). Either Excel sheet made a mistake in the date or data did not change from 2020-10-16 to 2020-10-18 in raw data source. However, there is NO WAY to confirm this since raw data source is missing for every date except 2020-10-16.
 # Every facility except STATEWIDE ADULT has a significant increase in Residents Confirmed on 2020-08-19. But, on 2020-08-20, the Residents Confirmed decreases back to original case number. Example below.
 # MAINE CORRECTIONAL CENTER MCC (example): On 2020-08-18, there are 4 Residents Confirmed. On 2020-08-19, there are 1061 Residents Confirmed. On 2020-08-20, Residents Confirmed decreases back to 4 Residents Confirmed.
