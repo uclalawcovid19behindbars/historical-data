@@ -1,7 +1,7 @@
 cleaning-settings:
   all:
     states: [AK, AL, AR, AZ, CA, CO, CT, FL, GA, HI, IA, IL, IN, KS, KY, LA, MA, MD, MN, MO, MS, NM, NC, NJ, NV, TN, OR, PA, SC, WA, WI, VA, DE, VT, WV,
-    MI, NE, NH]
+    MI, NE, NH, SD, TX, ME, UT]
     run: TRUE
   partial:
     states: []

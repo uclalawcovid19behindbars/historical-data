@@ -81,27 +81,31 @@ available are:
     > 15) Kansas
     > 16) Kentucky
     > 17) Louisiana
-    > 18) Maryland
-    > 19) Massachusetts
-    > 20) Michigan
-    > 21) Minnesota
-    > 22) Mississippi
-    > 23) Missouri
-    > 24) Nebraska
-    > 25) Nevada
-    > 26) New Hampshire
-    > 27) New Jersey
-    > 28) New Mexico
-    > 29) North Carolina
-    > 30) Oregon
-    > 31) Pennsylvania
-    > 32) South Carolina
-    > 33) Tennessee
-    > 34) Vermont
-    > 35) Virginia
-    > 36) Washington
-    > 37) West Virginia
-    > 38) Wisconsin
+    > 18) Maine
+    > 19) Maryland
+    > 20) Massachusetts
+    > 21) Michigan
+    > 22) Minnesota
+    > 23) Mississippi
+    > 24) Missouri
+    > 25) Nebraska
+    > 26) Nevada
+    > 27) New Hampshire
+    > 28) New Jersey
+    > 29) New Mexico
+    > 30) North Carolina
+    > 31) Oregon
+    > 32) Pennsylvania
+    > 33) South Carolina
+    > 34) South Dakota
+    > 35) Tennessee
+    > 36) Texas
+    > 37) Utah
+    > 38) Vermont
+    > 39) Virginia
+    > 40) Washington
+    > 41) West Virginia
+    > 42) Wisconsin
 
 We aim to have all states’ data cleaned by early summer 2021.
 

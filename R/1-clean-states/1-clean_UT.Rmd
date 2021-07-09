@@ -1,7 +1,7 @@
 ---
-title: "Clean Rhode Island - COVID-19 Behind Bars Historical Data Cleaning"
-author: "Kayla Teng"
-date: "6/10/21"
+title: "Clean Utah - COVID-19 Behind Bars Historical Data Cleaning"
+author: "Hope Johnson and Meichen Chen"
+date: "7/8/21"
 output: html_document
 ---
 
@@ -22,7 +22,7 @@ library(behindbarstools)
 help(package=behindbarstools)
 
 ##Define state
-state_toclean <- "Rhode Island"
+state_toclean <- "Utah"
 state_abbrev <- behindbarstools::translate_state(state_toclean, reverse = TRUE)
 ```
 
@@ -38,8 +38,8 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("C:/Users/kayla/Documents/Github/historical-data")
-data_path <- file.path(base_path, "data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
@@ -48,9 +48,9 @@ source(util_path, local = knitr::knit_global())
 Load in all the historical data for this state!
 
 ```{r load data, message=FALSE}
-df <- load_data(data_path, 
-                "11420",
-                filter_state = state_toclean) 
+df <- load_data(data_path,
+               "11420",
+               filter_state = state_toclean)
 df_typed <- type_convert(df)
 ```
 
@@ -79,7 +79,8 @@ df_out %>%
 
 ```{r}
 df_out %<>% 
-  mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
+  mutate(
+    #Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
          Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
 ```
 
@@ -105,6 +106,7 @@ Show instances where the  didn't identify a clean name.
 
 ```{r facility name cleaning checks}
 # check if it's in fac_data
+
 df_mid %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
@@ -190,6 +192,7 @@ ggplotly(res_death_stacked)
 
 # create a testing file 
 testing_cases <- flag_noncumulative_cases(df_hist_final, Name)
+df_hist_final$Residents.Deaths <- as.numeric(df_hist_final$Residents.Deaths)
 testing_deaths <- flag_noncumulative_deaths(df_hist_final, Name, Residents.Deaths)
 
 # lag cases overall 
@@ -250,19 +253,6 @@ for (i in 1:nrow(lag_death_plots)){
          path = file.path(base_path, "plots", state_abbrev, "deaths"))
 }
 ```
-```{r Plot Notes}
-# Original data source were Facebook posts from the Rhode Island Department of Corrections (Checked Perma.cc and Facebook)
-# No data from Facebook about Donald W Wyatt Detention Facility.
-# No data about Resident and Staff Deaths reported from original source until 2020-09-28.
-
-# Cases
-# STATEWIDE: On 2020-04-07, there were two staff that test positive. However, on 2020-04-08, the Excel sheet reports 0 staff confirmed cases even though there are positive COVID-19 cases. Staff confirmed remains 0 until 2020-05-26.
-# MINIMUM SECURITY FACILITY: On 2020-05-14, original data source says there are 3 residents confirmed cases, but Excel sheet reports 0 resident confirmed.
-# From 2020-05-26 to 2020-11-04, Resident Confirmed in Excel reports NA values even though original data source reports positive COVID-19 cases (CRANSTON ADULT WOMENS, INTAKE SERVICE CENTER, MEDIUM SECURITY FACILITY, MINIMUM SECURITY FACILITY).
-# From 2020-05-30 to 2020-11-04, Staff Confirmed in Excel reports NA values even though original data source reports positive COVID-19 cases (CRANSTON ADULT WOMENS, INTAKE SERVICE CENTER, MEDIUM SECURITY FACILITY, MINIMUM SECURITY FACILITY).
-# Original data source stops reporting data from 2020-07-30 to 2020-09-28.
-# STATEWIDE: Do not know where Residents Recovered and Staff Recovered numbers come from because original data source does not report them.
-```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
@@ -278,9 +268,13 @@ ggplot(data = dates,
   labs(x = "Date",
     y = "n instances")
 ```
+Small spot fixes based on data irregularities with raw data: 
 
-```{r Date Span Notes}
-# From 2020-08-29 to 2020-11-04, counts fluctuate up and down between 6 and 7 instances.
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  filter(!(Date == as.Date("2020-09-16") & Name == "UTAH STATE PRISON DRAPER"))
+
+## Staff.Confirmed also seems to have issues, unfixed
 ```
 
 Marshall Project / AP data comparison.
@@ -289,13 +283,14 @@ Marshall Project / AP data comparison.
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
             Residents.Recovered = sum_na_rm(Residents.Recovered),
-            Staff.Recovered = sum_na_rm(Staff.Recovered))
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed)
+            )
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
@@ -304,36 +299,16 @@ comparison <- ourdat_tocompare %>%
   select(Date, 
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
+         starts_with("Staff.Confirmed"),
          starts_with("Residents.Recovered"),
          starts_with("Staff.Recovered"))
 ```
 
-```{r Comparison Notes}
-# Residents Confirmed
-# 2020-05-20: 45 (cbb) vs. 7 (mpap)
-# 2020-05-28: 45 (cbb) vs. 11 (mpap)
-# 2020-06-01: 46 (cbb) vs. 15 (mpap)
-# 2020-06-10: 48 (cbb) vs. 16 (mpap)
-# 2020-06-18: 48 (cbb) vs. 17 (mpap)
-# 2020-06-23: 49 (cbb) vs. 18 (mpap)
-# 2020-06-29: 49 (cbb) vs. 18 (mpap)
-# 2020-07-09: 49 (cbb) vs. 20 (mpap)
-# 2020-07-14: 49 (cbb) vs. 21 (mpap)
-# 2020-07-23: 56 (cbb) vs. 21 (mpap)
-# 2020-07-28: 56 (cbb) vs. 22 (mpap)
-# 2020-08-04: 56 (cbb) vs. 25 (mpap)
-# 2020-08-11: 56 (cbb) vs. 26 (mpap)
-# 2020-08-18: 56 (cbb) vs. 29 (mpap)
-# 2020-08-25: 56 (cbb) vs. 33 (mpap)
-# 2020-09-01: 56 (cbb) vs. 33 (mpap)
-# 2020-09-08: 56 (cbb) vs. 34 (mpap)
-# 2020-09-15: 56 (cbb) vs. 35 (mpap)
-```
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
