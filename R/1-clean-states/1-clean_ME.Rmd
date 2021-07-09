@@ -37,8 +37,8 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("C:/Users/kayla/Documents/Github/historical-data")
-data_path <- file.path(base_path, "data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
@@ -200,15 +200,16 @@ for (i in 1:nrow(lag_case_plots)){
 # Cases ONLY
 # Cannot verify historical counts because missing raw data source.
 # Only found raw data source for 2020-10-16, but data for 2020-10-16 was not scraped into Excel sheet. The Excel sheet only reports data from 2020-10-14 and then skips to 2020-10-18. No Residents Confirmed reported for the individual facilities in raw data source.
+
 # For STATEWIDE ADULT, there are supposed to be 4 Residents Confirmed on 2020-10-16, but Excel sheet reports NA on 2020-10-18 which is not accurate. STATEWIDE ADULT in Excel sheet only reports 0 or NA for Residents Confirmed.
+
 # The Excel sheet data for 2020-10-18 is identical to the data from the raw data source for 2020-10-16 except Residents Confirmed (not reported in original). Either Excel sheet made a mistake in the date or data did not change from 2020-10-16 to 2020-10-18 in raw data source. However, there is NO WAY to confirm this since raw data source is missing for every date except 2020-10-16.
-# Every facility except STATEWIDE ADULT has a significant increase in Residents Confirmed on 2020-08-19. But, on 2020-08-20, the Residents Confirmed decreases back to original case number. Example below.
-# MAINE CORRECTIONAL CENTER MCC (example): On 2020-08-18, there are 4 Residents Confirmed. On 2020-08-19, there are 1061 Residents Confirmed. On 2020-08-20, Residents Confirmed decreases back to 4 Residents Confirmed.
 ```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
 ```{r}
+# On 2020-09-05, there were 7 instances. But, on 2020-09-06, the instances decreased to 3. On 2020-09-09, the instances increased back to 7 instances.
 dates <- df_hist_final %>%
   arrange(Date) %>%
   count(Date)
@@ -220,8 +221,16 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
-```{r Date/Week Span Notes}
-# On 2020-09-05, there were 7 instances. But, on 2020-09-06, the instances decreased to 3. On 2020-09-09, the instances increased back to 7 instances.
+Do some minor data filters based on misscrapes:
+
+```{r}
+# Every facility except STATEWIDE ADULT has a significant increase in Residents Confirmed on 2020-08-19. But, on 2020-08-20, the Residents Confirmed decreases back to original case number. Example below.
+
+# MAINE CORRECTIONAL CENTER MCC (example): On 2020-08-18, there are 4 Residents Confirmed. On 2020-08-19, there are 1061 Residents Confirmed. On 2020-08-20, Residents Confirmed decreases back to 4 Residents Confirmed.
+
+df_hist_final_edit <- df_hist_final %>%
+  filter(Date != as.Date("2020-08-19"),
+         Date != as.Date("2020-09-06"))
 ```
 
 Marshall Project / AP data comparison.
@@ -229,28 +238,25 @@ Marshall Project / AP data comparison.
 ```{r}
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
-  summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed))
+  summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed))
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
   arrange(Date) %>%
   select(-State) %>% 
   select(Date, 
-         starts_with("Residents.Confirmed"))
-```
-
-```{r Comparison Notes}
-# Only compared Residents Confirmed
-# Same issue where there is 1673 Residents Confirmed reported for cbb on 2020-08-19, but there is only supposed to be 5 Residents Confirmed.
+         starts_with("Residents.Confirmed"),
+         starts_with("Staff.Confirmed"))
 ```
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 skim(df_hist_towrite) # double-check everything in the data 
 ```
 
