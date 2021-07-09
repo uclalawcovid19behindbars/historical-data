@@ -1,7 +1,7 @@
 ---
 title: "Clean Rhode Island - COVID-19 Behind Bars Historical Data Cleaning"
-author: "Hope Johnson"
-date: "4/26/21"
+author: "Kayla Teng"
+date: "6/10/21"
 output: html_document
 ---
 
@@ -99,7 +99,7 @@ df_mid <- df_mid %>%
 
 Show instances where the  didn't identify a clean name. 
 
-- Stop and add these to facility spellings and/or facility data, here: 
+- Stop and add these to facility spellings and/or facility data, here: https://docs.google.com/spreadsheets/d/1tAhD-brnuqw0s55QXM-xYLPsyD-rNrqHbAVIbxSOMwI/edit#gid=0
 
 - Reference the current working versions of both sheets, available here: https://github.com/uclalawcovid19behindbars/facility_data/tree/master/data 
 
@@ -121,7 +121,7 @@ Figure out duplicate date/facilities, concatenate those instances from multiple 
 
 ```{r concat duplicate date/facilities}
 nrow(distinct(df_mid, Date, Name))
-see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, Date))) ## ok if this is false
+see_if(nrow(df_mid) == nrow(distinct(df_mid, Name, Date)))
 
 # if there are two values, sum them 
 df_comb <- df_mid %>% 
@@ -129,7 +129,7 @@ df_comb <- df_mid %>%
                                      .ignore = "scrape_name_clean",
                                      .method = "sum") 
 
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date))) ## this must be true
+assert_that(nrow(df_comb) == nrow(distinct(df_comb, Name, Date)))
 ```
 
 Assertions / sanity checks ! 
@@ -250,6 +250,26 @@ for (i in 1:nrow(lag_death_plots)){
          path = file.path(base_path, "plots", state_abbrev, "deaths"))
 }
 ```
+```{r Plot Notes}
+## DECISION --> HOLD OFF ON INTEGRATING THIS UNTIL WE DO A SYSTEMATIC RUN-THROUGH OF THE PRE_NOV SOURCES SAVED
+
+# Original data source were Facebook posts from the Rhode Island Department of Corrections (Checked Perma.cc and Facebook)
+# No data from Facebook about Donald W Wyatt Detention Facility.
+# No data about Resident and Staff Deaths reported from original source until 2020-09-28.
+
+# Cases
+# STATEWIDE: On 2020-04-07, there were two staff that test positive. However, on 2020-04-08, the Excel sheet reports 0 staff confirmed cases even though there are positive COVID-19 cases. Staff confirmed remains 0 until 2020-05-26.
+
+# MINIMUM SECURITY FACILITY: On 2020-05-14, original data source says there are 3 residents confirmed cases, but Excel sheet reports 0 resident confirmed.
+
+# From 2020-05-26 to 2020-11-04, Resident Confirmed in Excel reports NA values even though original data source reports positive COVID-19 cases (CRANSTON ADULT WOMENS, INTAKE SERVICE CENTER, MEDIUM SECURITY FACILITY, MINIMUM SECURITY FACILITY).
+
+# From 2020-05-30 to 2020-11-04, Staff Confirmed in Excel reports NA values even though original data source reports positive COVID-19 cases (CRANSTON ADULT WOMENS, INTAKE SERVICE CENTER, MEDIUM SECURITY FACILITY, MINIMUM SECURITY FACILITY).
+
+# Original data source stops reporting data from 2020-07-30 to 2020-09-28.
+
+# STATEWIDE: Do not know where Residents Recovered and Staff Recovered numbers come from because original data source does not report them.
+```
 
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
@@ -266,22 +286,35 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
+```{r Date Span Notes}
+# From 2020-08-29 to 2020-11-04, counts fluctuate up and down between 6 and 7 instances.
+```
+
+Make data updates based on irregularities from scraping: 
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  filter(Name != "STATEWIDE") %>% ## statewide numbers are very sus 
+  filter(Date != as.Date("2020-08-31"), ## days when we only had "non-specific facilities" collected
+         Date != as.Date("2020-09-06"),
+         Date != as.Date("2020-09-23"),
+         Date < as.Date("2020-10-30"))
+```
+
 Marshall Project / AP data comparison.
-
-Starting on May 14th, UCLA collected both statewide and facility-specific counts. 
-
-Might want to remove Residents.Confirmed for state-wide from that point onwards. 
 
 ```{r}
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
+  filter(!str_detect(Name, "(i?)statewide")) %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
             Residents.Recovered = sum_na_rm(Residents.Recovered),
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed),
             Staff.Recovered = sum_na_rm(Staff.Recovered))
   
 comparison <- ourdat_tocompare %>%
@@ -291,17 +324,15 @@ comparison <- ourdat_tocompare %>%
   select(Date, 
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
+         starts_with("Staff.Confirmed"),
          starts_with("Residents.Recovered"),
          starts_with("Staff.Recovered"))
-
-View(comparison)
 ```
-
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
