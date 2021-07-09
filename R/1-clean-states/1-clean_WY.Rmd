@@ -250,6 +250,7 @@ for (i in 1:nrow(lag_death_plots)){
          path = file.path(base_path, "plots", state_abbrev, "deaths"))
 }
 ```
+
 ```{r Cases Notes}
 # Original source does not report data everyday. Not all prisons have data on certain days. Unsure where much of the data is being scraped from and how it is being scraped because original source reports data very randomly. One notable case is that the original source reports data on October 2, 2020 and reports the next set of data on November 20, 2020. But, the Excel sheet reports data for many days in October.
 # STATEWIDE FOR NON-SPECIFIC FACILITIES: 0 Residents Cases on 2020-07-21, then increases to 3 Residents Cases from 2020-07-22 to 2020-07-26, then decreases back to 0 Residents Cases (negative lag cases). In the original source, it states that 3 Residents in the WYOMING STATE PENITENTIARY (WSP) tested positive for COVID-19 on July 22, 2020. On July 27, 2020, there were 15 positive cases in WSP. Most likely, the 3 Residents Cases from 2020-07-22 to 2020-07-26 scraped for STATEWIDE FOR NON-SPECIFIC FACILITIES belongs to WYOMING STATE PENITENTIARY. The Excel sheet starts reporting data for WYOMING STATE PENITENTIARY on 2020-07-27, so they are missing the data from 2020-07-22 to 2020-07-26 which got scraped to STATEWIDE FOR NON-SPECIFIC FACILITIES.
