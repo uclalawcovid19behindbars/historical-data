@@ -1,7 +1,7 @@
 ---
 title: "Clean Texas - COVID-19 Behind Bars Historical Data Cleaning"
-author: "Hope Johnson"
-date: "4/16/21"
+author: "Hope Johnson and Meichen Chen"
+date: "6/23/21"
 output: html_document
 ---
 
@@ -48,9 +48,9 @@ source(util_path, local = knitr::knit_global())
 Load in all the historical data for this state!
 
 ```{r load data, message=FALSE}
-df <- load_data(data_path, 
-                "11420",
-                filter_state = state_toclean) 
+df <- load_data(data_path,
+               "11420",
+               filter_state = state_toclean)
 df_typed <- type_convert(df)
 ```
 
@@ -80,15 +80,7 @@ df_out %>%
 ```{r}
 df_out %<>% 
   mutate(Staff.Deaths = behindbarstools::coalesce_with_warnings(Staff.Deaths, Staff.Death),
-         Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death)) 
-
-# fix facilities with different values for Resident.Deaths and Resident.Death
-df_out$Resident.Deaths[10737] <- 1
-df_out$Resident.Deaths[10735] <- 1
-df_out$Resident.Deaths[10879] <- 1
-df_out$Resident.Deaths[10881] <- 1
-df_out$Resident.Deaths[11023] <- 1
-df_out$Resident.Deaths[11025] <- 1
+         Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Death, Resident.Deaths)) 
 ```
 
 ```{r create date var}
@@ -113,10 +105,35 @@ Show instances where the  didn't identify a clean name.
 
 ```{r facility name cleaning checks}
 # check if it's in fac_data
+
 df_mid %>%
   filter(name_match == FALSE) %>% 
   select(scrape_name_clean) %>%
   unique()
+
+# unknown facility names can be split into three categories:
+# 1 : from website https://www.tcjs.state.tx.us
+#     not much COVID data
+
+# 2 : from website https://www.tdcj.texas.gov/covid-19/mac_dashboard.html
+#   : majority of the COVID data
+
+# 3 : from other websites, can disregard
+
+# added facilities from category #2 to the crosswalk, disregarded the rest
+
+# facility names that were excluded (from category #3)
+# LOCAL HOSPITAL
+# NO LONGER IN CUSTODY
+# DECEASED
+# MASS TESTING
+# NON UNIT
+# TOTAL
+# UNKNOWN
+# SAGUARO CORRECTIONAL CENTER (in Arizona)
+
+df_mid <- df_mid %>% filter(name_match == TRUE)
+
 ```
 
 Remove rows when we didn't get a name at all.
@@ -161,29 +178,12 @@ Filter down and re-order columns in order to row bind them to latest data.
 df_hist <- behindbarstools::reorder_cols(df_comb)
 df_hist_final <- df_hist %>%
   mutate(source = Website,
-         Residents.Deaths = string_to_clean_numeric(Resident.Deaths)) %>%
+         Residents.Deaths = Resident.Deaths) %>%
   select(-c(Website, Resident.Deaths, Resident.Death, Count.ID, Facility)) 
 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
   select_if(~sum(!is.na(.)) > 0) # rm all NA
 ```
-Check out historical TX deaths in state facililities.
-
-```{r}
-my.max <- function(x) ifelse( !all(is.na(x)), max(x, na.rm=T), NA)
-
-tx_deaths_sum <- df_hist_final %>%
-  filter(Jurisdiction == "state") %>% # filters out "NA" jurisdiction I believe 
-  group_by(Name, Facility.ID, month_yr = glue('{month(Date)}_{year(Date)}')) %>% 
-  summarise(Residents.Deaths_max_fac_month = my.max(Residents.Deaths)) %>% # get max cumulative count from each facility in each month 
-  ungroup() %>% 
-  group_by(month_yr) %>% 
-  summarize(Residents.Deaths_cbb_historical = sum_na_rm(Residents.Deaths_max_fac_month)) # sum max cumulatives by month
-
-# write_csv(tx_deaths_sum, "~/Desktop/historical_tx_deaths.csv")
-
-```
-
 
 Make plots for the data, and take a look at any weirdness. 
 
@@ -215,6 +215,7 @@ ggplotly(res_death_stacked)
 
 # create a testing file 
 testing_cases <- flag_noncumulative_cases(df_hist_final, Name)
+df_hist_final$Residents.Deaths <- as.numeric(df_hist_final$Residents.Deaths)
 testing_deaths <- flag_noncumulative_deaths(df_hist_final, Name, Residents.Deaths)
 
 # lag cases overall 
@@ -290,6 +291,16 @@ ggplot(data = dates,
   labs(x = "Date",
     y = "n instances")
 ```
+Fix little data issues:
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  filter(Date != as.Date("2020-07-07")) ## something went wrong on this day
+
+
+## NB: after 9/20/20, Residents.Confirmed started dropping
+```
+
 
 Marshall Project / AP data comparison.
 
@@ -297,13 +308,15 @@ Marshall Project / AP data comparison.
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
-  filter(Jurisdiction == "state") %>%
+ourdat_tocompare <- df_hist_final_edit %>% 
+  # filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
             Residents.Recovered = sum_na_rm(Residents.Recovered),
-            Staff.Recovered = sum_na_rm(Staff.Recovered))
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed),
+            #Staff.Recovered = sum_na_rm(Staff.Recovered)
+            )
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
@@ -313,14 +326,14 @@ comparison <- ourdat_tocompare %>%
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
          starts_with("Residents.Recovered"),
-         starts_with("Staff.Recovered"))
+         starts_with("Staff.Confirmed"))
 ```
 
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
