@@ -106,6 +106,7 @@ available are:
     > 40) Washington
     > 41) West Virginia
     > 42) Wisconsin
+    > 43) Wyoming
 
 We aim to have all states’ data cleaned by early summer 2021.
 
