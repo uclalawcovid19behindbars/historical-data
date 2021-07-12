@@ -277,16 +277,34 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
+Spot corrections for staff data misscrapes: 
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Staff.Confirmed = ifelse(Date > as.Date("2020-08-16") & Date < as.Date("2020-08-30"),
+                                  NA, Staff.Confirmed),
+         Staff.Confirmed = ifelse(Date == as.Date("2020-09-01"),
+                                  NA, Staff.Confirmed),
+         Staff.Deaths = ifelse(Date > as.Date("2020-08-16") & Date < as.Date("2020-08-30"),
+                                  NA, Staff.Deaths),
+         Staff.Deaths = ifelse(Date == as.Date("2020-09-01"),
+                                  NA, Staff.Deaths)
+         )
+
+```
+
 Marshall Project / AP data comparison.
 
 ```{r}
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed),
+            Staff.Deaths= sum_na_rm(Staff.Deaths),
             Residents.Deaths = sum_na_rm(Residents.Deaths))
   
 comparison <- ourdat_tocompare %>%
@@ -295,6 +313,8 @@ comparison <- ourdat_tocompare %>%
   select(-State) %>% 
   select(Date, 
          starts_with("Residents.Confirmed"), 
+         starts_with("Staff.Confirmed"),
+         starts_with("Staff.Deaths"),
          starts_with("Residents.Deaths"))
 ```
 
@@ -302,7 +322,7 @@ comparison <- ourdat_tocompare %>%
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
