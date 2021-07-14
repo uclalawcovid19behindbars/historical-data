@@ -266,13 +266,25 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
+
+Change anomalous state-wide cumulative infection counts to NA.
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  ## scraper data is better for these days
+  filter(Date != as.Date("2020-10-01"),
+         Date != as.Date("2020-10-14"),
+         Date != as.Date("2020-10-20")) %>% 
+  mutate(Residents.Tested <- NA)
+```
+
 Marshall Project / AP data comparison.
 
 ```{r}
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
@@ -289,21 +301,10 @@ comparison <- ourdat_tocompare %>%
          starts_with("Residents.Recovered"))
 ```
 
-Change anomalous state-wide cumulative infection counts to NA.
-
-```{r}
-df_hist_final <- df_hist_final %>%
-  ## scraper data is better for these days
-  filter(Date != as.Date("2020-10-01"),
-         Date != as.Date("2020-10-14"),
-         Date != as.Date("2020-10-20")) %>% 
-  mutate(Residents.Tested <- NA)
-```
-
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```

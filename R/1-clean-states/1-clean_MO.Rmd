@@ -246,7 +246,9 @@ Staff.Confirmed fell a lot on 11/12/20 and in the following (few) scrapes we col
 df_hist_final_edit <- df_hist_final %>%
   ## big dips in almost every facility
   filter(Date != as.Date("2020-11-04")) %>%
-  mutate(Staff.Confirmed = ifelse(Date > "2020-11-05", NA, Staff.Confirmed))
+  mutate(Staff.Confirmed = ifelse(Date > "2020-11-05", NA, Staff.Confirmed)) %>%
+  ## picked up residents.active as statewide residents.confirmed 
+  mutate(Residents.Confirmed = ifelse(Name == "STATEWIDE", NA, Residents.Confirmed)) 
 ```
 
 

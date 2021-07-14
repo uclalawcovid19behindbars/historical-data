@@ -108,7 +108,8 @@ df_hist_final <- df_hist %>%
   mutate(source = Website,
          Residents.Deaths = Resident.Deaths,
          Date = date) %>%
-  select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) 
+  select(-c(Website, Resident.Deaths, date, Count.ID, Facility)) %>%
+  select(-Staff.Deaths) ## ambiguous source and seems wrong
 
 df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TRUE) %>%
   select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols. doing this because we don't want all logical cols for the row_bind
