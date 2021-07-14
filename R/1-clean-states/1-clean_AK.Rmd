@@ -279,12 +279,10 @@ df_hist_final_edit <- df_hist_final %>%
                             Residents.Tested),
         Residents.Tested = ifelse(Date == as.Date("2020-09-04") | Date == as.Date("2020-10-01"),
                     NA,
-                    Residents.Tested),
-        Staff.Confirmed = ifelse(Date == as.Date("2020-06-14") & Name == "LEMON CREEK CC JUNEAU",
-                                 11, Staff.Confirmed),
-        Staff.Confirmed = ifelse(Date == as.Date("2020-10-01") & Name == "LEMON CREEK CC JUNEAU",
-                         11, Staff.Confirmed),
-         )
+                    Residents.Tested)
+         ) %>%
+  select(-Staff.Confirmed,    ## from a news article, only one facility for five months 
+         -Staff.Deaths)       ## ambiguous source
 ```
 
 
@@ -314,7 +312,7 @@ ourdat_tocompare <- df_hist_final_edit %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
-            Staff.Confirmed = sum_na_rm(Staff.Confirmed)
+            # Staff.Confirmed = sum_na_rm(Staff.Confirmed)
           # Residents.Recovered = sum_na_rm(Residents.Recovered),
            #Staff.Recovered = sum_na_rm(Staff.Recovered)
 )
@@ -327,7 +325,7 @@ comparison <- ourdat_tocompare %>%
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
       #   starts_with("Residents.Recovered"),
-       starts_with("Staff.Confirmed")
+       # starts_with("Staff.Confirmed")
 )
 ```
 
@@ -349,16 +347,3 @@ write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_
 
 sync_remote_files(srvr_outfile_name) # ignore this line if you're not hope!
 ```
-
-Saving my workspace:
-
-```{r}
-# df historical
-# out_name_1 <- glue('{state_abbrev}-historical-data.csv')
-# write_csv(df_hist, file.path(base_path, "data", out_name_1))
-# 
-# #df historical final
-# out_name_2 <- glue('{state_abbrev}-historical-data-final.csv')
-# write_csv(df_hist_final, file.path(base_path, "data", out_name_2))
-```
-
