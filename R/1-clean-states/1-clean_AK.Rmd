@@ -267,7 +267,7 @@ for (i in 1:nrow(lag_death_plots)){
 Change anomalous state-wide cumulative infection counts that were not confirmed in the WayBack Machine. 
 
 ```{r}
-df_hist_final <- df_hist_final %>%
+df_hist_final_edit <- df_hist_final %>%
   mutate(Residents.Confirmed = ifelse((Name == "STATEWIDE" & Date == as.Date("2020-10-01")),
                                       NA,
                                       Residents.Confirmed),
@@ -279,7 +279,11 @@ df_hist_final <- df_hist_final %>%
                             Residents.Tested),
         Residents.Tested = ifelse(Date == as.Date("2020-09-04") | Date == as.Date("2020-10-01"),
                     NA,
-                    Residents.Tested)
+                    Residents.Tested),
+        Staff.Confirmed = ifelse(Date == as.Date("2020-06-14") & Name == "LEMON CREEK CC JUNEAU",
+                                 11, Staff.Confirmed),
+        Staff.Confirmed = ifelse(Date == as.Date("2020-10-01") & Name == "LEMON CREEK CC JUNEAU",
+                         11, Staff.Confirmed),
          )
 ```
 
@@ -287,7 +291,7 @@ df_hist_final <- df_hist_final %>%
 Find date spans / week spans with no data. In instances where the count went down by one, it could be that a PDF was misread. 
 
 ```{r}
-dates <- df_hist_final %>%
+dates <- df_hist_final_edit %>%
   arrange(Date) %>%
   count(Date)
 dates
@@ -305,11 +309,12 @@ Marshall Project / AP data comparison.
 mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed)
           # Residents.Recovered = sum_na_rm(Residents.Recovered),
            #Staff.Recovered = sum_na_rm(Staff.Recovered)
 )
@@ -322,7 +327,7 @@ comparison <- ourdat_tocompare %>%
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
       #   starts_with("Residents.Recovered"),
-       # starts_with("Staff.Recovered")
+       starts_with("Staff.Confirmed")
 )
 ```
 
@@ -330,7 +335,7 @@ comparison <- ourdat_tocompare %>%
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
