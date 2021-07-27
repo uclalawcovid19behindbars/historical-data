@@ -94,19 +94,20 @@ available are:
     > 28) New Jersey
     > 29) New Mexico
     > 30) North Carolina
-    > 31) Oregon
-    > 32) Pennsylvania
-    > 33) South Carolina
-    > 34) South Dakota
-    > 35) Tennessee
-    > 36) Texas
-    > 37) Utah
-    > 38) Vermont
-    > 39) Virginia
-    > 40) Washington
-    > 41) West Virginia
-    > 42) Wisconsin
-    > 43) Wyoming
+    > 31) North Dakota
+    > 32) Oregon
+    > 33) Pennsylvania
+    > 34) South Carolina
+    > 35) South Dakota
+    > 36) Tennessee
+    > 37) Texas
+    > 38) Utah
+    > 39) Vermont
+    > 40) Virginia
+    > 41) Washington
+    > 42) West Virginia
+    > 43) Wisconsin
+    > 44) Wyoming
 
 We aim to have all states’ data cleaned by early summer 2021.
 
