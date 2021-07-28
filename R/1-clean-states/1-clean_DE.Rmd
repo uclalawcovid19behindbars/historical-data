@@ -245,13 +245,29 @@ ggplot(data = dates,
   labs(x = "Date",
     y = "n instances")
 ```
+Fix some scraper issues!
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Residents.Deaths = ifelse(Name == "JAMES T VAUGHN CORRECTIONAL CENTER" & 
+                                     Date > as.Date("2020-06-25") & 
+                                     Date < as.Date("2020-07-01"),
+                                   7, Residents.Deaths),
+         Residents.Deaths = ifelse(Name == "JAMES T VAUGHN CORRECTIONAL CENTER" & 
+                                     Date == as.Date("2020-06-11"),
+                                   7, Residents.Deaths)
+)
+## can't tell where we collected this from, and when non-NA, it's also zero (diff than MP reported 1 death)
+df_hist_final_edit$Staff.Deaths <- NULL
+```
+
 
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
@@ -276,7 +292,7 @@ comparison <- ourdat_tocompare %>%
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 skim(df_hist_towrite) # double-check everything in the data 
 ```
 
