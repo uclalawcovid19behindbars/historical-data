@@ -38,8 +38,8 @@ Input files:
 * Historical data
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("C:/Users/kayla/Documents/Github/historical-data")
-data_path <- file.path(base_path, "data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
+data_path <- file.path(base_path, "data", "inputs")
 ##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
@@ -288,8 +288,8 @@ ourdat_tocompare <- df_hist_final %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),
-            Residents.Recovered = sum_na_rm(Residents.Recovered),
-            Staff.Recovered = sum_na_rm(Staff.Recovered))
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed),
+            Staff.Deaths = sum_na_rm(Staff.Deaths))
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
@@ -298,15 +298,14 @@ comparison <- ourdat_tocompare %>%
   select(Date, 
          starts_with("Residents.Confirmed"), 
          starts_with("Residents.Deaths"),
-         starts_with("Residents.Recovered"),
-         starts_with("Staff.Recovered"))
+         starts_with("Staff.Confirmed"),
+         starts_with("Staff.Deaths"))
 ```
 
 ```{r Comparison Notes}
 # Residents Confirmed (cbb) keeps fluctuating up and down until 2020-10-28. The values are very strange.
 # Residents Confirmed - 2020-10-26: 115 (cbb) vs. 661 (mpap)
 ```
-
 
 Prep pre-November data for writing to the server. 
 
