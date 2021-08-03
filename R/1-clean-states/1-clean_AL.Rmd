@@ -163,12 +163,17 @@ ggplot(data = dates,
 ```
 ```{r}
 df_hist_final_edit <- df_hist_final %>%
-  filter(Date != as.Date("2020-08-26"))
+  filter(Date != as.Date("2020-08-26")) %>%
+  mutate(Staff.Deaths = ifelse(Name == "FOUNTAIN CORRECTIONAL FACILITY" &
+                                 (Date > as.Date("2020-05-29") & 
+                                 Date < as.Date("2020-06-26")),
+                               0, Staff.Deaths
+                               ))
 ```
 
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final_edit %>% 
