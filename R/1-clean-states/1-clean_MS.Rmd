@@ -134,10 +134,12 @@ df_hist_final %>%
 Address issues with the scraper: 
 
 ```{r}
+df_hist_final_edit <- df_hist_final 
 
 ## no way to check these numbers and they seem wrong
 df_hist_final_edit$Residents.Deaths <- NULL
-  
+df_hist_final_edit$Staff.Confirmed <- NULL
+df_hist_final_edit$Staff.Deaths <- NULL
 ```
 
 Marshall Project / AP data comparison.
@@ -149,27 +151,21 @@ ourdat_tocompare <- df_hist_final_edit %>%
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
-            Residents.Deaths = sum_na_rm(Residents.Deaths),
-            Residents.Recovered = sum_na_rm(Residents.Recovered),
-            Staff.Confirmed = sum_na_rm(Staff.Confirmed),
-            Staff.Recovered = sum_na_rm(Staff.Recovered))
+            Residents.Recovered = sum_na_rm(Residents.Recovered))
   
 comparison <- ourdat_tocompare %>%
   full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
   arrange(Date) %>%
   select(-State) %>% 
   select(Date, 
-         starts_with("Residents.Confirmed"), 
-         starts_with("Residents.Deaths"),
-         starts_with("Residents.Recovered"),
-         starts_with("Staff.Recovered"),
-         starts_with("Staff.Confirmed"))
+         starts_with("Residents.Confirmed"),
+         starts_with("Residents.Recovered"))
 ```
 
 
 Prep pre-November data for writing to the server. 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
