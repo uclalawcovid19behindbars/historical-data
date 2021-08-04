@@ -124,12 +124,44 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
   select_if(~sum(!is.na(.)) > 0) %>% # get rid of all-NA columns for easier row-binding
   mutate(Zipcode = as.character(Zipcode),
          County.FIPS = as.character(County.FIPS))
+```
 
+```{r}
+## no good raw source for staff.deaths, so fixing the ones we know are wrong, and making the rest NA
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Staff.Deaths = ifelse((Date > as.Date("2020-06-25") & 
+                                  Date < as.Date("2020-08-30")) & 
+                                 Name == "PHOENIX CORRECTIONAL INSTITUTION",
+                                1, Staff.Deaths),
+         Staff.Deaths = ifelse(Date > "2020-09-15", NA, Staff.Deaths))
+```
+
+Marshall Project / AP data comparison.
+
+```{r}
+mpap <- read_mpap_data(all_dates = TRUE) %>%
+  filter(State == state_toclean)
+
+ourdat_tocompare <- df_hist_final_edit %>% 
+  filter(Jurisdiction == "state") %>%
+  group_by(Date) %>%
+  summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
+            Staff.Confirmed = sum_na_rm(Staff.Confirmed),
+            Staff.Deaths= sum_na_rm(Staff.Deaths))
+  
+comparison <- ourdat_tocompare %>%
+  full_join(mpap, by = "Date", suffix = c("_cbb", "_mpap")) %>%
+  arrange(Date) %>%
+  select(-State) %>% 
+  select(Date, 
+         starts_with("Residents.Confirmed"), 
+         starts_with("Staff.Confirmed"),
+         starts_with("Staff.Deaths"))
 ```
 
 Prep pre-November data for writing to the server. 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 options(skimr_strip_metadata = FALSE)
 skim(df_hist_towrite) # double-check everything in the data 
 ```
