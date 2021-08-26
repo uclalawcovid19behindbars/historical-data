@@ -194,6 +194,7 @@ prep_server_data <- function(df, state_abbrev) {
     "Date","Name", "State", "id", "jurisdiction", 
     "Staff.Confirmed", "Residents.Confirmed",
     "Staff.Deaths", "Residents.Deaths",
+    "Staff.Active",
     "Staff.Recovered", "Residents.Recovered",
     "Staff.Tested", "Residents.Tested", "Residents.Tadmin",
     "Staff.Negative", "Residents.Negative",
@@ -223,7 +224,10 @@ prep_server_data <- function(df, state_abbrev) {
       ~ !is.na(.x))))
   
   out_df <- out_df %>%
-    mutate(State = toupper(state_abbrev))
+    mutate(State = ifelse(str_detect(id, "federal"),
+                          State,
+                          toupper(state_abbrev)))
+  
 
   return(out_df)
 }

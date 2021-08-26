@@ -1,7 +1,7 @@
 ---
   title: "Clean Federal data - COVID-19 Behind Bars Historical Data Cleaning"
 author: "Hope Johnson"
-date: "11/30/2020"
+date: "8/24/21"
 output: html_document
 ---
   
@@ -32,253 +32,122 @@ Input files:
 * Facility name look-up table 
 
 ```{r load inputs, echo=FALSE}
-base_path <- file.path("~", "UCLA", "code", "historical", "historical-data")
+base_path <- file.path("~", "UCLA", "code", "historical-data")
 data_path <- file.path(base_path, "data", "inputs")
-##Load utilities function
 util_path <- file.path(base_path, "R", "0-utilities.R")
 source(util_path, local = knitr::knit_global())
 ```
 
+## Extract Data
 
-```{r load data}
-# no filter
-df <- load_data(data_path, 
-                "11420")
+```{r}
+## offset starts at 0 and progresses by 2,000
+## resident cases URL 
+grab_bop_data <- function(call_type, offset_limit) {
+  df_total = data.frame()
+  url_base <- glue("https://services5.arcgis.com/6zMLz8j1ZaiDC1Ud/arcgis/rest/services/{call_type}_Public/FeatureServer/0/query?f=json&cacheHint=true&")
+  url_ending <- "&resultRecordCount=2000&where=1%3D1&orderByFields=&outFields=*&returnGeometry=false&spatialRel=esriSpatialRelIntersects"
+  offset = 0 
+  while (offset <= offset_limit) {
+    offset_val <- glue("resultOffset={offset}")
+    full_url <- glue('{url_base}{offset_val}{url_ending}')
+    json_data <- full_url %>% jsonlite::read_json(simplifyVector = TRUE)
+    out_data <- as_tibble(json_data$features$attributes) %>%
+      mutate(Date_transmuted = as.Date(as.POSIXct(as.numeric(Date) / 1000,
+                                                  origin = "1970-01-01",
+                                                  tz = "GMT")))
+      df_total <- rbind(df_total, out_data)
+      offset <- offset + 2000
+  }
+  return(df_total)
+}
 
-df_federal <- df %>%
-  filter((State == "Federal") | 
-         str_detect(Facility, "(?i)federal"))
+test <- "https://services5.arcgis.com/6zMLz8j1ZaiDC1Ud/arcgis/rest/services/COVID_BOP_Testing_Fac_Public/FeatureServer/0/query?f=json&cacheHint=true&resultOffset=0&resultRecordCount=50&where=1%3D1&orderByFields=&outFields=*&returnGeometry=false&spatialRel=esriSpatialRelIntersects"
 
-df_typed <- type_convert(df_federal) 
-df_out <- df_typed %>%
-  select(!starts_with("...")) %>%
-  select(!starts_with("lots")) %>%
-  select(!starts_with("Bad")) %>%
-  select(!c("V2", "V4", "V5", "V7", "V8", "V10")) %>%
-  select(!c("Facility.", "Coder", "Housing.Type")) %>%
-  select_if(~sum(!is.na(.)) > 0) # rm 100% missing cols 
+res_cases_raw <- grab_bop_data("COVID_FAC_COUNTY_INMATE", 66000)
+staff_cases_raw <- grab_bop_data("COVID_FAC_COUNTY_STAFF", 66000) 
+res_testing_raw <- grab_bop_data("COVID_BOP_Testing_Fac", 58000) 
 
-df_out <- df_out %>% 
-  mutate(Resident.Deaths = behindbarstools::coalesce_with_warnings(Resident.Deaths, Resident.Death))
+## group facilities to the level of aggregation we xwalk to 
+staff_cases_coalesced <- staff_cases_raw %>% 
+  group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
+res_cases_coalesced <- res_cases_raw %>% 
+  group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
+res_testing_coalesced <- res_testing_raw %>% 
+  group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
+
+## clean and combine dfs
+out_data <- list(staff_cases_coalesced, res_cases_coalesced, res_testing_coalesced) %>% 
+  reduce(full_join, by = c("Date_transmuted", "BOP_Naming_Convention")) %>%
+  select(Date = Date_transmuted,
+       Name = BOP_Naming_Convention,
+       Residents.Active = Inmates_Active,
+       Residents.Deaths = Inmate_Deaths,
+       Residents.Recovered = Inmates_Recovered,
+       Staff.Active = Staff_Active,
+       Staff.Deaths = Staff_Deaths,
+       Staff.Recovered = Staff_Recovered,
+       Residents.Tested = Inmates_Completed_Tests,
+       Residents.Confirmed = Inmates_Positive_Tests
+       ) 
+nrow(out_data)
+skim(out_data)
+
+## only want 1 clean name/date combo per row
+assert_that(nrow(out_data) == nrow(distinct(out_data, Name, Date)))
+
 ```
 
-```{r create date var}
-df_out <- df_out %>%
-  mutate(date = as_date(sheet_name, format = "%Om.%d.%y"))
-table(is.na(df_out$Residents.Tested), df_out$da)
-```
+## Clean data
 
-```{r standardize facility names}
-name_xwalk <- "https://raw.githubusercontent.com/uclalawcovid19behindbars" %>%
-    str_c("/facility_data/master/data_sheets/fac_spellings.csv") %>%
-    read_csv(col_types = cols()) %>%
-    select(
-      ID = Count.ID, State, 
-      facility_name_clean,
-      facility_name_raw) %>%
-    mutate(xwalk_name_clean = behindbarstools::clean_fac_col_txt(str_to_upper(facility_name_clean))) %>%
-    mutate(xwalk_name_raw = behindbarstools::clean_fac_col_txt(str_to_upper(facility_name_raw))) %>%
-    unique()
+```{r}
+## NB: not sure if "Other - RRC" should map to "ALL BOP RESIDENTIAL REENTRY CENTERS" 
 
-df_out <- df_out %>%
-  mutate(scrape_name_clean = 
-           behindbarstools::clean_fac_col_txt(str_to_upper(Name)))
+df_mid <- out_data %>%
+  mutate(Jurisdiction = "federal",
+         State = NA_character_) %>% 
+  behindbarstools::clean_facility_name(., debug = TRUE) %>%
+  group_by_coalesce(., Name, Date, method = "sum") %>% ## another group_by_coalesce for "ALL BOP RESIDENTIAL REENTRY CENTERS"
+  filter(Date < as.Date("2020-10-26")) %>%
+  mutate(state_full = State,  
+    State = unname(toupper(behindbarstools::translate_state(state_full, reverse = TRUE))),
+    State = ifelse(state_full == "Not Available", "Not Available", State),
+    State = ifelse(state_full == "Puerto Rico", "PR", State),
+    ) %>%
+  filter(Name != "OTHER - CI") ## very little data and no clear facility 
 
-federal_xwalk <- name_xwalk %>%
-    filter(State == "Federal") 
-  
-federal <- df_out %>%
-  nest_join(name_xwalk, 
-            by = c("scrape_name_clean" = "xwalk_name_raw")) %>%
-  hoist(name_xwalk, Name = pluck("xwalk_name_clean", 1)) %>%
-  mutate(Name = map(Name, first),
-        Name = as.character(Name),
-        Name = ifelse(is.na(Name), scrape_name_clean, Name)) 
-```
+df_mid %>%
+  filter(name_match == FALSE) %>% 
+  select(scrape_name_clean) %>%
+  unique()
 
+## only want 1 clean name/date combo per row
+assert_that(nrow(df_mid) == nrow(distinct(df_mid, Name, Date)))
 
-```{r facility merge checks, include = FALSE}
-# show instances where merge didn't identify a clean name
-ck <- anti_join(df_out, federal_xwalk, 
-                by = c("scrape_name_clean" = "xwalk_name_raw"))
-print(ck)
-print(unique(ck$Name))
-```
-
-```{r concat duplicate date/facilities}
-federal %<>% 
-  group_by(Name, sheet_name) %>%
-  mutate(dupe_fac_date = n() > 1) %>%
+df_mid %>% 
+    group_by(Name, Date) %>% 
+    summarise(n_fac_date = n(),
+              fac = first(Name),
+              date = first(Date)) %>% 
   ungroup() %>%
-  relocate(dupe_fac_date, .before =) %>%
-  mutate(fac_date = glue::glue('{Name}_{sheet_name}')) %>%
-  select(-name_xwalk)
+  filter(n_fac_date > 1)
 
-df_comb <- federal %>%
-  group_by(fac_date) %>%
-  summarise_all(coalesce_by_column) %>%
-  ungroup()
-
-assert_that(nrow(df_comb) == nrow(distinct(df_comb, sheet_name, Name)))
 ```
 
-```{r clean most recently scraped data}
-slist <- read_rds(file.path(data_path, "scrape_details.rds"))
-hist_dat <- slist[["hist_data"]]
-today_dat <- slist[["current_data"]]
-recent_dat <- hist_dat %>%
-  bind_rows(today_dat)
-
-recent_dat <- recent_dat %>%
-  mutate(date = lubridate::mdy(Date)) %>%
-  filter(jurisdiction == "federal",
-         date > as.Date('2020-11-04'))
-
-recent_comb <- recent_dat %>%
-  group_by(Name, date) %>%
-  summarise_all(coalesce_by_column) %>%
-  ungroup()
-
-clean_recent_dat <- recent_comb %>%
-  select(Name, date,Residents.Confirmed, Staff.Confirmed,
-         Residents.Deaths, Staff.Deaths, City)
-```
-
-```{r merge recently scraped data and historical data}
-df_comb_out <- df_comb %>%
-  rename(Residents.Deaths = Resident.Death) %>%
-    select(Name, date,Residents.Confirmed, Staff.Confirmed,
-         Residents.Deaths, Staff.Deaths, City)
-
-all_dat <- bind_rows(df_comb_out, clean_recent_dat)
-n_distinct(all_dat$Name)
-```
-
-Find date spans / week spans with no data. Instances where the count went down by one, it could be a PDF was misread. 
+## Write data
 
 ```{r}
-dates <- all_dat %>%
-  arrange(date) %>%
-  count(date)
-dates
-
-ggplot(data = dates, 
-       aes(x = date, y = n)) +
-  geom_bar(stat="identity") +
-  labs(x = "Date",
-       y = "n instances")
-```
-
-
-```{r plot cases/deaths}
-all_dat <- flag_noncumulative_cases(all_dat, Name)
-all_dat <- flag_noncumulative_deaths(all_dat, Name, Residents.Deaths)
-
-# lag cases overall 
-all_dat %>%
-  ggplot(data = ., 
-         aes(x = date, y = lag_change_cases, group = Name)) +
-  geom_line(alpha=0.6 , size=.5, color = "black") +
-  scale_x_date(date_labels = "%m") + 
-  labs(x = "Date",
-       y = "lag_change_cases")
-
-# lag deaths overall
-all_dat %>%
-  ggplot(data = ., 
-         aes(x = date, y = lag_change_deaths, group = Name)) +
-  geom_line(alpha=0.6 , size=.5, color = "black") +
-  scale_x_date(date_labels = "%m") + 
-  labs(x = "Date",
-       y = "lag_change_deaths")
-
-# plot lag counts by facility
-lag_case_plots <- plot_lags(all_dat, "date", 
-                            y_var = "lag_change_cases",
-                            grp_var = Name)
-
-# massive outbreak in May - 500+
-lag_case_plots %>%
-  filter(Name == "LOMPOC FCI") %>%
-  pull(plot)
-
-# May outbreak - 200, lasted a few days
-lag_case_plots %>%
-  filter(Name == "TERMINAL ISLAND FCI") %>%
-  pull(plot)
-
-# big July outbreak -- high numbers 
-lag_case_plots %>%
-  filter(Name == "SEAGOVILLE FCI") %>%
-  pull(plot)
-
-# sustained outbreaks all summer
-lag_case_plots %>%
-  filter(Name == "ELKTON FCI") %>%
-  pull(plot)
-
-# more recent outbreak -- Sept until present
-lag_case_plots %>%
-  filter(Name == "BIG SPRING FCI") %>%
-  pull(plot)
-```
-
-
-```{r}
-# plot  cumulative cases by facility
-cumulative_case_plots <- plot_lags(all_dat, "date", 
-                            y_var = "Residents.Confirmed",
-                            grp_var = Name,
-                            y_lab = "Cases among incarcerated people")
-
-# massive outbreak in May - 500+
-# CUMULATIVE COUNTS DECREASING
-cumulative_case_plots %>%
-  mutate(file_name = glue("'{Name}.png'")) %>%
-  filter(Name == "LOMPOC FCI") %>%
-  pull(plot) 
-ggsave(file.path("~", "Desktop", "federal plots", "LOMPOC FCI.png"))
-
-# May outbreak - 200, lasted a few days
-# CUMULATIVE COUNTS DECREASING
-cumulative_case_plots %>%
-  filter(Name == "TERMINAL ISLAND FCI") %>%
-  pull(plot)
-ggsave(file.path("~", "Desktop", "federal plots", "TERMINAL ISLAND FCI.png"))
-
-# big July outbreak -- high numbers 
-cumulative_case_plots %>%
-  filter(Name == "SEAGOVILLE FCI") %>%
-  pull(plot)
-ggsave(file.path("~", "Desktop", "federal plots", "SEAGOVILLE FCI.png"))
-
-# sustained outbreaks all summer
-cumulative_case_plots %>%
-  filter(Name == "ELKTON FCI") %>%
-  pull(plot)
-ggsave(file.path("~", "Desktop", "federal plots", "ELKTON FCI.png"))
-
-
-# more recent outbreak -- Sept until present
-cumulative_case_plots %>%
-  filter(Name == "BIG SPRING FCI") %>%
-  pull(plot)
-ggsave(file.path("~", "Desktop", "federal plots", "BIG SPRING FCI.png"))
+state_abbrev <- 'federal'
+df_hist_towrite <- prep_server_data(df_mid, state_abbrev)
+srvr_outfile_name <- glue('1-pre-november-{state_abbrev}.csv')
+write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+sync_remote_files(srvr_outfile_name)
 ```
 
 
 
-Merge in population data.
 
-```{r population data merge}
-# clean population data
-pop <- read_csv('https://raw.githubusercontent.com/uclalawcovid19behindbars/Population/main/Merg_Pop.csv') %>%
-  mutate(Name = behindbarstools::clean_fac_col_txt(Name,to_upper = TRUE))
 
-dat_with_pop <- all_dat %>%
-  left_join(pop, by = "Name")
 
-# no federal data in here, it seems! 
-table(is.na(dat_with_pop$Population))
 
-```
+
