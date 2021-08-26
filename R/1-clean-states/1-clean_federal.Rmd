@@ -62,8 +62,6 @@ grab_bop_data <- function(call_type, offset_limit) {
   return(df_total)
 }
 
-test <- "https://services5.arcgis.com/6zMLz8j1ZaiDC1Ud/arcgis/rest/services/COVID_BOP_Testing_Fac_Public/FeatureServer/0/query?f=json&cacheHint=true&resultOffset=0&resultRecordCount=50&where=1%3D1&orderByFields=&outFields=*&returnGeometry=false&spatialRel=esriSpatialRelIntersects"
-
 res_cases_raw <- grab_bop_data("COVID_FAC_COUNTY_INMATE", 66000)
 staff_cases_raw <- grab_bop_data("COVID_FAC_COUNTY_STAFF", 66000) 
 res_testing_raw <- grab_bop_data("COVID_BOP_Testing_Fac", 58000) 
