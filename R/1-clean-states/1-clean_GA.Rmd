@@ -245,14 +245,20 @@ ggplot(data = dates,
 ```
 
 ```{r}
-df_hist_final <- df_hist_final %>%
-  filter(Date != as.Date("2020-08-23"))
+df_hist_final_edit <- df_hist_final %>%
+  filter(Date != as.Date("2020-08-23"),
+         Date != as.Date("2020-10-11")) %>%
+  mutate(Residents.Confirmed = ifelse(Date == as.Date("2020-06-17") & Name == "COFFEE CORRECTIONAL FACILITY",
+                                      6, Residents.Confirmed),
+         Residents.Confirmed = ifelse(Date == as.Date("2020-11-04") & Name == "RICHMOND COUNTY CORRECTIONAL INSTITUTION",
+                                      NA, Residents.Confirmed),
+         )
 ```
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
