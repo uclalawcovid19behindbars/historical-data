@@ -285,15 +285,23 @@ Remove funky data from one facility, date:
 
 ```{r}
 df_hist_final_edit <- df_hist_final %>%
-  mutate(Residents.Confirmed = ifelse(Date == as.Date("2020-09-01") & Name == "MOUNT OLIVE CORRECTIONAL CENTER",
-         NA,
-         Residents.Confirmed))
+  mutate(Residents.Confirmed = ifelse(Date == as.Date("2020-09-01") & 
+                                      Name == "MOUNT OLIVE CORRECTIONAL CENTER",
+               NA,
+               Residents.Confirmed),
+         Staff.Confirmed = ifelse(Name == "STATEWIDE" & Date > as.Date("2020-08-21"),
+                                  NA,
+                                  Staff.Confirmed)
+        ) %>%
+  filter(Date != "2020-10-30", 
+         Date != "2020-11-02",
+         Date != "2020-11-04")
 ```
 
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final_edit %>% 
@@ -316,7 +324,6 @@ comparison <- ourdat_tocompare %>%
          # starts_with("Staff.Confirmed"),
          starts_with("Staff.Recovered"))
 ```
-
 
 Prep pre-November data for writing to the server. 
 
