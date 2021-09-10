@@ -111,9 +111,24 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
   select_if(~sum(!is.na(.)) > 0) 
 ```
 
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Staff.Confirmed = ifelse(Name == "WAUPUN CORRECTIONAL INSTITUTION" & 
+                                    (Date > "2020-06-25" & Date < "2020-07-01"),
+                                  22,
+                                  Staff.Confirmed),
+         Staff.Confirmed = ifelse(Name == "COPPER LAKE SCHOOL LINCOLN HILLS SCHOOL" & 
+                                    (Date > "2020-08-20" & Date < "2020-09-21") & 
+                                    Staff.Confirmed == 0,
+                                  NA,
+                                  Staff.Confirmed),
+         )
+# Staff.Confirmed for Copper Lake School drops to zero randomly between 2020-08-21 and 2020-09-20, not reflected in raw data (e.g. WBM here). I think either way-back scraping or just making all of the 0's NAs for the facility during these weeks would both work out!
+```
+
 Prep pre-November data for writing to the server. 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
