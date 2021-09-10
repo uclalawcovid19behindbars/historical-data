@@ -146,16 +146,25 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
 df_hist_towrite <- prep_server_data(df_hist_final, "CA")
 skim(df_hist_towrite)
 ```
+
 Get rid of Residents.Tested variable because it only exists for 2 facilities and might not actually be reflecting the number of tests.
 ```{r}
-df_hist_towrite <- df_hist_towrite %>%
-  select(-Residents.Tested)
+df_hist_final <- df_hist_towrite %>%
+  select(-Residents.Tested) %>%
+  mutate(Staff.Confirmed = ifelse(Date > as.Date("2020-09-03") & Date < as.Date("2020-09-08"),
+                                  NA,
+                                  Staff.Confirmed),
+         Staff.Recovered = ifelse(Date > as.Date("2020-09-03") & Date < as.Date("2020-09-08"),
+                                  NA,
+                                  Staff.Recovered),
+  )
+  
 ```
 
 Write pre-November data to the server!
 
 ```{r}
 srvr_outfile_name <- '1-pre-november-CA.csv'
-write_csv(df_hist_towrite, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
+write_csv(df_hist_final, file.path(base_path, "data", "pre-nov", srvr_outfile_name))
 sync_remote_files(srvr_outfile_name)
 ```
