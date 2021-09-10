@@ -157,6 +157,12 @@ df_hist_final <- df_hist_towrite %>%
          Staff.Recovered = ifelse(Date > as.Date("2020-09-03") & Date < as.Date("2020-09-08"),
                                   NA,
                                   Staff.Recovered),
+         Staff.Confirmed = ifelse(Name == "NORTH KERN STATE PRISON" & Date == "2020-06-29",
+                                  11,
+                                  Staff.Confirmed),
+        Staff.Confirmed = ifelse(Name == "NORTH KERN STATE PRISON" & Date == "2020-06-30",
+                        11,
+                        Staff.Confirmed)
   )
   
 ```
