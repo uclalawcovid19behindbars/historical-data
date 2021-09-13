@@ -249,13 +249,26 @@ ggplot(data = dates,
     y = "n instances")
 ```
 
+Fix issues identified in facility anomaly checking process: 
+
+From 2020-06-16 through 2020-06-24, Staff.Confirmed for NEBRASKA STATE PENITENTIARY fell to 0 after being 6 before and after. I think these should probably be 6 or NA. Can't find raw archives.
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Staff.Confirmed = ifelse(Name == "NEBRASKA STATE PENITENTIARY" & 
+                                    (Date > as.Date("2020-06-15") & Date < as.Date("2020-06-26")),
+                                  6,
+                                  Staff.Confirmed))
+
+```
+
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
-ourdat_tocompare <- df_hist_final %>% 
+ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
@@ -279,7 +292,7 @@ comparison <- ourdat_tocompare %>%
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
