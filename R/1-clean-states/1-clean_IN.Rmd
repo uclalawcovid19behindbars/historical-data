@@ -296,11 +296,18 @@ comparison <- ourdat_tocompare %>%
          starts_with("Staff.Recovered"))
 ```
 
+Fix issue from facility anomaly checking: 
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  filter(Date != as.Date("2020-11-04"))
+  
+```
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```

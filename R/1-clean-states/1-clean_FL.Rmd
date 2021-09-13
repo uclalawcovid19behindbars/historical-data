@@ -367,9 +367,20 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
   select_if(~sum(!is.na(.)) > 0) # rm 10
 ```
 
+Fix issues from facility anomaly checking:
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Residents.Confirmed = ifelse(Name == "WALTON CORRECTIONAL INSTITUTION" & 
+                                        Date == as.Date("2020-11-04"),
+                                      5,
+                                      Residents.Confirmed))
+  
+```
+
 Prep pre-November data for writing to the server. 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
