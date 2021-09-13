@@ -255,6 +255,10 @@ problem_facs_10_18 <- c("MIKE DURFEE STATE PRISON SPRINGFIELD",
                         "SOUTH DAKOTA STATE PENITENTIARY")
 
 df_hist_final_edit <- df_hist_final %>%
+  filter(!(Name %in% problem_facs_10_18 & Date == as.Date("2020-10-18")),
+         !(Name == "SIOUX FALLS COMMUNITY WORK CENTER" & Date == as.Date("2020-11-02")),
+         !(Name == "SIOUX FALLS COMMUNITY WORK CENTER" & Date == as.Date("2020-11-04"))
+  ) %>% 
   mutate(Residents.Confirmed = 
            ifelse(Name == "PIERRE COMMUNITY WORK CENTER" & Date == as.Date("2020-09-20"), 105, Residents.Confirmed),
          Residents.Confirmed = 
@@ -265,17 +269,13 @@ df_hist_final_edit <- df_hist_final %>%
            ifelse(Name == "PIERRE COMMUNITY WORK CENTER" & Date == as.Date("2020-09-07"), 3, Residents.Confirmed),
          Residents.Confirmed = 
            ifelse(Name == "PIERRE COMMUNITY WORK CENTER" & Date == as.Date("2020-09-08"), 3, Residents.Confirmed),
-         ) %>%
-  mutate(Staff.Confirmed = 
-           ifelse(Name %in% problem_facs_10_18 & Date == as.Date("2020-10-18"), NA, Staff.Confirmed))
-
-## NB: there are some other minor issues with staff.confirmed after 10/18/20
+         )
 ```
 
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
@@ -297,7 +297,6 @@ comparison <- ourdat_tocompare %>%
          starts_with("Residents.Recovered"),
          starts_with("Staff.Recovered"))
 ```
-
 
 Prep pre-November data for writing to the server. 
 
