@@ -264,7 +264,7 @@ ggplot(data = dates,
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final %>% 
@@ -286,11 +286,21 @@ comparison <- ourdat_tocompare %>%
          starts_with("Staff.Recovered"))
 ```
 
+Spot corrections from anomaly checking:
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Staff.Confirmed = ifelse(Name == "OREGON STATE PENITENTIARY" & Date == as.Date("2020-06-26"),
+                                  36,
+                                  Staff.Confirmed),
+         Staff.Confirmed = ifelse(Name == "OREGON STATE PENITENTIARY" & Date == as.Date("2020-06-27"),
+                                  36,
+                                  Staff.Confirmed))
+```
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
