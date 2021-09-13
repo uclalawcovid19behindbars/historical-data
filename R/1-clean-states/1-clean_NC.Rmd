@@ -135,9 +135,20 @@ df_hist_final <- behindbarstools::reorder_cols(df_hist_final, rm_extra_cols = TR
          County.FIPS = as.character(County.FIPS))
 ```
 
+Fix issues from facility anomaly checking process:
+
+On 2020-11-04, values for TABOR CORRECTIONAL INSTITUTION and ALEXANDER CORRECTIONAL INSTITUTION spike, but then fall the next day (raw file linked below, no WBM archive for that particular day though). Delete these two facilities for 2020-11-04: http://104.131.72.50:3838/scraper_data/raw_files/2020-11-05_north_carolina.html 
+
+```{r}
+prob_facs <- c("TABOR CORRECTIONAL INSTITUTION", "ALEXANDER CORRECTIONAL INSTITUTION")
+
+df_hist_final_edit <- df_hist_final %>%
+  filter(!(Date == as.Date("2020-11-04") & (Name %in% prob_facs)))
+```
+
 Prep pre-November data for writing to the server. 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
