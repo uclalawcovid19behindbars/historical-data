@@ -288,15 +288,16 @@ df_hist_final_edit <- df_hist_final %>%
          Staff.Deaths = ifelse(Date > as.Date("2020-08-16") & Date < as.Date("2020-08-30"),
                                   NA, Staff.Deaths),
          Staff.Deaths = ifelse(Date == as.Date("2020-09-01"),
-                                  NA, Staff.Deaths)
-         )
-
+                                  NA, Staff.Deaths),
+         Residents.Active = NA,
+         Residents.Active = ifelse(Name == "SPOKANE COUNTY JAIL", Residents.Confirmed, Residents.Active),
+         Residents.Confirmed = ifelse(Name == "SPOKANE COUNTY JAIL", NA, Residents.Confirmed))
 ```
 
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final_edit %>% 
