@@ -248,7 +248,16 @@ df_hist_final_edit <- df_hist_final %>%
   filter(Date != as.Date("2020-11-04")) %>%
   mutate(Staff.Confirmed = ifelse(Date > "2020-11-05", NA, Staff.Confirmed)) %>%
   ## picked up residents.active as statewide residents.confirmed 
-  mutate(Residents.Confirmed = ifelse(Name == "STATEWIDE", NA, Residents.Confirmed)) 
+  mutate(Residents.Confirmed = ifelse(Name == "STATEWIDE", NA, Residents.Confirmed),
+         ## anomaly checking review
+         Residents.Confirmed = ifelse(Date == "2020-07-13" & Name == "FARMINGTON CORRECTIONAL CENTER", 
+                                      NA, 
+                                      Residents.Confirmed),
+         Staff.Confirmed = ifelse(Name == "STATEWIDE" & Date == as.Date("2020-08-17"),
+                                  NA, Staff.Confirmed),
+          Staff.Confirmed = ifelse(Name == "STATEWIDE" & Date > as.Date("2020-08-23"),
+                          NA, Staff.Confirmed),
+         ) 
 ```
 
 
@@ -269,7 +278,7 @@ ggplot(data = dates,
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 ourdat_tocompare <- df_hist_final_edit %>% 
   filter(Jurisdiction == "state") %>%
