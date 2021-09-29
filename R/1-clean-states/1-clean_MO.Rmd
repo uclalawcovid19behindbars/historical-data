@@ -257,6 +257,9 @@ df_hist_final_edit <- df_hist_final %>%
                                   NA, Staff.Confirmed),
           Staff.Confirmed = ifelse(Name == "STATEWIDE" & Date > as.Date("2020-08-23"),
                           NA, Staff.Confirmed),
+         Residents.Confirmed = ifelse(Date == "2020-10-23" & Name == "JCCC JEFFERSON CITY", 
+                                NA, 
+                                Residents.Confirmed)
          ) 
 ```
 

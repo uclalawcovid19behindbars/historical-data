@@ -271,7 +271,7 @@ Marshall Project / AP data comparison.
 Starting in July 2020, MP cumulative infection counts among incarcerated population were consistently higher than CBB counts (~10).
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final %>% 
@@ -293,11 +293,24 @@ comparison <- ourdat_tocompare %>%
          starts_with("Staff.Recovered"))
 ```
 
+Make the changes that need to happen from facility-level vetting!
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  mutate(Staff.Confirmed = ifelse(Name == "INDIAN SPRINGS SOUTHERN TRAINING CENTER" & 
+                                  Date == as.Date("2020-06-26"),
+                                  8, Staff.Confirmed),
+         Staff.Confirmed = ifelse(Name == "LOVELOCK CORRECTIONAL CENTER" & 
+                                  Date == as.Date("2020-06-26"),
+                                  13, Staff.Confirmed)
+         )
+  
+```
 
 Prep pre-November data for writing to the server. 
 
 ```{r}
-df_hist_towrite <- prep_server_data(df_hist_final, state_abbrev)
+df_hist_towrite <- prep_server_data(df_hist_final_edit, state_abbrev)
 
 skim(df_hist_towrite) # double-check everything in the data 
 ```
