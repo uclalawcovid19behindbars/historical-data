@@ -68,11 +68,11 @@ res_testing_raw <- grab_bop_data("COVID_BOP_Testing_Fac", 58000)
 
 ## group facilities to the level of aggregation we xwalk to 
 staff_cases_coalesced <- staff_cases_raw %>% 
-  group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
+  behindbarstools::group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
 res_cases_coalesced <- res_cases_raw %>% 
-  group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
+  behindbarstools::group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
 res_testing_coalesced <- res_testing_raw %>% 
-  group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
+  behindbarstools::group_by_coalesce(., BOP_Naming_Convention, Date_transmuted, method = "sum")
 
 ## clean and combine dfs
 out_data <- list(staff_cases_coalesced, res_cases_coalesced, res_testing_coalesced) %>% 
@@ -105,7 +105,7 @@ df_mid <- out_data %>%
   mutate(Jurisdiction = "federal",
          State = NA_character_) %>% 
   behindbarstools::clean_facility_name(., debug = TRUE) %>%
-  group_by_coalesce(., Name, Date, method = "sum") %>% ## another group_by_coalesce for "ALL BOP RESIDENTIAL REENTRY CENTERS"
+  behindbarstools::group_by_coalesce(., Name, Date, method = "sum") %>% ## another group_by_coalesce for "ALL BOP RESIDENTIAL REENTRY CENTERS"
   filter(Date < as.Date("2020-10-26")) %>%
   mutate(state_full = State,  
     State = unname(toupper(behindbarstools::translate_state(state_full, reverse = TRUE))),
@@ -129,7 +129,6 @@ df_mid %>%
               date = first(Date)) %>% 
   ungroup() %>%
   filter(n_fac_date > 1)
-
 ```
 
 ## Write data
