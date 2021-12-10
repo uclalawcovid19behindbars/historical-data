@@ -274,6 +274,9 @@ df_hist_final_edit <- df_hist_final %>%
          Residents.Confirmed = ifelse((Name == "STATEWIDE" & Date == as.Date("2020-09-04")),
                                       NA,
                                       Residents.Confirmed),
+        Residents.Confirmed = ifelse((Name == "STATEWIDE" & Date == as.Date("2020-11-04")),
+                            240,
+                            Residents.Confirmed),
         Residents.Tested = ifelse((Name == "STATEWIDE" & Date == as.Date("2020-09-04")),
                             NA,
                             Residents.Tested),
@@ -304,7 +307,7 @@ ggplot(data = dates,
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final_edit %>% 
@@ -327,6 +330,21 @@ comparison <- ourdat_tocompare %>%
       #   starts_with("Residents.Recovered"),
        # starts_with("Staff.Confirmed")
 )
+```
+
+```{r}
+## looking for statewide drop on 2020-10-21, 2020-11-05
+df_hist_final_edit %>% 
+  filter(Name == "STATEWIDE") %>% 
+  select(Name, Date, Residents.Confirmed) %>%
+  View()
+
+## come back and check this in 
+ak_checking <- read_scrape_data(all_dates = TRUE, state = "Alaska")
+ak_checking %>% 
+  filter(Name == "STATEWIDE") %>%
+  select(Name, Date, Residents.Confirmed) %>%
+  View()
 ```
 
 

@@ -484,7 +484,7 @@ df_hist_final_corrected %>%
 Marshall Project / AP data comparison.
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final_corrected %>% 

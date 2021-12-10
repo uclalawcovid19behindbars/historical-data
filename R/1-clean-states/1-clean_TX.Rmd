@@ -309,7 +309,7 @@ mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
   filter(State == state_toclean)
 
 ourdat_tocompare <- df_hist_final_edit %>% 
-  # filter(Jurisdiction == "state") %>%
+  filter(Jurisdiction == "state") %>%
   group_by(Date) %>%
   summarise(Residents.Confirmed = sum_na_rm(Residents.Confirmed),
             Residents.Deaths = sum_na_rm(Residents.Deaths),

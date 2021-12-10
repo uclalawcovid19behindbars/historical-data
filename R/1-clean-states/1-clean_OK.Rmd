@@ -255,7 +255,7 @@ Marshall Project / AP data comparison.
 YIKES ! Data is crazy crazy. Not integrating this one. 
 
 ```{r}
-mpap <- read_mpap_data(all_dates = TRUE, window = 14) %>%
+mpap <- read_mpap_data(all_dates = TRUE) %>%
   filter(State == state_toclean)
 ourdat_tocompare <- df_hist_final %>% 
   filter(Jurisdiction == "state") %>%
@@ -276,6 +276,12 @@ comparison <- ourdat_tocompare %>%
          starts_with("Staff.Recovered"))
 ```
 
+Fix issues from facility anomaly-checking:
+
+```{r}
+df_hist_final_edit <- df_hist_final %>%
+  
+```
 
 Prep pre-November data for writing to the server. 
 
